@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aisssky | Game Dev Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: {} } }
+    </script>
+
+    <meta property="og:title" content="Aisssky | Game Dev Portfolio">
+    <meta property="og:description" content="Unreal Engine Developer - My Own ONE PIECE">
+    <meta property="og:type" content="website">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap');
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Fira Code', monospace;
+            background-color: #000000; 
+            overflow-x: hidden;
+            min-height: 100vh;
+            
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), 
+                url('https://haowallpaper.com/link/common/file/previewFileImg/18103845665230208');
+            
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+
+            /* 平滑淡入动画 */
+            animation: fadeInBackground 1.5s ease-in-out;
+        }
+
+        @keyframes fadeInBackground {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 美化暗黑风滚动条 */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+
+        /* 作品卡片强化 */
+        .game-card:hover { 
+            transform: translateY(-6px); 
+            box-shadow: 0 0 24px rgba(236, 72, 153, 0.25);
+            border-color: #ec4899;
+            background: rgba(236, 72, 153, 0.05);
+        }
+        .avatar {
+            border: 2px solid #ec4899;
+        }
+
+        /* 贴纸强化：更真实的质感 */
+        .game-sticker {
+            position: relative;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .game-sticker::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        /* 打字机效果 */
+        .typewriter {
+            overflow: hidden;
+            border-right: .15em solid #ec4899;
+            white-space: nowrap;
+            letter-spacing: .1em;
+            animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+        }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #ec4899; } }
+    </style>
+</head>
+<body class="text-zinc-300 selection:bg-pink-400/30 relative">
+
+    <div class="w-full mx-auto px-10 min-h-screen md:h-screen mt-10">
+        <div class="flex flex-col md:flex-row h-full gap-6">
+
+            <div class="w-full md:w-3/12 h-full flex items-center justify-center text-center shrink-0 py-10 md:py-0">
+                <div class="space-y-5 w-full">
+
+                    <!-- 头像 + 在线呼吸灯 -->
+                    <div class="relative w-fit mx-auto">
+                        <div class="w-28 h-28 rounded-full bg-zinc-800 flex items-center justify-center avatar overflow-hidden">
+                            <img src="https://avatars.githubusercontent.com/u/207451722?v=4" alt="头像" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute bottom-1 right-2 w-4 h-4 bg-emerald-500 border-2 border-black rounded-full shadow-[0_0_8px#10b981] animate-pulse"></div>
+                    </div>
+
+                    <!-- 名称 + 状态 -->
+                    <div class="space-y-1 text-center">
+                        <h1 class="text-2xl font-bold text-white">
+                            <span class="text-pink-400">Aisssky</span>
+                        </h1>
+                    </div>
+
+                    <!-- 1. Character Stats -->
+                    <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg">
+                        <h3 class="text-white text-sm font-bold mb-3 flex items-center justify-center">
+                            <span class="w-2 h-2 bg-pink-500 rounded-full mr-2"></span> Character Stats
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[10px] uppercase tracking-tighter">
+                                    <span class="text-zinc-400 font-bold">Passion (HP)</span>
+                                    <span class="text-pink-400">100 / 100</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-pink-600 to-pink-400 w-[100%] shadow-[0_0_8px#ec4899]"></div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[10px] uppercase tracking-tighter">
+                                    <span class="text-zinc-400 font-bold">Inspiration (MP)</span>
+                                    <span class="text-purple-400">85 / 100</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-purple-600 to-purple-400 w-[85%] shadow-[0_0_8px#a855f7]"></div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-1 justify-center text-[9px]">
+                                <span class="px-1.5 py-0.5 rounded border border-pink-500/50 text-pink-400 bg-pink-500/5">UE5</span>
+                                <span class="px-1.5 py-0.5 rounded border border-emerald-500/50 text-emerald-400 bg-emerald-500/5">C++</span>
+                                <span class="px-1.5 py-0.5 rounded border border-blue-500/50 text-blue-400 bg-blue-500/5">TypeScript</span>
+                                <span class="px-1.5 py-0.5 rounded border border-blue-500/50 text-blue-400 bg-blue-500/5">Lua</span>
+                                <span class="px-1.5 py-0.5 rounded border border-blue-500/50 text-blue-400 bg-blue-500/5">图形学</span>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    
+
+                    <!-- 3. 联系方式 + 社交 -->
+                    <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg">
+                        <h3 class="text-white text-sm font-bold mb-2">📮 联系方式</h3>
+                        <ul class="text-xs space-y-1 text-zinc-400">
+                            <li>📩 aisssky09@163.com</li>
+                            <li>🐙 https://github.com/Aisssky</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ========== 看板 ========== -->
+            <div class="w-full md:w-9/12 h-full flex flex-col py-6">
+                <div class="flex items-center h-[10%]">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-white">
+                            My Own <span class="text-pink-400">ONE PIECE</span>
+                        </h1>
+                        <p class="text-lg mt-1 text-pink-300 typewriter">
+                            Develop with Unreal Engine
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 👇 已修改：图标放大1.5倍 + 完美居中 -->
+                <div class="h-[25%] py-2 relative">
+                    <h2 class="text-xl font-bold text-white mb-2 flex items-center relative z-10">
+                        <span class="w-8 h-px bg-pink-500 mr-4"></span> 
+                        <span class="text-pink-100">Played & Inspired</span>
+                    </h2>
+                    <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg h-[calc(100%-2rem)]">
+                        <div class="relative w-fit mx-auto flex items-center justify-center w-full h-full">
+                            <!-- 七栏网格线 -->
+                            <div class="absolute inset-0 grid grid-cols-7 grid-rows-4 -z-10 opacity-2 justify-items-center">
+                                <div class="border-l border-zinc-700"></div>
+                                <div class="border-l border-zinc-700"></div>
+                                <div class="border-l border-zinc-700"></div>
+                                <div class="border-l border-zinc-700"></div>
+                                <div class="border-l border-zinc-700"></div>
+                                <div class="border-l border-zinc-700"></div>
+                                <div class="border-l border-zinc-700"></div>
+                            </div>
+                            
+                            <!-- 游戏图标：放大1.5倍 -->
+                            <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-8">
+                                <div class="game-sticker w-24 h-24 rounded-full border-2 border-white shadow-lg rotate-[-8deg] hover:rotate-0 hover:scale-110 transition-all duration-300 overflow-hidden group">
+                                    <img src="https://bkimg.cdn.bcebos.com/pic/8d5494eef01f3a29b5d7166b9125bc315c607c7c" alt="阴阳师" class="w-full h-full object-cover group-hover:opacity-100 opacity-90 transition">
+                                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[8px] text-white p-1 text-center font-semibold">阴阳师</div>
+                                </div>
+                                <div class="game-sticker w-24 h-24 rounded-xl border-2 border-zinc-100 shadow-xl rotate-[12deg] hover:rotate-3 hover:scale-110 transition-all duration-300 overflow-hidden group">
+                                    <img src="https://pic.k73.com/up/soft/2021/1220/184211_29767304.png" alt="明日方舟" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[8px] text-white p-1 text-center font-semibold">明日方舟</div>
+                                </div>
+                                <div class="game-sticker w-24 h-24 rounded-xl border-2 border-zinc-100 shadow-xl rotate-[12deg] hover:rotate-3 hover:scale-110 transition-all duration-300 overflow-hidden group">
+                                    <img src="https://pic.rmb.bdstatic.com/bjh/news/d6a37cdbaf3bb6bab37eb4324488a780.png" alt="星露谷物语" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[8px] text-white p-1 text-center font-semibold">星露谷物语</div>
+                                </div>
+                                <div class="game-sticker w-24 h-24 border-2 border-white shadow-lg rotate-[-15deg] hover:rotate-[-5deg] hover:scale-110 transition-all duration-300 overflow-hidden group" style="clip-path: polygon(0 0, 100% 10%, 95% 100%, 10% 95%);">
+                                    <img src="https://img.ylmfwin8.com/uploadfile/2024/0422/20240422115159631.png" alt="战双" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[8px] text-white p-1 text-center font-semibold">战双</div>
+                                </div>
+                                <div class="game-sticker w-24 h-24 rounded-full p-[3px] bg-gradient-to-tr from-pink-400 to-purple-500 shadow-xl rotate-[5deg] hover:rotate-[10deg] hover:scale-110 transition-all duration-300 overflow-hidden group">
+                                    <div class="w-full h-full rounded-full overflow-hidden border-2 border-zinc-950">
+                                        <img src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fitem%2F201803%2F24%2F20180324045743_KrUvF.thumb.400_0.jpeg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1778438070&t=5255011e0c3ff6af25c4815ac7f42d2d" alt="Genshin" class="w-full h-full object-cover">
+                                    </div>
+                                </div>
+                                <div class="game-sticker w-24 h-24 rounded-full border-2 border-white shadow-lg rotate-[-8deg] hover:rotate-0 hover:scale-110 transition-all duration-300 overflow-hidden group">
+                                    <img src="https://gd-hbimg.huaban.com/325083dfe39ebba715625f8f41e726163751387b6738-k3Zv84_fw658" alt="洛克王国" class="w-full h-full object-cover group-hover:opacity-100 opacity-90 transition">
+                                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[8px] text-white p-1 text-center font-semibold">洛克王国</div>
+                                </div>
+                                <div class="game-sticker w-24 h-24 rounded-xl border-2 border-zinc-100 shadow-xl rotate-[12deg] hover:rotate-3 hover:scale-110 transition-all duration-300 overflow-hidden group">
+                                    <img src="https://pic.k73.com/up/soft/2024/1203/144829_40192979.png" alt="无限暖暖" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[8px] text-white p-1 text-center font-semibold">无限暖暖</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-[25%] py-2">
+                    <h2 class="text-xl font-bold text-white mb-2 flex items-center">
+                        <span class="w-8 h-px bg-pink-500 mr-4"></span> 
+                        <span class="text-pink-100">Demo</span>
+                    </h2>
+                    <div class="grid grid-cols-1 gap-3 h-[calc(100%-2rem)]">
+                        <div class="game-card bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg overflow-hidden transition-all duration-300">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-bold text-pink-400">完善中</h3>
+                                <span class="text-xs bg-pink-500/10 text-pink-400 px-2 py-1 rounded">Unreal</span>
+                            </div>
+                            <p class="text-sm text-zinc-400">   </p>
+                        </div>
+                        <div class="game-card bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg overflow-hidden transition-all duration-300">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-bold text-pink-400">重做中</h3>
+                                <span class="text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded">Unreal</span>
+                            </div>
+                            <p class="text-sm text-zinc-400">    </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-[40%] py-2">
+                    <h2 class="text-xl font-bold text-white mb-2 flex items-center">
+                        <span class="w-8 h-px bg-pink-500 mr-4"></span> 
+                        <span class="text-pink-100">Notes</span>
+                    </h2>
+                    <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-5 rounded-lg h-[calc(100%-2rem)] grid grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <p class="text-[10px] uppercase tracking-widest text-zinc-500">Engine & Language</p>
+                            <ul class="text-sm space-y-2 text-pink-300">
+                                <li class="hover:translate-x-1 transition-transform cursor-pointer"><span class="text-pink-500 mr-2">✦</span> Unreal Engine 学习</li>
+                                <li class="hover:translate-x-1 transition-transform cursor-pointer"><span class="text-pink-500 mr-2">✦</span> C++ 基础</li>
+                                <li class="hover:translate-x-1 transition-transform cursor-pointer"><span class="text-pink-500 mr-2">✦</span> Lua 脚本优化</li>
+                                <li class="hover:translate-x-1 transition-transform cursor-pointer"><span class="text-pink-500 mr-2">✦</span> Games101/104</li>
+                                <li class="hover:translate-x-1 transition-transform cursor-pointer"><span class="text-pink-500 mr-2">✦</span> 问题汇总</li>
+                            </ul>
+                        </div>
+                        <div class="space-y-3 border-l border-zinc-800 pl-4">
+                            <p class="text-[10px] uppercase tracking-widest text-zinc-500">Other</p>
+                            <ul class="text-sm space-y-2 text-pink-300">
+                                <li class="hover:translate-x-1 transition-transform cursor-pointer"><span class="text-pink-500 mr-2">✦</span> 游戏渲染 & 特效研究</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
