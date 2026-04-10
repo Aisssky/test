@@ -31,7 +31,7 @@
             background-attachment: fixed;
             background-repeat: no-repeat;
 
-            /* 平滑淡入动画 */
+            /* 动画 */
             animation: fadeInBackground 1.5s ease-in-out;
         }
 
@@ -40,13 +40,11 @@
             to { opacity: 1; }
         }
 
-        /* 美化暗黑风滚动条 */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #ec4899; }
 
-        /* 作品卡片强化 */
         .game-card:hover { 
             transform: translateY(-6px); 
             box-shadow: 0 0 24px rgba(236, 72, 153, 0.25);
@@ -57,7 +55,6 @@
             border: 2px solid #ec4899;
         }
 
-        /* 贴纸强化：更真实的质感 */
         .game-sticker {
             position: relative;
             box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
@@ -72,7 +69,7 @@
             border-radius: inherit;
         }
 
-        /* 打字机效果 */
+        /* 打字机 */
         .typewriter {
             overflow: hidden;
             border-right: .15em solid #ec4899;
@@ -92,7 +89,6 @@
             <div class="w-full md:w-3/12 h-full flex items-center justify-center text-center shrink-0 py-10 md:py-0">
                 <div class="space-y-5 w-full">
 
-                    <!-- 头像 + 在线呼吸灯 -->
                     <div class="relative w-fit mx-auto">
                         <div class="w-28 h-28 rounded-full bg-zinc-800 flex items-center justify-center avatar overflow-hidden">
                             <img src="https://avatars.githubusercontent.com/u/207451722?v=4" alt="头像" class="w-full h-full object-cover">
@@ -100,14 +96,13 @@
                         <div class="absolute bottom-1 right-2 w-4 h-4 bg-emerald-500 border-2 border-black rounded-full shadow-[0_0_8px#10b981] animate-pulse"></div>
                     </div>
 
-                    <!-- 名称 + 状态 -->
                     <div class="space-y-1 text-center">
                         <h1 class="text-2xl font-bold text-white">
                             <span class="text-pink-400">Aisssky</span>
                         </h1>
                     </div>
 
-                    <!-- 1. Character Stats -->
+                    <!-- Character Stats -->
                     <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg">
                         <h3 class="text-white text-sm font-bold mb-3 flex items-center justify-center">
                             <span class="w-2 h-2 bg-pink-500 rounded-full mr-2"></span> Character Stats
@@ -146,7 +141,7 @@
 
                     
 
-                    <!-- 3. 联系方式 + 社交 -->
+                    <!-- 联系方式 -->
                     <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg">
                         <h3 class="text-white text-sm font-bold mb-2">📮 联系方式</h3>
                         <ul class="text-xs space-y-1 text-zinc-400">
@@ -171,7 +166,6 @@
                     </div>
                 </div>
 
-                <!-- 👇 已修改：图标放大1.5倍 + 完美居中 -->
                 <div class="h-[25%] py-2 relative">
                     <h2 class="text-xl font-bold text-white mb-2 flex items-center relative z-10">
                         <span class="w-8 h-px bg-pink-500 mr-4"></span> 
@@ -179,7 +173,7 @@
                     </h2>
                     <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg h-[calc(100%-2rem)]">
                         <div class="relative w-fit mx-auto flex items-center justify-center w-full h-full">
-                            <!-- 七栏网格线 -->
+                        
                             <div class="absolute inset-0 grid grid-cols-7 grid-rows-4 -z-10 opacity-2 justify-items-center">
                                 <div class="border-l border-zinc-700"></div>
                                 <div class="border-l border-zinc-700"></div>
@@ -190,7 +184,7 @@
                                 <div class="border-l border-zinc-700"></div>
                             </div>
                             
-                            <!-- 游戏图标：放大1.5倍 -->
+                     
                             <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-8">
                                 <div class="game-sticker w-24 h-24 rounded-full border-2 border-white shadow-lg rotate-[-8deg] hover:rotate-0 hover:scale-110 transition-all duration-300 overflow-hidden group">
                                     <img src="https://bkimg.cdn.bcebos.com/pic/8d5494eef01f3a29b5d7166b9125bc315c607c7c" alt="阴阳师" class="w-full h-full object-cover group-hover:opacity-100 opacity-90 transition">
@@ -259,7 +253,7 @@
                             <p class="text-[10px] uppercase tracking-widest text-zinc-500">Engine & Language</p>
                             <ul class="text-sm space-y-2 text-pink-300">
                                 <li class="hover:translate-x-1 transition-transform cursor-pointer">
-        <a href="./assets/UE_CPP_Notes.pdf" target="_blank" class="flex items-center">
+        <a href="./Assets/UE_CPP_Notes.pdf" target="_blank" class="flex items-center">
             <span class="text-pink-500 mr-2">✦</span> 
             <span>UE_C++ 核心编程笔记</span>
         </a>
