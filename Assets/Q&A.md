@@ -26,5 +26,18 @@ C++创建的蓝图子类重启虚幻5.6以后Failed to load ParentClass的问题
 - 我尝试了贴吧老哥修改项目config. ini文件定向的方法，但是这种方法好像并不符合我的实际情况 
 
 
+### 20260422问题描述：
+
+团队协作中由于“
+Package /Game/Blueprints/Hero/BP_MainCharater was saved with a newer custom version than the current engine and cannot be loaded, see output log for details
+Package /Game/Blueprints/Machine/Boom/BP_Boom was saved with a newer custom version than the current engine and cannot be loaded,see output log for details”导致文件丢失的问题
 
 
+
+#### 解决方法：
+
+PaperZD所用插件版本与团队所用版本不一致的问题，出现错误首先从日志定位问题会少走很多弯路。在Saved/Logs/下最新的日志文件搜索相关报错信息得到更完整的内容：
+“[2026.04.22-04.24.31:901][  0]LogLinker: Error: [AssetLog] E:\piaomiao\Content\Blueprints\Hero\BP_MainCharater.uasset: Package was saved with a newer custom version than the current. Tag 11310AED2E554D61AF679AA3C5A1082A Name 'Paper_ZD_Version' PackageVersion 8  MaxExpected 7
+[2026.04.22-04.24.31:924][  0]LogAssetRegistry: Error: Package E:/piaomiao/Content/Map/Map_0_0.umap has newer custom version of Paper_ZD_Version”
+
+在0503帮助其他策划朋友打开项目时也遇到了FMOD插件版本不一致的问题。
