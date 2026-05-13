@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>赛博朋克：飘渺城影 · 对话系统逻辑图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8f8f8;
+        }
+
+        /* 固定背景图 */
+        .top-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            background: url("https://image.gcores.com/4e75bea5563e96c560b29c782cf939a8-1920-960.png?x-oss-process=image/resize,limit_1,m_lfit,h_900,w_2400/quality,q_90/format,webp") center/cover no-repeat;
+            z-index: 0;
+        }
+
+        /* 固定标题栏 */
+        .header-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            background-color: rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 1;
+            backdrop-filter: blur(2px);
+        }
+
+        .header-bar h1 {
+            font-size: 36px;
+            font-weight: 800;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .header-bar .date {
+            font-size: 16px;
+            color: #e0e0e0;
+        }
+
+        /* 主容器：三栏布局 (左侧索引 | 正文 | 右侧空白) */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            width: 100%;
+            margin-top: 250px;
+            background: #fff;
+            min-height: calc(100vh - 250px);
+        }
+
+        /* ========= 左侧导航栏 (sticky 索引) ========= */
+        .sidebar {
+            width: 240px;
+            background-color: #ffffff;
+            padding: 40px 25px;
+            border-right: 1px solid #eee;
+            flex-shrink: 0;
+            align-self: flex-start;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            height: fit-content;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 3;
+        }
+
+        .sidebar h3 {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin: 14px 0;
+        }
+
+        .sidebar a {
+            color: #555;
+            text-decoration: none;
+            font-size: 15px;
+            display: block;
+            padding: 6px 8px;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #f5f0f0;
+            color: #000;
+        }
+
+        /* ========= 正文区域 (弹性宽度) ========= */
+        .content-area {
+            flex: 1;
+            background-color: #ffffff;
+            padding: 60px 70px;
+            overflow-x: hidden;
+            word-wrap: break-word;
+            /* 移除原本的 border-left，边框转移至右侧空白栏，实现左右对称视觉 */
+        }
+
+        .content-area h2 {
+            font-size: 22px;
+            margin: 40px 0 20px;
+            color: #222;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .content-area h3 {
+            font-size: 18px;
+            color: #333;
+            margin: 25px 0 10px;
+        }
+
+        .content-area p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .content-area ul {
+            margin: 10px 0 20px 20px;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .content-area a {
+            color: #c2185b;
+            text-decoration: none;
+            border-bottom: 1px dotted #e0a5b9;
+        }
+
+        .content-area a:hover {
+            text-decoration: none;
+            border-bottom: 1px solid #c2185b;
+        }
+
+        /* 技术栈卡片 */
+        .tech-stack-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+        }
+
+        .tech-stack-block {
+            background: #ffffff;
+            color: #333;
+            padding: 8px 18px;
+            border: 1px solid #cccccc;
+            border-radius: 40px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            transition: all 0.1s ease;
+        }
+
+        /* 图表卡片 */
+        .diagram-card {
+            width: 100%;
+            max-width: 100%;
+            margin: 30px 0;
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .diagram-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: #ffffff;
+            border-bottom: 1px solid #eee;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .diagram-toolbar .title {
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .diagram-toolbar .btn {
+            padding: 0.3rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .diagram-toolbar .btn:hover {
+            background: #f0f0f0;
+        }
+
+        #diagram-container {
+            width: 100%;
+            height: 520px;
+            overflow: auto;
+            background: #ffffff;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .mermaid {
+            min-width: 1300px;
+            height: fit-content;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .zoom-level {
+            font-size: 0.85rem;
+            min-width: 3rem;
+            text-align: center;
+            color: #666;
+        }
+
+        video,
+        audio,
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .img-caption {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin: 8px 0 20px;
+        }
+
+        /* 策划需求图片 (比例 31.25% 依照原设计) */
+        .req-img {
+            width: 31.25%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+        }
+
+        .video-card {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            margin: 20px auto;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .video-card video {
+            width: 100%;
+            display: block;
+        }
+
+        .video-desc {
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 15px;
+            color: #555;
+            background: #fff;
+        }
+
+        /* 右侧空白栏 —— 与左侧索引等宽，优雅留白 */
+        .right-blank {
+            width: 240px;
+            background-color: #ffffff;
+            flex-shrink: 0;
+            border-left: 1px solid #eee;   /* 与左侧 border-right 形成对称分隔 */
+            min-height: 100%;
+            /* 无任何内容，纯粹为对称留白与平衡设计 */
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: #fff;
+            border-top: 1px solid #eee;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        /* 表单元素 (保持风格) */
+        form {
+            display: flex;
+            direction: column;
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 1rem;
+            margin-top: 0.2rem;
+        }
+
+        button[type="submit"] {
+            align-self: flex-start;
+            padding: 0.6rem 2rem;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        button[type="submit"]:hover {
+            background: #555;
+        }
+
+        /* 响应式布局：移动端去掉右侧空白，灵活折叠导航栏 */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                padding: 20px 25px;
+            }
+
+            .sidebar ul {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.8rem;
+            }
+
+            .sidebar li {
+                margin: 0;
+            }
+
+            .content-area {
+                padding: 30px 20px;
+                border-left: none;
+            }
+
+            /* 右侧空白栏在移动端隐藏，确保阅读区域不受干扰 */
+            .right-blank {
+                display: none;
+            }
+
+            .header-bar h1 {
+                font-size: 26px;
+                text-align: center;
+                padding: 0 12px;
+            }
+
+            .video-card {
+                width: 100%;
+            }
+
+            .req-img {
+                width: 85%;
+            }
+        }
+
+        /* 中等屏幕微调 避免过于拥挤 */
+        @media (max-width: 1100px) and (min-width: 769px) {
+            .content-area {
+                padding: 40px 35px;
+            }
+            .sidebar, .right-blank {
+                width: 200px;
+            }
+        }
+
+        /* 美化滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 6px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bg"></div>
+    <header class="header-bar">
+        <h1>《赛博朋克：飘渺城影》</h1>
+        <h2>开发日志</h2>
+        <div class="date">2026-04-21 ~ 2026-05-10</div>
+    </header>
+
+    <main class="main-container">
+        <!-- 左侧：索引导航栏 -->
+        <nav class="sidebar">
+            <h3>📌 索引</h3>
+            <ul>
+                <li><a href="#section1">简介与技术栈</a></li>
+                <li><a href="#diagram-section">系统逻辑图</a></li>
+                <li><a href="#video-section">实现及演示</a></li>
+            </ul>
+        </nav>
+
+        <!-- 中间：正文内容区 -->
+        <div class="content-area">
+            <section id="section1">
+                <h2>📖 简介</h2>
+                <h3>🛠️ 技术栈</h3>
+                <div class="tech-stack-container">
+                    <div class="tech-stack-block">UE5 C++</div>
+                    <div class="tech-stack-block">BluePrints</div>
+                    <div class="tech-stack-block">UMG</div>
+                    <div class="tech-stack-block">SVN</div>
+                </div>
+
+                <h3>🔗 项目链接</h3>
+                <p><a href="https://store.steampowered.com/app/3552700/_/" target="_blank" rel="noopener">https://store.steampowered.com/app/3552700/_/</a> 现已开放愿望单</p>
+
+                <h3>✨ 技术亮点与职责</h3>
+                <ul>
+                    <li>基于<a href="https://www.fab.com/listings/052820ab-f423-48e8-978a-eefd4087b1a4?lang=zh-cn" target="_blank" rel="noopener">Dialogue Builder插件</a>进行二次开发，协同文案策划构建支持富文本打字机、动态分支选项、技能检定提示与音效联动的完整对话UI框架。</li>
+                    <li>C++ 底层逻辑：扩展 DialogueBubbleWidget、OptionButtonWidget、MainDialogueWidget 等核心类，实现逐字打印、富文本标签无截断渲染、统一打字速度及标点停顿倍率，大幅提升剧情演出节奏感。</li>
+                    <li>分支选项系统：设计并实现单/多选项弹出、选项后自动衔接NPC侧对话的完整分支逻辑；通过合理数据结构约定，简化蓝图流程，消除分支判定的冗余数组操作，显著降低维护成本。</li>
+                    <li>辅助功能：集成节点驱动的打字音效自动播放/停止，沉浸式赛博叙事体验。</li>
+                </ul>
+            </section>
+
+            <section id="diagram-section">
+                <h2>📐 系统逻辑图</h2>
+                <div class="diagram-card">
+                    <div class="diagram-toolbar">
+                        <span class="title">🧠 对话核心流程图</span>
+                        <div class="zoom-controls">
+                            <button class="btn" id="zoomOut" aria-label="缩小">➖</button>
+                            <span class="zoom-level" id="zoomLevel">100%</span>
+                            <button class="btn" id="zoomIn" aria-label="放大">➕</button>
+                            <button class="btn" id="zoomReset" aria-label="重置缩放">↺ 重置</button>
+                        </div>
+                    </div>
+                    <div id="diagram-container">
+                        <div class="mermaid">
+graph LR
+    subgraph 对话启动
+        A["外部控制器"] -->|InitDialogue| B["UTestMainDialogueWidget"]
+    end
+
+    subgraph 显示NPC对话
+        B -->|AddBubble| C{"UDialogueBubbleWidget"}
+        C -->|SetUpBubble| D["设置头像/名称/文本"]
+        D --> E{"WriteEffect?"}
+        E -->|是| F["StartTyping 打字机"]
+        F --> G["逐字输出/跳过标签"]
+        G --> H["标点暂停计算"]
+        H --> I["OnTypingCompleted"]
+        E -->|否| I
+        I -->|广播| B
+        C -->|OnSetPlayerNode| B
+    end
+
+    subgraph 用户点击推进
+        B -->|NativeOnMouseButtonDown| J{"当前气泡打字完成?"}
+        J -->|未完成| K["SkipTyping 立即显示全文"]
+        J -->|已完成| L["广播 OnUserPressNext"]
+        L --> A
+    end
+
+    subgraph 显示玩家选项
+        A -->|ShowOptions| B
+        B --> M["循环创建 UOptionButtonWidget"]
+        M --> N["SetupOption 设置文本/图标"]
+        N --> O{"是否有检定?"}
+        O -->|是| P["向InfoPanel传递RollType/RiskLevel"]
+        O -->|否| Q["仅显示文本"]
+        P --> Q
+        Q --> R["绑定 OnOptionChosen"]
+        R --> S["设置 bWaitingForChoice=true"]
+    end
+
+    subgraph 玩家选择处理
+        S --> T["玩家点击选项"]
+        T -->|OnOptionChosen| B
+        B --> U["构建玩家气泡 IsPlayerNode=true"]
+        U --> C
+        B --> V["清空选项列表 bWaitingForChoice=false"]
+        V -->|广播 OnOptionSelected| A
+    end
+
+    subgraph 检定流程
+        A -->|EnterPreCheckState| B
+        B --> W["bWaitingForChoice=true 广播OnEnterPreCheck"]
+        A -->|ShowCheckResult| X["广播 OnCheckResultReceived"]
+    end
+
+    subgraph 对话结束
+        A -->|EndDialogue| B
+        B --> Y["NotifyDialogueEnd"]
+        Y --> Z["清空所有气泡/选项"]
+        Z -->|广播 OnDialogueEnd| A
+    end
+
+    style A fill:#e0f0ff,stroke:#1e466e,stroke-width:1.5px
+    style B fill:#fff4e0,stroke:#b57c1c,stroke-width:1.5px
+    style C fill:#f0e0ff,stroke:#6b3fa0,stroke-width:1.5px
+    style F fill:#ffe0e0,stroke:#c22,stroke-width:1px
+    style M fill:#d9f0f0,stroke:#2c6e6e
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="video-section">
+                <h2>🎮 实现思路及演示</h2>
+                <p>在重构前，原对话系统采用「显示一条清一条」的机制，玩家无法回顾历史对话以及已选分支选项，严重削弱赛博朋克题材的剧情沉浸感。因此本次重构核心目标：<strong>打造可追溯、动态检定、富有节奏的叙事UI框架</strong>，并对接 Dialogue Builder 插件实现节点化驱动。</p>
+                <p>✨ 重构策略：</p>
+                <ul>
+                    <li><strong>历史记录组件</strong>：采用环形队列存储气泡实例，支持滚动回溯，玩家可在对话间隙翻看之前文本。</li>
+                    <li><strong>统一打字机控制器</strong>：支持富文本标签延迟解析，标点符号自动停歇，音效逐字匹配。</li>
+                    <li><strong>选项-检定联动</strong>：选项按钮根据数据驱动显示技能类型及风险等级，UI面板动态刷新掷骰反馈。</li>
+                    <li><strong>模块化事件广播</strong>：解耦 C++ 与蓝图，选项选择、对话结束、检定进入等事件均通过动态多播驱动，策划可灵活配置。</li>
+                </ul>
+                <!-- 策划需求 -->
+                <img src="D:\cxdownload\yemian\image\req.jpg" alt="策划需求图 - 对话分支与检定规则" class="req-img" onerror="this.onerror=null;this.style.opacity='0.5';this.alt='图片加载示例: 策划需求文档示意'">
+                <div class="img-caption">📑 策划需求</div>
+                
+                <p>🎬 以下为对话系统在开发环境中的实机演示。</p>
+                <div class="video-card">
+                    <video controls muted loop preload="auto" poster="https://via.placeholder.com/800x450?text=Cyberpunk+Dialogue+Preview">
+                        <source src="D:/cxdownload/yemian/video/5月12日.mp4" type="video/mp4">
+                        您的浏览器不支持视频播放，请升级浏览器或查看项目文档。
+                    </video>
+                    <div class="video-desc">🎞️ 对话系统演示视频 | 动态选项 + 逐字演出 + 技能检定</div>
+                </div>
+            </section>
+        </div>
+
+        <div class="right-blank" aria-hidden="true"></div>
+    </main>
+
+    <footer>
+        <p>© 2026 集体梦境 项目组 | 赛博朋克：飘渺城影 | 对话系统深度重构记录 | 仅供学习交流与开发展示</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        (function() {
+            // 初始化 Mermaid 图表
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                themeVariables: {
+                    'background': '#ffffff',
+                    'primaryColor': '#f4f0ff',
+                    'primaryBorderColor': '#6b3fa0',
+                    'primaryTextColor': '#2c2c2c',
+                    'lineColor': '#8f8f9f',
+                    'secondaryColor': '#fff0db',
+                    'tertiaryColor': '#e6f7f7'
+                },
+                securityLevel: 'loose',
+                fontFamily: 'Microsoft YaHei, -apple-system, sans-serif',
+                fontSize: 14,
+                flowchart: {
+                    useMaxWidth: false,
+                    htmlLabels: true,
+                    nodeSpacing: 55,
+                    rankSpacing: 85,
+                    curve: 'basis'
+                }
+            });
+            
+            const container = document.getElementById('diagram-container');
+            const mermaidDiv = document.querySelector('.mermaid');
+            let currentZoom = 1.0; 
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const zoomResetBtn = document.getElementById('zoomReset');
+            const zoomLevelSpan = document.getElementById('zoomLevel');
+            
+            function applyZoom() {
+                if (mermaidDiv) {
+                    mermaidDiv.style.transform = `scale(${currentZoom})`;
+                    mermaidDiv.style.transformOrigin = 'top left';
+                    zoomLevelSpan.textContent = Math.round(currentZoom * 100) + '%';
+                    // 调整父容器高度避免底部空白溢出
+                    if (container) {
+                        const newHeight = Math.max(520, mermaidDiv.scrollHeight * currentZoom + 40);
+                        container.style.height = `${Math.min(newHeight, 900)}px`;
+                    }
+                }
+            }
+            
+            if (zoomInBtn && zoomOutBtn && zoomResetBtn) {
+                zoomInBtn.addEventListener('click', () => {
+                    currentZoom = Math.min(2.2, currentZoom + 0.1);
+                    applyZoom();
+                });
+                zoomOutBtn.addEventListener('click', () => {
+                    currentZoom = Math.max(0.5, currentZoom - 0.1);
+                    applyZoom();
+                });
+                zoomResetBtn.addEventListener('click', () => {
+                    currentZoom = 1.0;
+                    applyZoom();
+                    if (container) container.style.height = '520px';
+                });
+            }
+            
+            if (container) {
+                container.addEventListener('wheel', (e) => {
+                    if (e.ctrlKey) {
+                        e.preventDefault();
+                        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                        currentZoom = Math.max(0.5, Math.min(2.2, currentZoom + delta));
+                        applyZoom();
+                    }
+                }, { passive: false });
+            }
+            
+            // 确保渲染后初次适配高度
+            setTimeout(() => {
+                if (mermaidDiv && container) {
+                    const estimatedHeight = mermaidDiv.scrollHeight || 500;
+                    if (estimatedHeight > 520) container.style.height = `${estimatedHeight + 30}px`;
+                }
+                applyZoom();
+            }, 200);
+        })();
+    </script>
+</body>
+</html>
