@@ -23,7 +23,7 @@
             left: 0;
             width: 100%;
             height: 250px;
-            background: url("https://image.gcores.com/4e75bea5563e96c560b29c782cf939a8-1920-960.png?x-oss-process=image/resize,limit_1,m_lfit,h_900,w_2400/quality,q_90/format,webp") center/cover no-repeat;
+            background: url("image/promo.webp") center/cover no-repeat;
             z-index: 0;
         }
 
@@ -115,6 +115,12 @@
             color: #000;
         }
 
+        /* 为侧边栏二级菜单增加缩进 */
+        .sidebar .sub-link {
+            padding-left: 24px;
+            font-size: 14px;
+        }
+
         /* ========= 正文区域 (弹性宽度) ========= */
         .content-area {
             flex: 1;
@@ -122,7 +128,6 @@
             padding: 60px 70px;
             overflow-x: hidden;
             word-wrap: break-word;
-            /* 移除原本的 border-left，边框转移至右侧空白栏，实现左右对称视觉 */
         }
 
         .content-area h2 {
@@ -275,15 +280,31 @@
             margin: 8px 0 20px;
         }
 
-        /* 策划需求图片 (比例 31.25% 依照原设计) */
-        .req-img {
-            width: 31.25%;
-            height: auto;
-            display: block;
-            margin: 20px auto;
+        /* 并排图片容器 */
+        .image-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 24px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .image-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 0 1 auto;
+        }
+
+        .image-item img {
+            height: 200px;          /* 统一高度，等比缩放 */
+            width: auto;
+            object-fit: contain;    /* 不裁剪 */
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             border: 1px solid #f0f0f0;
+            background: #fff;
         }
 
         .video-card {
@@ -310,17 +331,14 @@
             background: #fff;
         }
 
-        /* 右侧空白栏 —— 与左侧索引等宽，优雅留白 */
         .right-blank {
             width: 240px;
             background-color: #ffffff;
             flex-shrink: 0;
-            border-left: 1px solid #eee;   /* 与左侧 border-right 形成对称分隔 */
+            border-left: 1px solid #eee;
             min-height: 100%;
-            /* 无任何内容，纯粹为对称留白与平衡设计 */
         }
 
-        /* 页脚 */
         footer {
             text-align: center;
             padding: 1.5rem;
@@ -330,43 +348,7 @@
             color: #888;
         }
 
-        /* 表单元素 (保持风格) */
-        form {
-            display: flex;
-            direction: column;
-            gap: 1.2rem;
-            margin-top: 1.5rem;
-        }
-
-        input[type="text"],
-        select {
-            width: 100%;
-            max-width: 400px;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background: #fff;
-            font-size: 1rem;
-            margin-top: 0.2rem;
-        }
-
-        button[type="submit"] {
-            align-self: flex-start;
-            padding: 0.6rem 2rem;
-            background: #333;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.2s;
-        }
-
-        button[type="submit"]:hover {
-            background: #555;
-        }
-
-        /* 响应式布局：移动端去掉右侧空白，灵活折叠导航栏 */
+        /* 响应式 */
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -396,7 +378,6 @@
                 border-left: none;
             }
 
-            /* 右侧空白栏在移动端隐藏，确保阅读区域不受干扰 */
             .right-blank {
                 display: none;
             }
@@ -411,12 +392,11 @@
                 width: 100%;
             }
 
-            .req-img {
-                width: 85%;
+            .image-item img {
+                height: 150px; /* 移动端适当缩小 */
             }
         }
 
-        /* 中等屏幕微调 避免过于拥挤 */
         @media (max-width: 1100px) and (min-width: 769px) {
             .content-area {
                 padding: 40px 35px;
@@ -426,7 +406,6 @@
             }
         }
 
-        /* 美化滚动条 */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -458,8 +437,13 @@
             <h3>📌 索引</h3>
             <ul>
                 <li><a href="#section1">简介与技术栈</a></li>
-                <li><a href="#diagram-section">系统逻辑图</a></li>
                 <li><a href="#video-section">实现及演示</a></li>
+                <li class="sub-links">
+                    <a href="#dialogue-system" class="sub-link">对话系统</a>
+                    <a href="#player-interaction" class="sub-link">玩家交互</a>
+                    <a href="#text-collection" class="sub-link">文本收集系统</a>
+                    <a href="#tutorial-system" class="sub-link">教程系统</a>
+                </li>
             </ul>
         </nav>
 
@@ -487,20 +471,50 @@
                 </ul>
             </section>
 
-            <section id="diagram-section">
-                <h2>📐 系统逻辑图</h2>
-                <div class="diagram-card">
-                    <div class="diagram-toolbar">
-                        <span class="title">🧠 对话核心流程图</span>
-                        <div class="zoom-controls">
-                            <button class="btn" id="zoomOut" aria-label="缩小">➖</button>
-                            <span class="zoom-level" id="zoomLevel">100%</span>
-                            <button class="btn" id="zoomIn" aria-label="放大">➕</button>
-                            <button class="btn" id="zoomReset" aria-label="重置缩放">↺ 重置</button>
-                        </div>
+            <section id="video-section">
+                <h2>🎮 实现思路及演示</h2>
+                <p>因为策划找到我时，这个项目已经是完成度很高的作品，所以我的任务就是在原来的庞然巨物上做功能调优和新增功能（作为一个纯蓝图项目，代码可读性极差，调断点的时候一直在四个文件里面反复跳）</p>
+                
+                <!-- 并排展示三张图片：策划需求 / omg / bug1 -->
+                <div class="image-row">
+                    <div class="image-item">
+                        <img src="image/req.jpg" alt="策划需求图 - 对话分支与检定规则" onerror="this.onerror=null;this.style.opacity='0.5';this.alt='图片加载失败'">
+                        <div class="img-caption">📑 策划需求</div>
                     </div>
-                    <div id="diagram-container">
-                        <div class="mermaid">
+                    <div class="image-item">
+                        <img src="image/omg.jpg" alt="直面蓝图古神来了" onerror="this.onerror=null;this.style.opacity='0.5';">
+                        <div class="img-caption">直面蓝图古神来了</div>
+                    </div>
+                    <div class="image-item">
+                        <img src="image/ver.jpg" alt="改了三版" onerror="this.onerror=null;this.style.opacity='0.5';">
+                        <div class="img-caption">改了三版</div>
+                    </div>
+                </div>
+
+                <h3 id="dialogue-system">对话系统</h3>
+                <p>在重构前，原对话系统采用「显示一条清一条」的机制，玩家无法回顾历史对话以及已选分支选项，严重削弱赛博朋克题材的剧情沉浸感。因此本次重构核心目标：<strong>打造可追溯、动态检定、富有节奏的叙事UI框架</strong>，并对接 Dialogue Builder 插件实现节点化驱动。</p>
+                <p>✨ 重构策略：</p>
+                <ul>
+                    <li><strong>历史记录组件</strong>：采用环形队列存储气泡实例，支持滚动回溯，玩家可在对话间隙翻看之前文本。</li>
+                    <li><strong>统一打字机控制器</strong>：支持富文本标签延迟解析，标点符号自动停歇，音效逐字匹配。</li>
+                    <li><strong>选项-检定联动</strong>：选项按钮根据数据驱动显示技能类型及风险等级，UI面板动态刷新掷骰反馈。</li>
+                    <li><strong>模块化事件广播</strong>：解耦 C++ 与蓝图，选项选择、对话结束、检定进入等事件均通过动态多播驱动，策划可灵活配置。</li>
+                </ul>
+
+                <section id="diagram-section">
+                    <h4> 系统逻辑图</h4>
+                    <div class="diagram-card">
+                        <div class="diagram-toolbar">
+                            <span class="title">🧠 对话核心流程图</span>
+                            <div class="zoom-controls">
+                                <button class="btn" id="zoomOut" aria-label="缩小">➖</button>
+                                <span class="zoom-level" id="zoomLevel">100%</span>
+                                <button class="btn" id="zoomIn" aria-label="放大">➕</button>
+                                <button class="btn" id="zoomReset" aria-label="重置缩放">↺ 重置</button>
+                            </div>
+                        </div>
+                        <div id="diagram-container">
+                            <div class="mermaid">
 graph LR
     subgraph 对话启动
         A["外部控制器"] -->|InitDialogue| B["UTestMainDialogueWidget"]
@@ -565,33 +579,26 @@ graph LR
     style C fill:#f0e0ff,stroke:#6b3fa0,stroke-width:1.5px
     style F fill:#ffe0e0,stroke:#c22,stroke-width:1px
     style M fill:#d9f0f0,stroke:#2c6e6e
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section id="video-section">
-                <h2>🎮 实现思路及演示</h2>
-                <p>在重构前，原对话系统采用「显示一条清一条」的机制，玩家无法回顾历史对话以及已选分支选项，严重削弱赛博朋克题材的剧情沉浸感。因此本次重构核心目标：<strong>打造可追溯、动态检定、富有节奏的叙事UI框架</strong>，并对接 Dialogue Builder 插件实现节点化驱动。</p>
-                <p>✨ 重构策略：</p>
-                <ul>
-                    <li><strong>历史记录组件</strong>：采用环形队列存储气泡实例，支持滚动回溯，玩家可在对话间隙翻看之前文本。</li>
-                    <li><strong>统一打字机控制器</strong>：支持富文本标签延迟解析，标点符号自动停歇，音效逐字匹配。</li>
-                    <li><strong>选项-检定联动</strong>：选项按钮根据数据驱动显示技能类型及风险等级，UI面板动态刷新掷骰反馈。</li>
-                    <li><strong>模块化事件广播</strong>：解耦 C++ 与蓝图，选项选择、对话结束、检定进入等事件均通过动态多播驱动，策划可灵活配置。</li>
-                </ul>
-                <!-- 策划需求 -->
-                <img src="Cyber/image/req.jpg" alt="策划需求图 - 对话分支与检定规则" class="req-img" onerror="this.onerror=null;this.style.opacity='0.5';this.alt='图片加载示例: 策划需求文档示意'">
-                <div class="img-caption">📑 策划需求</div>
-                
-                <p>🎬 以下为对话系统在开发环境中的实机演示。</p>
+                <p>对话系统实机演示</p>
                 <div class="video-card">
-                    <video controls muted loop preload="auto" poster="Cyber/image/poster.jpg">
-                        <source src="Cyber/video/5%E6%9C%8812%E6%97%A5.mp4" type="video/mp4">
+                    <video controls muted loop preload="auto" poster="image/poster.jpg">
+                        <source src="video/5月12日.mp4" type="video/mp4">
                         您的浏览器不支持视频播放，请升级浏览器或查看项目文档。
                     </video>
                     <div class="video-desc">🎞️ 对话系统演示视频 | 动态选项 + 逐字演出 + 技能检定</div>
                 </div>
+
+                <h3 id="player-interaction">玩家交互</h3>
+                <p>这个最简单了，</p>
+                <h3 id="text-collection">文本收集系统</h3>
+                <p>同理剧情对话系统，玩家收集到的线索没有回顾功能</p>
+                <h3 id="tutorial-system">教程系统</h3>
+                <p>这还是我第一次接触UE MediaSource 相关的内容，还好文档够多</p>
             </section>
         </div>
 
@@ -599,13 +606,12 @@ graph LR
     </main>
 
     <footer>
-        <p>© 2026 集体梦境 项目组 | 赛博朋克：飘渺城影 | 对话系统深度重构记录 | 仅供学习交流与开发展示</p>
+        <p>© 2026 集体梦境 项目组 | 仅供学习交流与开发展示</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
         (function() {
-            // 初始化 Mermaid 图表
             mermaid.initialize({
                 startOnLoad: true,
                 theme: 'base',
@@ -643,7 +649,6 @@ graph LR
                     mermaidDiv.style.transform = `scale(${currentZoom})`;
                     mermaidDiv.style.transformOrigin = 'top left';
                     zoomLevelSpan.textContent = Math.round(currentZoom * 100) + '%';
-                    // 调整父容器高度避免底部空白溢出
                     if (container) {
                         const newHeight = Math.max(520, mermaidDiv.scrollHeight * currentZoom + 40);
                         container.style.height = `${Math.min(newHeight, 900)}px`;
@@ -678,7 +683,6 @@ graph LR
                 }, { passive: false });
             }
             
-            // 确保渲染后初次适配高度
             setTimeout(() => {
                 if (mermaidDiv && container) {
                     const estimatedHeight = mermaidDiv.scrollHeight || 500;
