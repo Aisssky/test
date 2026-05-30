@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>C++/UE5 技术笔记 · 内联与编译优化</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8f8f8;
+        }
+
+        .top-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            background: url("image/promo.webp") center/cover no-repeat;
+            z-index: 0;
+        }
+
+        .header-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            background-color: rgba(0, 0, 0, 0.45);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 1;
+            backdrop-filter: blur(2px);
+        }
+
+        .header-bar h1 {
+            font-size: 36px;
+            font-weight: 800;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .header-bar h2 {
+            font-size: 17px;
+            font-weight: 400;
+            color: #e0e0e0;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 6px;
+        }
+
+        .header-bar .date {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            width: 100%;
+            margin-top: 250px;
+            background: #fff;
+            min-height: calc(100vh - 250px);
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: #ffffff;
+            padding: 40px 25px;
+            border-right: 1px solid #eee;
+            flex-shrink: 0;
+            align-self: flex-start;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            height: fit-content;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 3;
+        }
+
+        .sidebar h3 {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin: 14px 0;
+        }
+
+        .sidebar a {
+            color: #555;
+            text-decoration: none;
+            font-size: 15px;
+            display: block;
+            padding: 6px 8px;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #f5f0f0;
+            color: #000;
+        }
+
+        .sidebar .sub-link {
+            padding-left: 24px;
+            font-size: 14px;
+        }
+
+        .content-area {
+            flex: 1;
+            background-color: #ffffff;
+            padding: 60px 70px;
+            overflow-x: hidden;
+            word-wrap: break-word;
+        }
+
+        .content-area h2 {
+            font-size: 22px;
+            margin: 40px 0 20px;
+            color: #222;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .content-area h3 {
+            font-size: 18px;
+            color: #333;
+            margin: 25px 0 10px;
+        }
+
+        .content-area h4 {
+            font-size: 16px;
+            color: #444;
+            margin: 20px 0 8px;
+        }
+
+        .content-area p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .content-area ul {
+            margin: 10px 0 20px 20px;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .content-area ol {
+            margin: 10px 0 20px 20px;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .content-area a {
+            color: #c2185b;
+            text-decoration: none;
+            border-bottom: 1px dotted #e0a5b9;
+        }
+
+        .content-area a:hover {
+            text-decoration: none;
+            border-bottom: 1px solid #c2185b;
+        }
+
+        .content-area pre {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            margin: 16px 0 20px;
+            white-space: pre;
+            color: #2c2c2c;
+        }
+
+        .content-area code {
+            font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.92em;
+            color: #c2185b;
+        }
+
+        .content-area pre code {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            font-size: inherit;
+            color: inherit;
+        }
+
+        .content-area table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0 20px;
+            font-size: 15px;
+        }
+
+        .content-area th,
+        .content-area td {
+            border: 1px solid #ddd;
+            padding: 10px 14px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .content-area th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .content-area td {
+            color: #444;
+        }
+
+        .content-area blockquote {
+            border-left: 4px solid #c2185b;
+            background: #fdf5f7;
+            padding: 14px 20px;
+            margin: 16px 0 20px;
+            border-radius: 0 8px 8px 0;
+            color: #555;
+            font-style: normal;
+            line-height: 1.8;
+        }
+
+        .content-area blockquote p {
+            margin-bottom: 0;
+            color: #555;
+        }
+
+        .content-area img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: block;
+        }
+
+        .img-caption {
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+            margin: 4px 0 18px;
+        }
+
+        .right-blank {
+            width: 240px;
+            background-color: #ffffff;
+            flex-shrink: 0;
+            border-left: 1px solid #eee;
+            min-height: 100%;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: #fff;
+            border-top: 1px solid #eee;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                padding: 20px 25px;
+            }
+
+            .sidebar ul {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.8rem;
+            }
+
+            .sidebar li {
+                margin: 0;
+            }
+
+            .content-area {
+                padding: 30px 20px;
+                border-left: none;
+            }
+
+            .right-blank {
+                display: none;
+            }
+
+            .header-bar h1 {
+                font-size: 24px;
+                text-align: center;
+                padding: 0 12px;
+            }
+
+            .header-bar h2 {
+                font-size: 15px;
+                text-align: center;
+                padding: 0 12px;
+            }
+        }
+
+        @media (max-width: 1100px) and (min-width: 769px) {
+            .content-area {
+                padding: 40px 35px;
+            }
+            .sidebar,
+            .right-blank {
+                width: 200px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 6px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bg"></div>
+    <header class="header-bar">
+        <h1>C++/UE5 技术笔记</h1>
+        <h2>内联 · 编译优化 · 反射机制</h2>
+        <div class="date">2026-04-21 ~ 2026-05-10</div>
+    </header>
+
+    <main class="main-container">
+        <nav class="sidebar">
+            <h3>📌 索引</h3>
+            <ul>
+                <li><a href="#data-types">数据类型</a></li>
+                <li><a href="#include-guard">防卫式声明</a></li>
+                <li><a href="#inline">InLine</a></li>
+                <li><a href="#ue5-forms">在 UE5 中的常见形式</a></li>
+                <li class="sub-links">
+                    <a href="#ue5-forceinline" class="sub-link">UE5 的 FORCEINLINE</a>
+                </li>
+                <li><a href="#summary">一句话总结</a></li>
+                <li class="sub-links">
+                    <a href="#ue5-inlined-gen" class="sub-link">内联生成代码机制</a>
+                    <a href="#gen-cpp" class="sub-link">.gen.cpp 是什么</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="content-area">
+            <section id="data-types">
+                <h2>📐 数据类型</h2>
+                <p>
+                    <code>short</code>(2) &nbsp; <code>int</code>(4) &nbsp; <code>long</code>(4) &nbsp; <code>long long</code>(8)
+                </p>
+                <p>利用 <code>sizeof(数据类型/变量)</code> 求出数据类型占用类型大小。</p>
+                <p>单精度 <code>float</code>(4) = x.xxxxxf &nbsp;|&nbsp; 双精度 <code>double</code>(8)</p>
+                <p>默认情况下输出小数会输出六位有效数字。</p>
+                <p>
+                    <code>char</code>(1) &nbsp;|&nbsp; <code>a</code>-97 &nbsp;|&nbsp; <code>A</code>-65
+                </p>
+                <p>常用转义字符：</p>
+                <ul>
+                    <li>水平制表符 <code>\t</code></li>
+                    <li>双引号 <code>\"</code></li>
+                    <li>反斜杠 <code>\\</code></li>
+                    <li>单引号 <code>\'</code></li>
+                    <li>问号 <code>\?</code></li>
+                    <li><code>\0</code> 代表数字 0（空字符）</li>
+                </ul>
+            </section>
+
+            <section id="include-guard">
+                <h2>🛡️ 防卫式声明（Include Guard）</h2>
+                <p>它的作用是<strong>防止同一个头文件被多次 <code>#include</code> 导致重复定义</strong>。</p>
+                <p>C++ 的 <code>#include</code> 本质是文本粘贴，假设没有防卫：</p>
+                <ul>
+                    <li><code>A.h</code> 包含 <code>B.h</code></li>
+                    <li><code>C.h</code> 包含 <code>B.h</code></li>
+                    <li><code>Main.cpp</code> 包含 <code>A.h</code> 和 <code>C.h</code></li>
+                </ul>
+                <p>编译 <code>Main.cpp</code> 时，<code>B.h</code> 的内容被粘贴了<strong>两次</strong>，导致类/结构体重复定义，编译报错。UHT（Unreal Header Tool）在处理 <code>.generated.h</code> 文件时，依赖头文件不被重复解析，没有防卫会导致 UHT 报错。</p>
+                <p>防卫式声明通过宏标记"我已经被包含过了"，第二次 <code>#include</code> 时整个文件内容被预处理器跳过。</p>
+                <img src="https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/d79dec2ce79d4f2196320b3e13aeec45~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgQWlzc3NreQ==:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMzQwNTY0NzMyOTEwMTg4OCJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1779515678&x-orig-sign=zH72m%2BxCc4%2BgtyhF8VQ%2FExLCF%2BU%3D" alt="防卫式声明示意图" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.4';this.alt='图片加载失败（掘金CDN）';">
+                <div class="img-caption">经典写法示意</div>
+                <p><strong>经典写法：</strong></p>
+                <pre><code>#ifndef MY_HEADER_H
+            #define MY_HEADER_H
+
+            // 头文件内容
+
+            #endif</code></pre>
+                <p><strong>或者现代写法（UE5 模板生成的文件天然就有）：</strong></p>
+                <pre><code>#pragma once
+
+            // 头文件内容</code></pre>
+            </section>
+
+            <section id="inline">
+                <h2>⚡ InLine</h2>
+                <p>本意是告诉编译器：<strong>不要为这个函数创建独立的调用地址，把函数体直接"复制粘贴"到调用处</strong>。</p>
+                <pre><code>inline int Add(int a, int b)
+            {
+            return a + b;
+            }
+
+            // 调用处
+            int result = Add(3, 5);
+
+            // 编译后实际变成
+            int result = 3 + 5;  // 函数体被直接展开，没有函数调用开销</code></pre>
+                <p>函数调用本身有开销：压栈、跳转、返回、出栈。对于<strong>极短小、频繁调用</strong>的函数，这个开销比函数本身还贵。<code>inline</code> 就是为了消除这个开销。</p>
+                <p><code>inline</code> 现在更核心的意义已经不是"展开优化"，而是：</p>
+                <blockquote>
+                    <p><strong>允许同一个函数定义出现在多个编译单元（.cpp）里，而不报重复定义错误</strong></p>
+                </blockquote>
+                <pre><code>// MathUtils.h
+            inline int Add(int a, int b)  // 没有 inline → 多个 .cpp include 此头文件时报错
+            {
+            return a + b;
+            }
+
+            加了 inline，链接器会自动合并重复定义，只保留一份。</code></pre>
+            </section>
+
+            <section id="ue5-forms">
+                <h2>🎮 在 UE5 中的常见形式</h2>
+                <p>UE5 里你会见到两种主要写法：</p>
+                <ol>
+                    <li>
+                        <strong>直接写在头文件里的短函数</strong>
+                        <pre><code>FORCEINLINE float GetHealth() const
+            {
+            return Health;
+            }</code></pre>
+                    </li>
+                    <li>
+                        <strong><code>.inl</code> 文件</strong>
+                        <p>UE5 里有些复杂的模板实现会单独放在 <code>.inl</code> 文件里，再在头文件末尾 include 进来：</p>
+                        <pre><code>// MyClass.h
+            #pragma once
+
+            class MyClass { ... };
+
+            #include "MyClass.inl"  // inline 实现单独存放，保持头文件整洁</code></pre>
+                    </li>
+                </ol>
+
+                <h3 id="ue5-forceinline">UE5 的 <code>FORCEINLINE</code></h3>
+                <p>UE5 不直接推荐写 <code>inline</code>，而是用自己的宏：</p>
+                <pre><code>FORCEINLINE float GetSpeed() const { return Speed; }</code></pre>
+                <p>区别在于：</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>行为</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>inline</code></td>
+                            <td><strong>建议</strong>编译器展开，编译器可以拒绝</td>
+                        </tr>
+                        <tr>
+                            <td><code>FORCEINLINE</code></td>
+                            <td><strong>强制</strong>展开（底层是 <code>__forceinline</code> / <code>__attribute__((always_inline))</code>）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="summary">
+                <h2>📝 一句话总结</h2>
+                <blockquote>
+                    <p><code>inline</code> 的现实意义有两个：①消除短函数的调用开销；②让函数定义可以安全地住在头文件里。在 UE5 中你更多会见到 <code>FORCEINLINE</code>，是它的加强版。</p>
+                </blockquote>
+
+                <h3 id="ue5-inlined-gen">UE5 的"内联生成代码"机制</h3>
+                <img src="https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/123d6e11471243b289152737e5a7dc2c~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgQWlzc3NreQ==:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMzQwNTY0NzMyOTEwMTg4OCJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1779515678&x-orig-sign=LClDOl3Rb%2FS1D5U730gXEevXpG8%3D" alt="内联生成代码机制示意" loading="lazy" onerror="this.onerror=null;this.style.opacity='0.4';this.alt='图片加载失败（掘金CDN）';">
+                <div class="img-caption">内联生成代码 · 编译单元合并示意</div>
+                <p>这其实是一个<strong>宏展开成路径字符串，再被 <code>#include</code> 引入</strong>的技巧：</p>
+                <pre><code>// 宏展开后大概等价于
+            #include "InventoryItemDefinition.gen.cpp"</code></pre>
+
+                <h4 id="gen-cpp"><code>.gen.cpp</code> 是什么</h4>
+                <p>平时熟悉的是 UHT 生成的 <code>.generated.h</code>，但其实 UHT 同时还会生成 <code>.gen.cpp</code>，里面包含：</p>
+                <ul>
+                    <li><code>UClass</code> 的反射注册代码</li>
+                    <li><code>UFUNCTION</code> 的函数绑定</li>
+                    <li>序列化、属性元数据等样板代码</li>
+                </ul>
+                <p><strong>正常情况下</strong>这个 <code>.gen.cpp</code> 是作为独立编译单元参与构建的。</p>
+                <p>这是 UE5.1 引入的<strong>优化手段</strong>，叫做 <strong>Inlined Generated Code</strong>：</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>方式</th>
+                            <th>行为</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>传统方式</td>
+                            <td><code>.gen.cpp</code> 单独编译，是一个独立的编译单元</td>
+                        </tr>
+                        <tr>
+                            <td>Inline 方式</td>
+                            <td><code>.gen.cpp</code> 被 include 进你的 <code>.cpp</code>，<strong>合并成同一个编译单元</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>合并后的好处：</p>
+                <ol>
+                    <li><strong>减少编译单元数量</strong> → 构建系统要处理的文件变少</li>
+                    <li><strong>编译器可以跨两个文件做优化</strong>，因为它们现在是同一份翻译单元</li>
+                    <li><strong>Unity Build 更友好</strong>，整体编译速度提升</li>
+                </ol>
+                <p>规则和 <code>.generated.h</code> 必须最后一个类似——<strong>这行也要放在 <code>.cpp</code> 文件的 include 列表末尾</strong>。</p>
+                <blockquote>
+                    <p>它本质是把 UHT 生成的反射样板代码<strong>内联进你的 .cpp</strong>，而不是单独编译，目的是减少编译单元、提升构建速度。是 UE5 的编译优化手段，Lyra 示例项目里大量使用，属于"最佳实践"写法。</p>
+                </blockquote>
+            </section>
+        </div>
+
+        <div class="right-blank" aria-hidden="true"></div>
+    </main>
+
+    <footer>
+        <p>© 2026 集体梦境 项目组 | 仅供学习交流与开发展示</p>
+    </footer>
+</body>
+</html>

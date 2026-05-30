@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>计算机图形学 GAMES101 课堂笔记</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8f8f8;
+        }
+
+        /* 固定背景图 */
+        .top-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            background: url("image/promo.webp") center/cover no-repeat;
+            z-index: 0;
+        }
+
+        /* 固定标题栏 */
+        .header-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            background-color: rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 1;
+            backdrop-filter: blur(2px);
+        }
+
+        .header-bar h1 {
+            font-size: 36px;
+            font-weight: 800;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .header-bar .date {
+            font-size: 16px;
+            color: #e0e0e0;
+        }
+
+        /* 主容器：三栏布局 (左侧索引 | 正文 | 右侧空白) */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            width: 100%;
+            margin-top: 250px;
+            background: #fff;
+            min-height: calc(100vh - 250px);
+        }
+
+        /* ========= 左侧导航栏 (sticky 索引) ========= */
+        .sidebar {
+            width: 240px;
+            background-color: #ffffff;
+            padding: 40px 25px;
+            border-right: 1px solid #eee;
+            flex-shrink: 0;
+            align-self: flex-start;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            height: fit-content;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 3;
+        }
+
+        .sidebar h3 {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin: 14px 0;
+        }
+
+        .sidebar a {
+            color: #555;
+            text-decoration: none;
+            font-size: 15px;
+            display: block;
+            padding: 6px 8px;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #f5f0f0;
+            color: #000;
+        }
+
+        /* 为侧边栏二级菜单增加缩进 */
+        .sidebar .sub-link {
+            padding-left: 24px;
+            font-size: 14px;
+        }
+
+        /* ========= 正文区域 (弹性宽度) ========= */
+        .content-area {
+            flex: 1;
+            background-color: #ffffff;
+            padding: 60px 70px;
+            overflow-x: hidden;
+            word-wrap: break-word;
+        }
+
+        .content-area h2 {
+            font-size: 22px;
+            margin: 40px 0 20px;
+            color: #222;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .content-area h3 {
+            font-size: 18px;
+            color: #333;
+            margin: 25px 0 10px;
+        }
+
+        .content-area p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .content-area ul, .content-area ol {
+            margin: 10px 0 20px 20px;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .content-area a {
+            color: #c2185b;
+            text-decoration: none;
+            border-bottom: 1px dotted #e0a5b9;
+        }
+
+        .content-area a:hover {
+            text-decoration: none;
+            border-bottom: 1px solid #c2185b;
+        }
+
+        /* 技术栈卡片 */
+        .tech-stack-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+        }
+
+        .tech-stack-block {
+            background: #ffffff;
+            color: #333;
+            padding: 8px 18px;
+            border: 1px solid #cccccc;
+            border-radius: 40px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            transition: all 0.1s ease;
+        }
+
+        /* 图表卡片 */
+        .diagram-card {
+            width: 100%;
+            max-width: 100%;
+            margin: 30px 0;
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .diagram-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: #ffffff;
+            border-bottom: 1px solid #eee;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .diagram-toolbar .title {
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .diagram-toolbar .btn {
+            padding: 0.3rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .diagram-toolbar .btn:hover {
+            background: #f0f0f0;
+        }
+
+        #diagram-container {
+            width: 100%;
+            height: 520px;
+            overflow: auto;
+            background: #ffffff;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .mermaid {
+            min-width: 1300px;
+            height: fit-content;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .zoom-level {
+            font-size: 0.85rem;
+            min-width: 3rem;
+            text-align: center;
+            color: #666;
+        }
+
+        video,
+        audio,
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .img-caption {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin: 8px 0 20px;
+        }
+
+        /* 并排图片容器 */
+        .image-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 24px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .image-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 0 1 auto;
+        }
+
+        .image-item img {
+            height: 200px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+            background: #fff;
+        }
+
+        .video-card {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            margin: 20px auto;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .video-card video {
+            width: 100%;
+            display: block;
+        }
+
+        .video-desc {
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 15px;
+            color: #555;
+            background: #fff;
+        }
+
+        .right-blank {
+            width: 240px;
+            background-color: #ffffff;
+            flex-shrink: 0;
+            border-left: 1px solid #eee;
+            min-height: 100%;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: #fff;
+            border-top: 1px solid #eee;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        /* 公式样式 */
+        .formula {
+            margin: 10px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        strong {
+            color: #c2185b;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                padding: 20px 25px;
+            }
+
+            .sidebar ul {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.8rem;
+            }
+
+            .sidebar li {
+                margin: 0;
+            }
+
+            .content-area {
+                padding: 30px 20px;
+                border-left: none;
+            }
+
+            .right-blank {
+                display: none;
+            }
+
+            .header-bar h1 {
+                font-size: 26px;
+                text-align: center;
+                padding: 0 12px;
+            }
+
+            .video-card {
+                width: 100%;
+            }
+
+            .image-item img {
+                height: 150px;
+            }
+        }
+
+        @media (max-width: 1100px) and (min-width: 769px) {
+            .content-area {
+                padding: 40px 35px;
+            }
+            .sidebar, .right-blank {
+                width: 200px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 6px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+    </style>
+    <!-- 数学公式渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="top-bg"></div>
+    <header class="header-bar">
+        <h1>计算机图形学 GAMES101</h1>
+        <h2>课堂完整笔记</h2>
+        <div class="date">Lecture 01 ~ Lecture 22</div>
+    </header>
+
+    <main class="main-container">
+        <!-- 左侧：索引导航栏 -->
+        <nav class="sidebar">
+            <h3>📌 目录索引</h3>
+            <ul>
+                <li><a href="#lec01">L01 图形学概述</a></li>
+                <li><a href="#lec02">L02 线性代数回顾</a></li>
+                <li><a href="#lec03_04">L03~04 矩阵变换</a></li>
+                <li><a href="#lec05_06">L05~06 光栅化</a></li>
+                <li><a href="#lec07_09">L07~09 着色与管线</a></li>
+                <li><a href="#lec10_12">L10~12 几何基础</a></li>
+                <li><a href="#lec13_16">L13~16 光线追踪</a></li>
+                <li><a href="#lec17">L17 材质与外观</a></li>
+                <li><a href="#lec18">L18 渲染前沿</a></li>
+                <li><a href="#lec19">L19 相机与光场</a></li>
+                <li><a href="#lec20">L20 颜色与感知</a></li>
+                <li><a href="#lec21_22">L21~22 动画与模拟</a></li>
+            </ul>
+        </nav>
+
+        <!-- 中间：正文内容区 -->
+        <div class="content-area">
+            <section id="lec01">
+                <h2>Lecture 01 Overview of Computer Graphics 计算机图形学概述</h2>
+                <p>计算机图形学（Computer Graphics）的四个重要组成：</p>
+                <ul>
+                    <li><strong>光栅化（Rasterization）</strong>：将三维空间中的几何体投射到屏幕上并生成片元（fragments）/像素（pixels）</li>
+                    <li><strong>曲线和网格（Curves and Meshes）</strong></li>
+                    <li><strong>光线追踪（Ray Tracing）</strong>：以真实的光线传播理论为基础计算物体的光照效果，以求得到更真实的效果</li>
+                    <li><strong>动画与模拟（Animation and Simulation）</strong>：例如关键帧动画和布料模拟</li>
+                </ul>
+
+                <p>计算机图形学相关知识区分：</p>
+                <ul>
+                    <li>图形学API：OpenGL、DirectX、Vulkan、Metal等</li>
+                    <li>计算机视觉：侧重<strong>分析图像</strong>（如汽车避障识别）；图形学侧重<strong>生成图像</strong>（如游戏画面）</li>
+                    <li>数字图像处理：专注已有图像编辑处理；图形学完成从3D模型到图像的全流程</li>
+                    <li>三者并非完全割裂，当下技术融合趋势明显。</li>
+                </ul>
+            </section>
+
+            <section id="lec02">
+                <h2>Lecture 02 Review of Linear Algebra 线性代数回顾</h2>
+                <h3>向量（Vector）</h3>
+                <ul>
+                    <li>向量加法：三角形法则、平行四边形法则</li>
+                    <li>向量点乘：单位向量点乘可得夹角余弦；也可计算向量投影长度</li>
+                    <li>向量叉乘：
+                        <ul>
+                            <li>方向：遵循右手螺旋定则</li>
+                            <li>模长：\(|\vec{a}||\vec{b}|\sin\theta\)，等价于两向量构成平行四边形面积</li>
+                            <li>用途：判断点在凸多边形内外、区分凹凸多边形</li>
+                        </ul>
+                    </li>
+                    <li>右手坐标系：xyz轴正向满足右手螺旋定则，反之为左手坐标系</li>
+                </ul>
+
+                <h3>矩阵（Matrices）</h3>
+                <ul>
+                    <li>基础运算：矩阵加减、乘法及对应运算律</li>
+                    <li>点乘矩阵形式：\(\vec{a}\cdot\vec{b} = \vec{a}^T\vec{b}\)</li>
+                    <li>叉乘矩阵形式：\(\vec{a}\times\vec{b} = A^*\vec{b}\)
+\[
+A^* = \begin{pmatrix}0 & -a_z & a_y \\ a_z & 0 & -a_x \\ -a_y & a_x & 0\end{pmatrix}
+\]
+\(A^*\) 为向量 \(\vec{a}\) 的反对称矩阵</li>
+                </ul>
+            </section>
+
+            <section id="lec03_04">
+                <h2>Lecture 03~04 Transformation 矩阵变换</h2>
+                <h3>二维变换（2D transformation）</h3>
+                <ul>
+                    <li>旋转矩阵：
+\[
+\mathbf{R}(\theta)=\begin{pmatrix}\cos\theta & -\sin\theta \\ \sin\theta & \cos\theta\end{pmatrix}
+\]</li>
+                    <li>缩放矩阵：
+\[
+\mathbf{S}(s_x,s_y)=\begin{pmatrix}s_x & 0 \\ 0 & s_y\end{pmatrix}
+\]
+缩放系数为负会产生翻转</li>
+                    <li>切变矩阵：
+\[
+\mathbf{Sh}_x(a)=\begin{pmatrix}1 & a \\ 0 & 1\end{pmatrix}
+\]</li>
+                    <li>平移矩阵（齐次坐标）：
+\[
+\mathbf{T}(t_x,t_y)=\begin{pmatrix}1 & 0 & t_x \\ 0 & 1 & t_y \\ 0 & 0 & 1\end{pmatrix}
+\]</li>
+                    <li>旋转、缩放、切变为<strong>线性变换</strong>；叠加平移后统称为<strong>仿射变换</strong>。矩阵乘法顺序会影响最终结果，不可随意交换。</li>
+                </ul>
+
+                <h3>齐次坐标（Homogeneous coordinates）</h3>
+                <ul>
+                    <li>统一线性变换与平移矩阵，支持混合运算</li>
+                    <li>w=1 表示空间点，w=0 表示向量，保证向量平移不变性</li>
+                </ul>
+
+                <h3>三维变换（3D Transformation）</h3>
+                <ul>
+                    <li>绕X轴旋转：
+\[
+\mathbf{R}_x(\theta)=\begin{pmatrix}1&0&0&0\\0&\cos\theta&-\sin\theta&0\\0&\sin\theta&\cos\theta&0\\0&0&0&1\end{pmatrix}
+\]</li>
+                    <li>绕Y轴旋转：
+\[
+\mathbf{R}_y(\theta)=\begin{pmatrix}\cos\theta&0&\sin\theta&0\\0&1&0&0\\-\sin\theta&0&\cos\theta&0\\0&0&0&1\end{pmatrix}
+\]</li>
+                    <li>绕Z轴旋转：
+\[
+\mathbf{R}_z(\theta)=\begin{pmatrix}\cos\theta&-\sin\theta&0&0\\\sin\theta&\cos\theta&0&0\\0&0&1&0\\0&0&0&1\end{pmatrix}
+\]</li>
+                    <li>三维缩放矩阵：
+\[
+\mathbf{S}(s_x,s_y,s_z)=\begin{pmatrix}s_x&0&0&0\\0&s_y&0&0\\0&0&s_z&0\\0&0&0&1\end{pmatrix}
+\]</li>
+                    <li>三维平移矩阵：
+\[
+\mathbf{T}(t_x,t_y,t_z)=\begin{pmatrix}1&0&0&t_x\\0&1&0&t_y\\0&0&1&t_z\\0&0&0&1\end{pmatrix}
+\]</li>
+                </ul>
+
+                <h3>万向节死锁</h3>
+                <p>欧拉角旋转存在轴顺序限制，中间轴旋转导致两轴重合时丢失一个自由度，产生万向节死锁。工程中常用<strong>四元数（Quaternion）</strong>规避该问题。</p>
+                <p>参考视频：<a href="www.bilibili.com/video/BV1Nr4y1j7kn" target="_blank">无伤理解欧拉角中的“万向死锁”现象</a></p>
+
+                <h3>MVP 矩阵变换</h3>
+                <ul>
+                    <li><strong>模型矩阵 Model</strong>：局部坐标 → 世界坐标，完成模型位移、旋转、缩放</li>
+                    <li><strong>视图矩阵 View</strong>：世界坐标 → 视图坐标，等价于反向移动摄像机</li>
+                    <li><strong>投影矩阵 Projection</strong>：视图坐标 → 裁剪空间，将3D场景映射为2D画面</li>
+                </ul>
+                <p>法线特殊处理：模型存在非等比缩放/切变时，法线需使用原模型矩阵左上3×3的<strong>逆矩阵</strong>变换。</p>
+
+                <h3>投影变换</h3>
+                <ul>
+                    <li><strong>正交投影</strong>：将场景立方体规整为 \([-1,1]^3\) 标准立方体，无透视形变</li>
+                    <li><strong>透视投影</strong>：将视锥体转为标准立方体，符合人眼近大远小特性；参数包含fovy、宽高比、远近裁剪面</li>
+                </ul>
+                <p>补充：投影得到裁剪空间坐标，需执行<strong>透视除法（除以w）</strong>得到NDC标准化设备坐标。</p>
+                <p>参考视频：<a href="www.bilibili.com/video/BV1ZY41157TR" target="_blank">图形学投影矩阵推导</a></p>
+            </section>
+
+            <section id="lec05_06">
+                <h2>Lecture 05~06 Rasterization 光栅化</h2>
+                <h3>基础概念</h3>
+                <ul>
+                    <li>光栅化：将几何图元转为屏幕像素的过程</li>
+                    <li>像素：屏幕最小显示单元，单像素仅能显示一种颜色，也是锯齿产生的根源</li>
+                    <li>视口变换：将NDC坐标映射为最终屏幕坐标</li>
+                </ul>
+
+                <h3>三角形网格</h3>
+                <p>三角形是实时渲染最基础图元：三点确定唯一平面、必为凸多边形、插值计算简单。</p>
+
+                <h3>采样与走样</h3>
+                <p>基础采样：判断像素中心是否在三角形内完成着色；可通过AABB包围盒缩小采样范围提升效率。</p>
+                <p>采样不足会引发<strong>走样</strong>：画面锯齿、摩尔纹、动态画面车轮倒转等。本质是采样率过低造成频谱混叠。</p>
+
+                <h3>频域、时域与滤波</h3>
+                <ul>
+                    <li>时域：描述信号随空间/时间分布；频域：描述信号频率组成</li>
+                    <li>傅里叶变换：实现时域 ↔ 频域转换；时域卷积等价于频域乘积</li>
+                    <li>滤波：等价于卷积运算。低通滤波做模糊，高通滤波做边缘检测/锐化</li>
+                </ul>
+
+                <h3>抗锯齿（AA）</h3>
+                <h4>超采样类</h4>
+                <ul>
+                    <li>SSAA 全超采样：画质最优，性能开销极大，实时渲染少用</li>
+                    <li>MSAA 多重采样：仅对几何边缘超采样，延迟渲染管线不兼容</li>
+                    <li>TAA 时间抗锯齿：复用历史帧数据，运动物体易出现拖影</li>
+                </ul>
+                <h4>后处理类</h4>
+                <ul>
+                    <li>FXAA：开销极低，会轻微模糊UI、文字等精细边缘</li>
+                    <li>MLAA / SMAA：形态类抗锯齿，SMAA画质更佳、实现复杂</li>
+                </ul>
+                <h4>AI超分类</h4>
+                <ul>
+                    <li>DLSS（NVIDIA）、FSR（AMD）：基于深度学习的超采样+抗锯齿方案</li>
+                </ul>
+
+                <h3>深度缓冲 Z-Buffer</h3>
+                <ul>
+                    <li>画家算法：由远及近绘制，存在循环遮挡无法排序的缺陷</li>
+                    <li>Z-Buffer：逐像素深度测试，通过测试则渲染并更新深度值，是主流遮挡解决方案</li>
+                    <li>透明物体：开启深度测试、关闭深度写入，再执行颜色混合</li>
+                </ul>
+            </section>
+
+            <section id="lec07_09">
+                <h2>Lecture 07~09 Shading 着色 & 渲染管线</h2>
+                <p>着色：为模型赋予材质与光照效果的过程。基础着色不计算遮挡与阴影。</p>
+
+                <h3>Blinn-Phong 光照模型</h3>
+                <h4>漫反射 Diffuse</h4>
+                <p>遵循兰伯特模型，亮度仅与法线、光照方向夹角有关，与观察视角无关。</p>
+                <p>公式：\(L_d = k_d (I/r^2) \max(0, \mathbf{n}\cdot\mathbf{l})\)</p>
+
+                <h4>高光 Specular</h4>
+                <p>Blinn-Phong 引入<strong>半角向量</strong>优化计算：\(\mathbf{h} = \frac{\mathbf{l}+\mathbf{v}}{||\mathbf{l}+\mathbf{v}||}\)</p>
+                <p>公式：\(L_s = k_s (I/r^2) \max(0, \mathbf{n}\cdot\mathbf{h})^p\)</p>
+
+                <h4>环境光 Ambient</h4>
+                <p>恒定基础亮度，避免暗部完全死黑。公式：\(L_a = k_a I_a\)</p>
+
+                <h3>着色频率</h3>
+                <ul>
+                    <li>Flat 逐面着色：单图元一次光照计算，开销最低，效果粗糙</li>
+                    <li>Gouraud 逐顶点着色：顶点计算光照，片元插值，折中方案</li>
+                    <li>Phong 逐像素着色：像素级法线插值+光照计算，效果最好、开销最高</li>
+                </ul>
+
+                <h3>渲染管线</h3>
+                <ol>
+                    <li>顶点处理：MVP变换、顶点着色器运算</li>
+                    <li>图元组装：顶点拼接为三角形等图元</li>
+                    <li>光栅化：图元转为片元</li>
+                    <li>片元处理：片元着色器执行纹理、光照、颜色计算</li>
+                    <li>帧缓冲输出：写入最终画面</li>
+                </ol>
+                <p>可编程管线核心：<strong>顶点着色器 + 片元着色器</strong>，依托GPU并行执行。</p>
+                <p>参考：<a href="shadertoy.com/view/ld3Gz2" target="_blank">Shader Toy</a></p>
+
+                <h3>纹理映射</h3>
+                <p>通过UV坐标将2D纹理贴到3D模型表面；片元UV由顶点重心坐标插值得到。</p>
+                <ul>
+                    <li>基础采样：最近邻采样、双线性插值、双立方插值</li>
+                    <li>远距离/大纹理走样：使用 Mipmap、各向异性过滤优化</li>
+                </ul>
+
+                <h3>常见纹理类型</h3>
+                <ul>
+                    <li>环境贴图/立方体贴图：实现天空盒、反射效果</li>
+                    <li>法线/凹凸贴图：模拟表面细节，配合TBN矩阵使用</li>
+                    <li>置换贴图：真实修改顶点位置，细节表现力更强</li>
+                    <li>程序纹理：基于Perlin噪声生成木纹、岩石等，无需外置贴图</li>
+                    <li>AO贴图：预计算环境光遮蔽，提升画面层次感</li>
+                </ul>
+            </section>
+
+            <section id="lec10_12">
+                <h2>Lecture 10~12 Geometry 几何表示</h2>
+                <h3>隐式几何</h3>
+                <p>使用数学函数描述形体，优点是快速判断点与模型内外关系，缺点是难以直观观察形状。</p>
+                <ul>
+                    <li>CSG 构造实体几何：基础几何体布尔运算组合复杂模型</li>
+                    <li>有向距离场 SDF：记录点到模型表面的符号距离，广泛用于特效、光影</li>
+                    <li>分形：自相似递归图形，易产生走样</li>
+                </ul>
+
+                <h3>显式几何</h3>
+                <p>直接定义顶点、参数描述形体，形状直观，难以判断点内外关系。</p>
+                <ul>
+                    <li>点云：三维扫描数据常用格式</li>
+                    <li>多边形网格：游戏、影视主流模型格式</li>
+                    <li>曲线/曲面：贝塞尔曲线、贝塞尔曲面</li>
+                </ul>
+
+                <h3>贝塞尔曲线</h3>
+                <ul>
+                    <li>由控制点插值生成，首末控制点必在曲线上</li>
+                    <li>特性：仿射不变性、凸包性质；不具备投影不变性</li>
+                    <li>拓展：逐段贝塞尔、B样条、NURBS 高阶曲线</li>
+                </ul>
+
+                <h3>网格操作</h3>
+                <ul>
+                    <li>细分：Loop细分（仅三角面）、Catmull-Clark细分（通用多边形），用于模型增面平滑</li>
+                    <li>简化：边坍缩 + 二次误差度量QEM，用于LOD层级细节</li>
+                </ul>
+            </section>
+
+            <section id="lec13_16">
+                <h2>Lecture 13~16 Ray Tracing 光线追踪</h2>
+                <h3>阴影映射 Shadow Map</h3>
+                <ol>
+                    <li>以光源视角渲染场景，生成深度贴图</li>
+                    <li>正常渲染时比对像素深度与阴影贴图，判断是否处于阴影</li>
+                </ol>
+                <p>拓展方案：CSM级联阴影、PCF/PCSS/VSSM 实现软阴影效果。</p>
+
+                <h3>光线追踪基础</h3>
+                <ul>
+                    <li>光线投射：仅计算直接光照，最简光线追踪</li>
+                    <li>递归光线追踪：支持反射、折射、光线多次弹射，还原全局光照</li>
+                </ul>
+                <p>光线通用表达式：\(\mathbf{r}(t) = \mathbf{o} + t\mathbf{d},\quad t>0\)</p>
+
+                <h3>光线求交与加速结构</h3>
+                <ul>
+                    <li>三角面求交：Möller–Trumbore 算法</li>
+                    <li>包围体：包围球、AABB、OBB</li>
+                    <li>空间划分：均匀网格、八叉树、KD-Tree、BSP-Tree</li>
+                    <li>物体划分：BVH 包围体层次结构，光线追踪主流加速方案</li>
+                </ul>
+
+                <h3>辐射度量学</h3>
+                <p>精准描述光线物理属性：能量、通量、强度、辐照度、辐亮度、立体角。</p>
+                <ul>
+                    <li>BRDF 双向反射分布函数：描述表面光线反射规则，满足互易性</li>
+                    <li>渲染方程：图形学全局光照理论核心</li>
+                </ul>
+
+                <h3>蒙特卡洛路径追踪</h3>
+                <ul>
+                    <li>蒙特卡洛积分：随机采样求解复杂积分</li>
+                    <li>路径追踪：从像素发射多条光路求平均，SPP为每像素采样数</li>
+                    <li>优化手段：光源重要性采样、俄罗斯轮盘赌（终止无限递归）</li>
+                </ul>
+            </section>
+
+            <section id="lec17">
+                <h2>Lecture 17 Materials and Appearances 材质与外观</h2>
+                <ul>
+                    <li>BRDF：仅描述反射；BTDF：仅描述透射；BSDF：反射+透射统一模型</li>
+                    <li>漫反射材质：Lambert 模型，\(f_r = \rho/\pi\)</li>
+                    <li>镜面/折射材质：遵循斯涅尔定律，存在全反射现象</li>
+                    <li>微表面模型：由<strong>法线分布项D、几何遮挡项G、菲涅尔项F</strong>组成</li>
+                </ul>
+                <p>菲涅尔效应：描述光线反射/透射占比，工程常用 Schlick 公式近似计算。材质分为各向同性、各向异性两大类。</p>
+            </section>
+
+            <section id="lec18">
+                <h2>Lecture 18 Advanced Topics in Rendering 渲染前沿</h2>
+                <h3>高级光线传播</h3>
+                <ul>
+                    <li>无偏算法：双向路径追踪BDPT、MLT马尔可夫光线传播</li>
+                    <li>有偏算法：光子映射、VCM、实时辐射度IR/虚拟点光源VPL</li>
+                </ul>
+
+                <h3>高级外观建模</h3>
+                <ul>
+                    <li>参与介质：雾、云等体积渲染效果</li>
+                    <li>次表面散射 BSSRDF：模拟皮肤、玉石、蜡烛等半透光材质</li>
+                    <li>特殊材质：毛发、布料、颗粒材质等专用模型</li>
+                </ul>
+            </section>
+
+            <section id="lec19">
+                <h2>Lecture 19 Cameras, Lenses and Light Field 相机、透镜与光场</h2>
+                <ul>
+                    <li>针孔相机：无景深，整张画面全部清晰</li>
+                    <li>曝光三要素：光圈（景深、进光量）、快门（曝光时间）、ISO感光度</li>
+                    <li>薄透镜、高斯透镜方程、弥散圆、景深概念</li>
+                    <li>光场：记录完整光线信息，光场相机支持后期重新对焦、调整视角</li>
+                </ul>
+            </section>
+
+            <section id="lec20">
+                <h2>Lecture 20 Color and Perception 颜色与感知</h2>
+                <ul>
+                    <li>可见光波长：380~750nm，SPD谱功率密度描述光的光谱分布</li>
+                    <li>人眼细胞：视杆细胞感知亮度，视锥细胞感知色彩</li>
+                    <li>同色异谱：不同光谱的光，人眼观感一致</li>
+                    <li>色彩空间：RGB(加色，屏幕)、CMYK(减色，印刷)、CIE XYZ、LAB、HSV</li>
+                </ul>
+            </section>
+
+            <section id="lec21_22">
+                <h2>Lecture 21~22 Animation and Simulation 动画与模拟</h2>
+                <h3>动画基础</h3>
+                <ul>
+                    <li>关键帧动画：仅制作关键姿态，中间帧由插值生成</li>
+                    <li>运动学：FK前向运动学、IK逆向运动学</li>
+                    <li>模型绑定、动作捕捉：角色动画常用制作流程</li>
+                </ul>
+
+                <h3>物理模拟</h3>
+                <ul>
+                    <li>质点-弹簧系统：布料、柔性物体模拟基础，包含弹力、阻尼</li>
+                    <li>粒子系统：模拟烟雾、水流、集群生物等</li>
+                    <li>数值积分：显式欧拉、隐式欧拉、中点法、Verlet积分等</li>
+                    <li>刚体模拟、流体模拟</li>
+                    <li>模拟分类：拉格朗日法(质点)、欧拉法(网格)、MPM混合方法</li>
+                </ul>
+            </section>
+        </div>
+
+        <div class="right-blank" aria-hidden="true"></div>
+    </main>
+
+    <footer>
+        <p>© 2026 计算机图形学学习笔记 | GAMES101 课程整理</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        (function() {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'base',
+                themeVariables: {
+                    'background': '#ffffff',
+                    'primaryColor': '#f4f0ff',
+                    'primaryBorderColor': '#6b3fa0',
+                    'primaryTextColor': '#2c2c2c',
+                    'lineColor': '#8f8f9f',
+                    'secondaryColor': '#fff0db',
+                    'tertiaryColor': '#e6f7f7'
+                },
+                securityLevel: 'loose',
+                fontFamily: 'Microsoft YaHei, -apple-system, sans-serif',
+                fontSize: 14,
+                flowchart: {
+                    useMaxWidth: false,
+                    htmlLabels: true,
+                    nodeSpacing: 55,
+                    rankSpacing: 85,
+                    curve: 'basis'
+                }
+            });
+            
+            const container = document.getElementById('diagram-container');
+            const mermaidDiv = document.querySelector('.mermaid');
+            let currentZoom = 1.0; 
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const zoomResetBtn = document.getElementById('zoomReset');
+            const zoomLevelSpan = document.getElementById('zoomLevel');
+            
+            function applyZoom() {
+                if (mermaidDiv) {
+                    mermaidDiv.style.transform = `scale(${currentZoom})`;
+                    mermaidDiv.style.transformOrigin = 'top left';
+                    zoomLevelSpan.textContent = Math.round(currentZoom * 100) + '%';
+                    if (container) {
+                        const newHeight = Math.max(520, mermaidDiv.scrollHeight * currentZoom + 40);
+                        container.style.height = `${Math.min(newHeight, 900)}px`;
+                    }
+                }
+            }
+            
+            if (zoomInBtn && zoomOutBtn && zoomResetBtn) {
+                zoomInBtn.addEventListener('click', () => {
+                    currentZoom = Math.min(2.2, currentZoom + 0.1);
+                    applyZoom();
+                });
+                zoomOutBtn.addEventListener('click', () => {
+                    currentZoom = Math.max(0.5, currentZoom - 0.1);
+                    applyZoom();
+                });
+                zoomResetBtn.addEventListener('click', () => {
+                    currentZoom = 1.0;
+                    applyZoom();
+                    if (container) container.style.height = '520px';
+                });
+            }
+            
+            if (container) {
+                container.addEventListener('wheel', (e) => {
+                    if (e.ctrlKey) {
+                        e.preventDefault();
+                        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                        currentZoom = Math.max(0.5, Math.min(2.2, currentZoom + delta));
+                        applyZoom();
+                    }
+                }, { passive: false });
+            }
+            
+            setTimeout(() => {
+                if (mermaidDiv && container) {
+                    const estimatedHeight = mermaidDiv.scrollHeight || 500;
+                    if (estimatedHeight > 520) container.style.height = `${estimatedHeight + 30}px`;
+                }
+                applyZoom();
+            }, 200);
+        })();
+    </script>
+    
+</body>
+</html>
