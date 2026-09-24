@@ -1,0 +1,27 @@
+---
+/**
+ * 404 页面。GitHub Pages 会把 dist/404.html 作为自定义 404 输出。
+ */
+import PageLayout from '../components/PageLayout.astro';
+import { withBase } from '../lib/site';
+---
+
+<PageLayout
+  title="404"
+  description="页面不存在"
+  subtitle="这个地址没有对应的页面，可能是链接过期或者文章被移动了。"
+  noindex
+>
+  <div class="empty">
+    <p style="margin-top:0;">要不要从这些地方重新开始？</p>
+    <p style="margin-bottom:0;">
+      <a href={withBase('/')} style="color:#c2185b;">首页</a>
+      <span style="color:#ddd;"> · </span>
+      <a href={withBase('/blog/')} style="color:#c2185b;">笔记</a>
+      <span style="color:#ddd;"> · </span>
+      <a href={withBase('/tags/')} style="color:#c2185b;">标签</a>
+      <span style="color:#ddd;"> · </span>
+      <a href={withBase('/about/')} style="color:#c2185b;">关于</a>
+    </p>
+  </div>
+</PageLayout>

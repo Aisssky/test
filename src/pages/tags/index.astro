@@ -1,0 +1,31 @@
+---
+/**
+ * 标签总览 /tags/
+ */
+import PageLayout from '../../components/PageLayout.astro';
+import { collectTags, getPublishedPosts } from '../../lib/posts';
+import { tagPath } from '../../lib/site';
+
+const posts = await getPublishedPosts();
+const tags = collectTags(posts);
+---
+
+<PageLayout
+  title="标签"
+  description="按标签浏览 Aisssky 的笔记"
+  subtitle={`共 ${tags.length} 个标签。标签来自每篇文章 frontmatter 的 tags 字段。`}
+>
+  {
+    tags.length > 0 ? (
+      <div class="chip-list">
+        {tags.map((tag) => (
+          <a class="chip chip-tag chip-lg" href={tagPath(tag.name)}>
+            #{tag.name} · {tag.count}
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="empty">还没有任何标签。</div>
+    )
+  }
+</PageLayout>

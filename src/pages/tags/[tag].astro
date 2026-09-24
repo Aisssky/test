@@ -1,0 +1,36 @@
+---
+/**
+ * 某个标签下的文章 /tags/<标签>/
+ */
+import PageLayout from '../../components/PageLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { collectTags, getPublishedPosts } from '../../lib/posts';
+import { withBase } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return collectTags(posts).map((tag) => ({
+    params: { tag: tag.name },
+    props: { name: tag.name },
+  }));
+}
+
+const { name } = Astro.props;
+const posts = (await getPublishedPosts()).filter((post) => post.data.tags.includes(name));
+---
+
+<PageLayout
+  title={`标签 · ${name}`}
+  description={`标签「${name}」下的全部文章，共 ${posts.length} 篇`}
+  subtitle={`#${name} · 共 ${posts.length} 篇`}
+>
+  <p style="margin:-16px 0 28px;">
+    <a href={withBase('/tags/')} style="color:#c2185b;font-size:14px;text-decoration:none;">
+      ← 全部标签
+    </a>
+  </p>
+
+  <ul class="post-list">
+    {posts.map((post) => <PostCard post={post} />)}
+  </ul>
+</PageLayout>

@@ -1,0 +1,129 @@
+---
+/**
+ * 像素开屏页（旧站 pixel.html）。
+ * DOM 与脚本逻辑原样迁移；跳转目标从 index.html 改为站点首页。
+ * 像素字体在 article 之外的路径下由 pixel.css 经 Vite 解析，base 会正确带上。
+ */
+import Layout from '../layouts/Layout.astro';
+import { withBase } from '../lib/site';
+import '../styles/pixel.css';
+
+const bootLines = [
+  'AISSSKY BIOS v2.6.07',
+  'CHECKING PIXEL FONT ........ OK',
+  'LOADING PORTFOLIO.SYS ...... OK',
+  'BOOT SEQUENCE COMPLETE.',
+];
+
+const binaryBackground =
+  '1000001100000000101001011011110000000101000011000100111110110100101101101101011000111110111010010000010010101100011001111110010110011010000011001110001100111010010010010011000001001100001111100010100101001010101000000011101000010000000000011101101001010100110111110100001100010100001100010100010110001110001011000001011110010100101011101100001010011100100010000001010000100011111011010110000001010010100000110011000010100001110111101010110010111100111100011001000011011001110000000000101110110001101111101110011011100010111011010001000100101101101100110111010011010110010000101010010000100100110101101110101011011001000111100111001011101000101101001001001011011000011111001001100101110100000111000100010010100001111101100001001110011011111001111101001110000000010000100101101101011011111000011100000010110111001110000110110100110100110011101100000101011101001010111001000000101000010111110101100110000110110001101000101100001110000110110011001010001011011000110100000101111101000011110110100010011110';
+
+const goHref = withBase('/');
+---
+
+<Layout
+  title="Aisssky | PRESS START"
+  description="Aisssky 像素黑白风开屏页"
+  bodyClass="pixel-page"
+>
+  <div class="crt-flash" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <main class="screen">
+    <div class="binary-bg" aria-hidden="true">{binaryBackground}</div>
+
+    <pre class="boot" id="boot"></pre>
+
+    <div class="stage" id="stage">
+      <div class="invader" aria-hidden="true"></div>
+      <h1>Aisssky<span class="cursor">█</span></h1>
+      <div class="sub">UNREAL ENGINE DEVELOPER</div>
+      <div class="tag">// MY OWN ONE PIECE</div>
+      <a class="go" id="go" href={goHref}>[ GO! ]</a>
+      <div class="hint">PRESS START</div>
+    </div>
+
+    <div class="foot">&copy; 2026 AISSSKY</div>
+  </main>
+</Layout>
+
+<script is:inline define:vars={{ bootLines, goHref }}>
+  (function () {
+    var bootEl = document.getElementById('boot');
+    var stageEl = document.getElementById('stage');
+    var goEl = document.getElementById('go');
+
+    var lines = bootLines;
+
+    var started = false,
+      finished = false,
+      timers = [];
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function showStage() {
+      if (finished) return;
+      finished = true;
+      timers.forEach(clearTimeout);
+      bootEl.classList.add('done');
+      bootEl.textContent = lines.join('\n');
+      stageEl.classList.add('on');
+    }
+
+    function typeBoot() {
+      started = true;
+      var li = 0,
+        ci = 0,
+        out = '';
+      (function tick() {
+        if (finished) return;
+        if (li >= lines.length) {
+          timers.push(setTimeout(showStage, 260));
+          return;
+        }
+        var line = lines[li];
+        if (ci < line.length) {
+          out += line[ci++];
+          bootEl.textContent = out;
+          timers.push(setTimeout(tick, 14));
+        } else {
+          out += '\n';
+          li++;
+          ci = 0;
+          timers.push(setTimeout(tick, 140));
+        }
+      })();
+    }
+
+    // 开机白线动画结束后开始打字；点击/按键可跳过
+    if (reduced) {
+      showStage();
+    } else {
+      timers.push(setTimeout(typeBoot, 650));
+    }
+
+    document.addEventListener('click', function (e) {
+      if (!finished && e.target !== goEl) showStage();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (!finished) {
+        showStage();
+        return;
+      }
+      if (e.key === 'Enter') goEl.click();
+    });
+
+    // 点击 GO!：先播放 CRT 关机动画，再跳转首页
+    goEl.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (document.body.classList.contains('off')) return;
+      document.body.classList.add('off');
+      setTimeout(
+        function () {
+          window.location.href = goHref;
+        },
+        reduced ? 0 : 380
+      );
+    });
+  })();
+</script>

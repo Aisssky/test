@@ -1,0 +1,31 @@
+---
+/**
+ * 分类总览 /categories/
+ */
+import PageLayout from '../../components/PageLayout.astro';
+import { collectCategories, getPublishedPosts } from '../../lib/posts';
+import { categoryPath } from '../../lib/site';
+
+const posts = await getPublishedPosts();
+const categories = collectCategories(posts);
+---
+
+<PageLayout
+  title="分类"
+  description="按分类浏览 Aisssky 的笔记"
+  subtitle={`共 ${categories.length} 个分类。分类来自每篇文章 frontmatter 的 category 字段。`}
+>
+  {
+    categories.length > 0 ? (
+      <div class="chip-list">
+        {categories.map((category) => (
+          <a class="chip chip-cat chip-lg" href={categoryPath(category.name)}>
+            {category.name} · {category.count}
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="empty">还没有任何分类。</div>
+    )
+  }
+</PageLayout>

@@ -1,0 +1,45 @@
+---
+/**
+ * 文章详情页：/blog/<slug>/
+ *
+ * 新增一篇 Markdown 就自动多一个页面，不再需要手写 HTML。
+ */
+import { render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+import { getPublishedPosts, getSiblings, SHOW_DRAFTS, type Post } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+
+  return posts.map((post) => {
+    const { newer, older } = getSiblings(posts, post.id);
+    return {
+      params: { slug: post.id },
+      props: { post, newer, older },
+    };
+  });
+}
+
+interface Props {
+  post: Post;
+  newer?: Post;
+  older?: Post;
+}
+
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<PostLayout post={post} headings={headings} newer={newer} older={older}>
+  {
+    SHOW_DRAFTS && post.data.draft && (
+      <p
+        style="margin:0 0 24px;padding:10px 16px;border:1px solid #f0e0b8;background:#fffbeb;border-radius:8px;color:#b45309;font-size:14px;"
+      >
+        当前是<b>草稿</b>，只在本地 dev 环境可见；把 frontmatter 的 <code>draft</code> 改成
+        <code>false</code> 后才会进入正式构建。
+      </p>
+    )
+  }
+  <Content />
+</PostLayout>

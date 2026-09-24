@@ -1,0 +1,49 @@
+---
+/**
+ * 文章列表页 /blog/
+ */
+import PageLayout from '../../components/PageLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { collectCategories, getPublishedPosts, SHOW_DRAFTS } from '../../lib/posts';
+import { categoryPath, withBase } from '../../lib/site';
+
+const posts = await getPublishedPosts();
+const categories = collectCategories(posts);
+const draftCount = SHOW_DRAFTS ? posts.filter((post) => post.data.draft).length : 0;
+---
+
+<PageLayout
+  title="笔记"
+  description="Aisssky 的技术笔记：UE5 / C++ / 图形学 / 项目开发日志"
+  subtitle={`共 ${posts.length} 篇${draftCount > 0 ? `（含 ${draftCount} 篇草稿，仅本地可见）` : ''}。内容是 Markdown 源文件，由 Astro 自动渲染。`}
+>
+  {
+    categories.length > 0 && (
+      <div class="chip-list" style="margin-bottom: 28px;">
+        <a class="chip chip-cat chip-lg" href={withBase('/categories/')}>
+          全部分类 →
+        </a>
+        {categories.map((category) => (
+          <a class="chip chip-tag chip-lg" href={categoryPath(category.name)}>
+            {category.name} · {category.count}
+          </a>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    posts.length > 0 ? (
+      <ul class="post-list">
+        {posts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </ul>
+    ) : (
+      <div class="empty">
+        还没有文章。打开 <code>/admin/</code> 新建一篇，或者直接往
+        <code>src/content/blog/</code> 里放一个 <code>.md</code> 文件。
+      </div>
+    )
+  }
+</PageLayout>

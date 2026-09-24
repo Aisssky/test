@@ -1,0 +1,81 @@
+---
+/**
+ * 关于页。旧站没有独立 About，这里把首页侧栏的信息展开成一页。
+ */
+import PageLayout from '../components/PageLayout.astro';
+import { SITE, postPath, withBase } from '../lib/site';
+
+const skills = ['UE5', 'C++', 'BluePrints', 'TypeScript', 'Lua', '图形学', 'SVN / Git'];
+
+const projects = [
+  {
+    name: '《赛博朋克：飘渺城影》',
+    role: '对话系统 / 文本收集 / 教程系统',
+    stack: 'UE5 C++ · UMG · Dialogue Builder · SVN',
+    link: 'https://store.steampowered.com/app/3552700/_/',
+    note: '现已开放愿望单',
+    post: postPath('2026-04-21-cyberpunk-devlog'),
+  },
+];
+
+const notes = [
+  { label: 'C++ / UE5 技术笔记', href: postPath('2026-04-21-cpp-ue5-notes') },
+  { label: '计算机图形学 GAMES101 笔记', href: postPath('2026-05-30-games101-notes') },
+  { label: 'UE5 踩坑记录', href: postPath('2026-02-17-ue5-qa') },
+];
+---
+
+<PageLayout title="关于" description="关于 Aisssky —— Unreal Engine 开发者">
+  <div class="about-card">
+    <p>
+      独立游戏开发，主要方向是 <strong>Unreal Engine 5 / C++</strong>。
+      这个站点同时是作品集和技术笔记的存放处——笔记部分是普通 Markdown，
+      由 Astro 自动渲染，改动不必再手写 HTML。
+    </p>
+
+    <h3>技能</h3>
+    <div class="chip-list" style="margin-bottom: 24px;">
+      {skills.map((skill) => <span class="chip chip-tag chip-lg">{skill}</span>)}
+    </div>
+
+    <h3>参与项目</h3>
+    <ul>
+      {
+        projects.map((project) => (
+          <li style="margin-bottom: 14px;">
+            <strong>{project.name}</strong>
+            <br />
+            职责：{project.role}
+            <br />
+            技术栈：{project.stack}
+            <br />
+            <a href={project.link} target="_blank" rel="noopener noreferrer">
+              Steam 商店页
+            </a>
+            <span style="color:#999;">（{project.note}）</span>
+            <br />
+            <a href={project.post}>开发日志 →</a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h3>笔记</h3>
+    <ul>
+      {notes.map((note) => <li><a href={note.href}>{note.label}</a></li>)}
+    </ul>
+    <p>
+      完整列表见 <a href={withBase('/blog/')}>笔记列表</a>，
+      也可以订阅 <a href={withBase('/rss.xml')}>RSS</a>。
+    </p>
+
+    <h3>联系</h3>
+    <ul>
+      <li>📩 <a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+      <li>
+        🐙
+        <a href={SITE.github} target="_blank" rel="noopener noreferrer">{SITE.github}</a>
+      </li>
+    </ul>
+  </div>
+</PageLayout>

@@ -1,0 +1,402 @@
+---
+/**
+ * 作品集首页。
+ * 从旧站 index.html 1:1 迁移：DOM 结构与全部 Tailwind 类名原样保留，
+ * 只把「Notes」栏里原本是死文本的条目接上了现在的文章页面。
+ */
+import Layout from '../layouts/Layout.astro';
+import { postPath, withBase } from '../lib/site';
+import '../styles/portfolio.css';
+
+type GameSticker = {
+  src: string;
+  alt: string;
+  label: string;
+  shape: 'circle' | 'rounded' | 'clip';
+  rotate: string;
+  gradient?: boolean;
+};
+
+const stickers: GameSticker[] = [
+  {
+    src: 'https://bkimg.cdn.bcebos.com/pic/8d5494eef01f3a29b5d7166b9125bc315c607c7c',
+    alt: '阴阳师',
+    label: '阴阳师',
+    shape: 'circle',
+    rotate: 'rotate-[-8deg]',
+  },
+  {
+    src: 'https://pic.k73.com/up/soft/2021/1220/184211_29767304.png',
+    alt: '明日方舟',
+    label: '明日方舟',
+    shape: 'rounded',
+    rotate: 'rotate-[12deg]',
+  },
+  {
+    src: 'https://pic.rmb.bdstatic.com/bjh/news/d6a37cdbaf3bb6bab37eb4324488a780.png',
+    alt: '星露谷物语',
+    label: '星露谷物语',
+    shape: 'rounded',
+    rotate: 'rotate-[12deg]',
+  },
+  {
+    src: 'https://img.ylmfwin8.com/uploadfile/2024/0422/20240422115159631.png',
+    alt: '战双',
+    label: '战双',
+    shape: 'clip',
+    rotate: 'rotate-[-15deg]',
+  },
+  {
+    src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fitem%2F201803%2F24%2F20180324045743_KrUvF.thumb.400_0.jpeg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1778438070&t=5255011e0c3ff6af25c4815ac7f42d2d',
+    alt: '原神',
+    label: '原神',
+    shape: 'circle',
+    rotate: 'rotate-[5deg]',
+    gradient: true,
+  },
+  {
+    src: 'https://gd-hbimg.huaban.com/325083dfe39ebba715625f8f41e726163751387b6738-k3Zv84_fw658',
+    alt: '洛克王国',
+    label: '洛克王国',
+    shape: 'circle',
+    rotate: 'rotate-[-8deg]',
+  },
+  {
+    src: 'https://pic.k73.com/up/soft/2024/1203/144829_40192979.png',
+    alt: '无限暖暖',
+    label: '无限暖暖',
+    shape: 'rounded',
+    rotate: 'rotate-[12deg]',
+  },
+];
+
+// 已迁移过来的文章，Notes 栏直接指过去
+const notes = [
+  { label: 'UE_C++ 核心编程笔记', href: postPath('2026-04-21-cpp-ue5-notes') },
+  { label: 'C++ 基础', href: postPath('2026-04-21-cpp-ue5-notes') },
+  { label: 'Lua 脚本优化', href: null },
+  { label: 'Games101/104', href: postPath('2026-05-30-games101-notes') },
+  { label: '问题汇总', href: postPath('2026-02-17-ue5-qa') },
+];
+
+const otherNotes = [{ label: '游戏渲染 & 特效研究', href: null }];
+---
+
+<Layout
+  title="Aisssky | Game Dev Portfolio"
+  description="Unreal Engine Developer - My Own ONE PIECE"
+  bodyClass="text-zinc-300 selection:bg-pink-400/30 relative portfolio-page"
+>
+  <!-- 旧站这里就是 Tailwind Play CDN + 内联配置；保持原样，零视觉风险 -->
+  <script is:inline slot="head" src="https://cdn.tailwindcss.com"></script>
+  <script is:inline slot="head">
+    tailwind.config = { theme: { extend: {} } };
+  </script>
+  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    slot="head"
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <div class="w-full mx-auto px-10 min-h-screen md:h-screen mt-10">
+    <div class="flex flex-col md:flex-row h-full gap-6">
+      <div
+        class="w-full md:w-3/12 h-full flex items-center justify-center text-center shrink-0 py-10 md:py-0"
+      >
+        <div class="space-y-5 w-full">
+          <div class="relative w-fit mx-auto">
+            <div
+              class="w-28 h-28 rounded-full bg-zinc-800 flex items-center justify-center avatar overflow-hidden"
+            >
+              <img
+                src="https://avatars.githubusercontent.com/u/207451722?v=4"
+                alt="头像"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div
+              class="absolute bottom-1 right-2 w-4 h-4 bg-emerald-500 border-2 border-black rounded-full shadow-[0_0_8px#10b981] animate-pulse"
+            >
+            </div>
+          </div>
+
+          <div class="space-y-1 text-center">
+            <h1 class="text-2xl font-bold text-white">
+              <span class="text-pink-400">Aisssky</span>
+            </h1>
+          </div>
+
+          <!-- Character Stats -->
+          <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg">
+            <h3 class="text-white text-sm font-bold mb-3 flex items-center justify-center">
+              <span class="w-2 h-2 bg-pink-500 rounded-full mr-2"></span> Character Stats
+            </h3>
+            <div class="space-y-3">
+              <div class="space-y-1">
+                <div class="flex justify-between text-[10px] uppercase tracking-tighter">
+                  <span class="text-zinc-400 font-bold">Passion (HP)</span>
+                  <span class="text-pink-400">100 / 100</span>
+                </div>
+                <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-gradient-to-r from-pink-600 to-pink-400 w-[100%] shadow-[0_0_8px#ec4899]"
+                  >
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex justify-between text-[10px] uppercase tracking-tighter">
+                  <span class="text-zinc-400 font-bold">Inspiration (MP)</span>
+                  <span class="text-purple-400">85 / 100</span>
+                </div>
+                <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-gradient-to-r from-purple-600 to-purple-400 w-[85%] shadow-[0_0_8px#a855f7]"
+                  >
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-1 justify-center text-[9px]">
+                <span class="px-1.5 py-0.5 rounded border border-pink-500/50 text-pink-400 bg-pink-500/5"
+                  >UE5</span
+                >
+                <span
+                  class="px-1.5 py-0.5 rounded border border-emerald-500/50 text-emerald-400 bg-emerald-500/5"
+                  >C++</span
+                >
+                <span
+                  class="px-1.5 py-0.5 rounded border border-blue-500/50 text-blue-400 bg-blue-500/5"
+                  >TypeScript</span
+                >
+                <span
+                  class="px-1.5 py-0.5 rounded border border-blue-500/50 text-blue-400 bg-blue-500/5"
+                  >Lua</span
+                >
+                <span
+                  class="px-1.5 py-0.5 rounded border border-blue-500/50 text-blue-400 bg-blue-500/5"
+                  >图形学</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- 联系方式 -->
+          <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg">
+            <h3 class="text-white text-sm font-bold mb-2">📮 联系方式</h3>
+            <ul class="text-xs space-y-1 text-zinc-400">
+              <li>📩 aisssky09@163.com</li>
+              <li>
+                🐙
+                <a
+                  href="https://github.com/Aisssky"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="hover:text-pink-400 transition-colors">https://github.com/Aisssky</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- 站点入口（旧站没有导航，这里补一个不破坏布局的入口） -->
+          <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-3 rounded-lg">
+            <div class="flex flex-wrap gap-2 justify-center text-[11px]">
+              <a
+                href={withBase('/blog/')}
+                class="px-2.5 py-1 rounded border border-pink-500/50 text-pink-400 bg-pink-500/5 hover:bg-pink-500/15 transition"
+                >笔记</a
+              >
+              <a
+                href={withBase('/tags/')}
+                class="px-2.5 py-1 rounded border border-zinc-700 text-zinc-400 hover:text-pink-400 hover:border-pink-500/50 transition"
+                >标签</a
+              >
+              <a
+                href={withBase('/about/')}
+                class="px-2.5 py-1 rounded border border-zinc-700 text-zinc-400 hover:text-pink-400 hover:border-pink-500/50 transition"
+                >关于</a
+              >
+              <a
+                href={withBase('/pixel/')}
+                class="px-2.5 py-1 rounded border border-zinc-700 text-zinc-400 hover:text-pink-400 hover:border-pink-500/50 transition"
+                >PRESS START</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 看板 ========== -->
+      <div class="w-full md:w-9/12 h-full flex flex-col py-6">
+        <div class="flex items-center h-[10%]">
+          <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-white">
+              My Own <span class="text-pink-400">ONE PIECE</span>
+            </h1>
+            <p class="text-lg mt-1 text-pink-300 typewriter">Develop with Unreal Engine</p>
+          </div>
+        </div>
+
+        <div class="h-[25%] py-2 relative">
+          <h2 class="text-xl font-bold text-white mb-2 flex items-center relative z-10">
+            <span class="w-8 h-px bg-pink-500 mr-4"></span>
+            <span class="text-pink-100">Played &amp; Inspired</span>
+          </h2>
+          <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg h-[calc(100%-2rem)]">
+            <div class="relative w-fit mx-auto flex items-center justify-center w-full h-full">
+              <div class="absolute inset-0 grid grid-cols-7 grid-rows-4 -z-10 opacity-2 justify-items-center">
+                <div class="border-l border-zinc-700"></div>
+                <div class="border-l border-zinc-700"></div>
+                <div class="border-l border-zinc-700"></div>
+                <div class="border-l border-zinc-700"></div>
+                <div class="border-l border-zinc-700"></div>
+                <div class="border-l border-zinc-700"></div>
+                <div class="border-l border-zinc-700"></div>
+              </div>
+
+              <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-8">
+                {
+                  stickers.map((game) => (
+                    <div
+                      class:list={[
+                        'game-sticker w-24 h-24 border-2 overflow-hidden group',
+                        game.shape === 'circle' && 'rounded-full border-white shadow-lg hover:rotate-0 hover:scale-110 transition-all duration-300',
+                        game.shape === 'rounded' && 'rounded-xl border-zinc-100 shadow-xl hover:rotate-3 hover:scale-110 transition-all duration-300',
+                        game.shape === 'clip' && 'border-white shadow-lg hover:rotate-[-5deg] hover:scale-110 transition-all duration-300',
+                        game.rotate,
+                      ]}
+                      style={
+                        game.shape === 'clip'
+                          ? 'clip-path: polygon(0 0, 100% 10%, 95% 100%, 10% 95%);'
+                          : undefined
+                      }
+                    >
+                      {game.gradient ? (
+                        <div class="w-full h-full rounded-full p-[3px] bg-gradient-to-tr from-pink-400 to-purple-500 hover:rotate-[10deg] hover:scale-110 transition-all duration-300">
+                          <div class="w-full h-full rounded-full overflow-hidden border-2 border-zinc-950">
+                            <img src={game.src} alt={game.alt} class="w-full h-full object-cover" />
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <img
+                            src={game.src}
+                            alt={game.alt}
+                            class="w-full h-full object-cover group-hover:opacity-100 opacity-90 transition"
+                          />
+                          <div
+                            class:list={[
+                              'absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[8px] text-white p-1 text-center font-semibold',
+                              game.shape === 'rounded' ? 'bg-black/60' : 'bg-black/50',
+                            ]}
+                          >
+                            {game.label}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="h-[25%] py-2">
+          <h2 class="text-xl font-bold text-white mb-2 flex items-center">
+            <span class="w-8 h-px bg-pink-500 mr-4"></span>
+            <span class="text-pink-100">Demo</span>
+          </h2>
+          <div class="grid grid-cols-1 gap-3 h-[calc(100%-2rem)]">
+            <div
+              class="game-card bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg overflow-hidden transition-all duration-300"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="text-lg font-bold text-pink-400">完善中</h3>
+                <span class="text-xs bg-pink-500/10 text-pink-400 px-2 py-1 rounded">Unreal</span>
+              </div>
+              <p class="text-sm text-zinc-400"></p>
+            </div>
+
+            <a
+              href={withBase('/blog/2026-04-21-cyberpunk-devlog/')}
+              title="查看开发日志"
+              class="game-card bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg overflow-hidden transition-all duration-300 block hover:border-pink-500/50"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="text-lg font-bold text-pink-400">《赛博朋克：飘渺城影》</h3>
+                <span class="text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded"
+                  >Unreal 5.2</span
+                >
+              </div>
+              <p class="text-sm text-zinc-400"></p>
+            </a>
+          </div>
+        </div>
+
+        <div class="h-[40%] py-2">
+          <h2 class="text-xl font-bold text-white mb-2 flex items-center">
+            <span class="w-8 h-px bg-pink-500 mr-4"></span>
+            <span class="text-pink-100">Notes</span>
+          </h2>
+          <div
+            class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-5 rounded-lg h-[calc(100%-2rem)] grid grid-cols-2 gap-4"
+          >
+            <div class="space-y-3">
+              <p class="text-[10px] uppercase tracking-widest text-zinc-500">Engine &amp; Language</p>
+              <ul class="text-sm space-y-2 text-pink-300">
+                {
+                  notes.map((note) => (
+                    <li class="hover:translate-x-1 transition-transform">
+                      {note.href ? (
+                        <a href={note.href} class="notes-link">
+                          <span class="text-pink-500 mr-2">✦</span>
+                          <span>{note.label}</span>
+                        </a>
+                      ) : (
+                        <span class="notes-link cursor-default">
+                          <span class="text-pink-500 mr-2">✦</span>
+                          <span>{note.label}</span>
+                        </span>
+                      )}
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+            <div class="space-y-3 border-l border-zinc-800 pl-4">
+              <p class="text-[10px] uppercase tracking-widest text-zinc-500">Other</p>
+              <ul class="text-sm space-y-2 text-pink-300">
+                {
+                  otherNotes.map((note) => (
+                    <li class="hover:translate-x-1 transition-transform">
+                      <span class="notes-link cursor-default">
+                        <span class="text-pink-500 mr-2">✦</span>
+                        <span>{note.label}</span>
+                      </span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 访问统计：不蒜子 -->
+  <script is:inline async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <div style="text-align:center; margin-top:20px; font-size:14px; color:#666;">
+    <span id="busuanzi_container_site_pv"
+      >总访问：<span id="busuanzi_value_site_pv"></span> 次</span
+    >
+    &nbsp;&nbsp;
+    <span id="busuanzi_container_site_uv"
+      >访客：<span id="busuanzi_value_site_uv"></span> 人</span
+    >
+  </div>
+</Layout>
