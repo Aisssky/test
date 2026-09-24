@@ -1,0 +1,36 @@
+---
+/**
+ * 列表类页面的外壳：顶部导航 + 标题区 + 内容 + 页脚。
+ */
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import '../styles/blog.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** 标题下方的说明行 */
+  subtitle?: string;
+  noindex?: boolean;
+}
+
+const { title, description, subtitle, noindex = false } = Astro.props;
+---
+
+<Layout
+  title={title}
+  description={description ?? subtitle}
+  bodyClass="page-shell"
+  noindex={noindex}
+>
+  <SiteHeader />
+
+  <main class="page-main" id="main">
+    <h1 class="page-title">{title}</h1>
+    {subtitle && <p class="page-subtitle">{subtitle}</p>}
+    <slot />
+  </main>
+
+  <SiteFooter />
+</Layout>

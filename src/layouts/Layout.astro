@@ -1,0 +1,89 @@
+---
+/**
+ * 根布局：<html> 外壳 + SEO / Open Graph / canonical / RSS。
+ * 所有页面都经由它输出，旧站各页零散的 <head> 元信息在这里统一。
+ */
+import '../styles/global.css';
+import { SITE, withBase } from '../lib/site';
+
+interface Props {
+  /** 页面标题，不含站点名；会自动补 " | Aisssky" */
+  title: string;
+  description?: string;
+  /** 挂到 <body> 上的类名 */
+  bodyClass?: string;
+  ogType?: 'website' | 'article';
+  /** 社交分享图，站内绝对路径（如 /images/promo.webp） */
+  image?: string;
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = SITE.description,
+  bodyClass = '',
+  ogType = 'website',
+  image,
+  publishedTime,
+  modifiedTime,
+  noindex = false,
+} = Astro.props;
+
+const base = Astro.site ?? new URL(SITE.url);
+const fullTitle = title.includes(SITE.author) ? title : `${title} | ${SITE.author}`;
+const canonical = new URL(Astro.url.pathname, base).href;
+const ogImage = image ? new URL(image, base).href : undefined;
+
+/** 旧站首页用的是 GitHub 头像，这里沿用同一张作为默认分享图 */
+const defaultImage = 'https://avatars.githubusercontent.com/u/207451722?v=4';
+---
+
+<!doctype html>
+<html lang={SITE.locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE.author} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:site_name" content={SITE.author} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage ?? defaultImage} />
+
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage ?? defaultImage} />
+
+    {ogType === 'article' && publishedTime && (
+      <meta property="article:published_time" content={publishedTime.toISOString()} />
+    )}
+    {ogType === 'article' && modifiedTime && (
+      <meta property="article:modified_time" content={modifiedTime.toISOString()} />
+    )}
+
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${SITE.author} · RSS`}
+      href={withBase('/rss.xml')}
+    />
+
+    <slot name="head" />
+  </head>
+
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main">跳到主内容</a>
+    <slot />
+  </body>
+</html>

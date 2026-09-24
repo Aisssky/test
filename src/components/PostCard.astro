@@ -1,0 +1,31 @@
+---
+/**
+ * 文章卡片。
+ *
+ * 用「拉伸链接」模式让整卡可点：卡片本身是 <li>，标题里的 <a> 通过
+ * ::after 铺满卡片；分类/标签链接用 z-index 抬到上层。
+ * 这样既保证全区可点，又不会产生 <a> 嵌套 <a> 的非法结构。
+ */
+import type { CollectionEntry } from 'astro:content';
+import PostMeta from './PostMeta.astro';
+import { postPath } from '../lib/site';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, cover } = post.data;
+---
+
+<li class="post-card">
+  <h2>
+    <a href={postPath(post.id)}>{title}</a>
+  </h2>
+
+  {description && <p class="desc">{description}</p>}
+
+  <PostMeta post={post} />
+
+  {cover && <span class="sr-only">含封面图</span>}
+</li>

@@ -1,0 +1,835 @@
+/* ==========================================================================
+   长文页样式
+   合并自旧站的三个长文页：
+     Assets/cpp.html           （双栏 7:3 + 面试题浮层 + 表格/代码/引用）
+     Assets/Games101-1.html    （左索引 + 正文 + 右留白）
+     Cyber/Untitled-1.html     （左索引 + 正文 + Mermaid 图 + 视频）
+   设计令牌与各处尺寸均沿用旧值，只把三个页面的差异做了合并。
+   ========================================================================== */
+
+:root {
+  --head-h: 250px;            /* 顶部固定头图高度 */
+  --accent: #c2185b;          /* 站点主强调色 */
+  --accent-ue: #1565c0;       /* UE 板块强调色 */
+  --page-bg: #f8f8f8;
+  --text: #444;
+  --text-strong: #222;
+  --border: #eee;
+  --code-bg: #f6f8fa;
+}
+
+/* ==================== 用旧站同款字体栈 ==================== */
+.article-page {
+  font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--page-bg);
+  color: var(--text);
+}
+
+/* ==================== 顶部固定头图 ==================== */
+.top-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--head-h);
+  background: var(--cover, none) center/cover no-repeat, #2b2b33;
+  z-index: 0;
+}
+
+.header-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--head-h);
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  z-index: 1;
+  backdrop-filter: blur(2px);
+}
+
+.header-bar h1 {
+  font-size: 36px;
+  font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  margin: 0 0 10px;
+  letter-spacing: 1px;
+  line-height: 1.25;
+  text-align: center;
+  padding: 0 16px;
+}
+
+.header-bar h2 {
+  font-size: 17px;
+  font-weight: 400;
+  color: #e0e0e0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  margin: 0 0 8px;
+  text-align: center;
+  padding: 0 16px;
+  line-height: 1.5;
+}
+
+.header-bar .date {
+  font-size: 15px;
+  color: #d6d6d6;
+}
+
+/* ==================== 主容器：左索引 | 正文 | 右留白 ==================== */
+.main-container {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 100%;
+  margin-top: var(--head-h);
+  background: #fff;
+  min-height: calc(100vh - var(--head-h));
+}
+
+/* ==================== 左侧 sticky 索引 ==================== */
+.sidebar {
+  width: 240px;
+  background-color: #fff;
+  padding: 40px 25px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  align-self: flex-start;
+  position: sticky;
+  top: 0;
+  height: fit-content;
+  max-height: 100vh;
+  overflow-y: auto;
+  z-index: 3;
+}
+
+.sidebar h3 {
+  font-size: 18px;
+  margin: 0 0 26px;
+  color: #333;
+  font-weight: 600;
+}
+
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar li {
+  margin: 8px 0;
+}
+
+.sidebar a {
+  color: #555;
+  text-decoration: none;
+  font-size: 15px;
+  display: block;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: 0.2s;
+  line-height: 1.5;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: #f5f0f0;
+  color: #000;
+}
+
+.sidebar .sub-link {
+  padding-left: 24px;
+  font-size: 14px;
+}
+
+.sidebar .nav-divider {
+  margin: 14px 0 10px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.sidebar .ue-label {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  padding-left: 4px;
+}
+
+/* 索引顶部返回链接 */
+.sidebar .back-link {
+  display: block;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.sidebar .back-link:hover {
+  text-decoration: underline;
+  background: none;
+}
+
+/* 索引下方的元信息（日期 / 分类 / 标签） */
+.sidebar .sidebar-meta {
+  padding-top: 4px;
+}
+
+.sidebar .sidebar-meta .post-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.sidebar .sidebar-meta .post-meta .sep {
+  display: none;
+}
+
+/* ==================== 正文区 ==================== */
+.content-area {
+  flex: 1;
+  min-width: 0;
+  background-color: #fff;
+  padding: 60px 70px;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.content-area h1,
+.content-area h2,
+.content-area h3,
+.content-area h4,
+.content-area h5,
+.content-area h6 {
+  color: var(--text-strong);
+  line-height: 1.35;
+  /* 顶部有 250px 固定头图，锚点跳转要留出这段高度，否则标题被压在头图下面 */
+  scroll-margin-top: calc(var(--head-h) + 20px);
+}
+
+/* 旧站锚点 <span id="…"></span> 单独占一个 <p>，不给它留视觉高度 */
+.content-area p:has(> span[id]:only-child) {
+  margin: 0;
+  height: 0;
+  overflow: hidden;
+  scroll-margin-top: calc(var(--head-h) + 20px);
+}
+
+.content-area h1 {
+  font-size: 26px;
+  margin: 40px 0 20px;
+}
+
+.content-area h2 {
+  font-size: 22px;
+  margin: 40px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.content-area h3 {
+  font-size: 18px;
+  color: #333;
+  margin: 25px 0 10px;
+}
+
+.content-area h4 {
+  font-size: 16px;
+  margin: 20px 0 8px;
+}
+
+.content-area p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text);
+  margin: 0 0 20px;
+}
+
+.content-area ul,
+.content-area ol {
+  margin: 10px 0 20px 20px;
+  padding-left: 10px;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.content-area li {
+  margin: 6px 0;
+}
+
+.content-area a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dotted #e0a5b9;
+}
+
+.content-area a:hover {
+  border-bottom: 1px solid var(--accent);
+}
+
+.content-area hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 32px 0;
+}
+
+/* 引用块（沿用 cpp.html 的粉色左边框风格） */
+.content-area blockquote {
+  border-left: 4px solid var(--accent);
+  background: #fdf5f7;
+  padding: 12px 18px;
+  margin: 14px 0 18px;
+  border-radius: 0 8px 8px 0;
+  color: #555;
+  font-style: normal;
+  line-height: 1.8;
+}
+
+.content-area blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* 行内代码 */
+.content-area code {
+  font-family: 'Fira Code', 'Consolas', 'SFMono-Regular', Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #b1255a;
+}
+
+/* 代码块 */
+.content-area pre {
+  background: var(--code-bg);
+  border: 1px solid #e6e8ea;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 14px 0 20px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.content-area pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  color: #333;
+  white-space: pre;
+}
+
+/* 表格 */
+.content-area table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 14px 0 18px;
+  font-size: 14px;
+  display: block;
+  overflow-x: auto;
+}
+
+.content-area th,
+.content-area td {
+  border: 1px solid #ddd;
+  padding: 9px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.content-area th {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+.content-area td {
+  color: var(--text);
+}
+
+.content-area img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+}
+
+/* ==================== 右侧留白栏 ==================== */
+.right-blank {
+  width: 240px;
+  background-color: #fff;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border);
+}
+
+/* ==================== 页脚 ==================== */
+.article-footer {
+  text-align: center;
+  padding: 1.5rem;
+  background: #fff;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.article-footer a {
+  color: #888;
+}
+
+/* ==========================================================================
+   正文里的自定义块（由 Markdown 直接书写，旧站同名类的样式在这里继续生效）
+   ========================================================================== */
+
+/* ---------- 技术栈标签 ---------- */
+.tech-stack-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.tech-stack-container .tech-stack-block {
+  background: #fff;
+  color: #333;
+  padding: 8px 18px;
+  border: 1px solid #ccc;
+  border-radius: 40px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ---------- 并排图片 ---------- */
+.image-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 24px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.image-row .image-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 1 auto;
+}
+
+.image-row .image-item img {
+  height: 200px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.img-caption {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin: 8px 0 20px;
+}
+
+/* ---------- 视频卡片 ---------- */
+.video-card {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin: 20px auto;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.video-card video {
+  width: 100%;
+  display: block;
+  border-radius: 0;
+}
+
+.video-desc {
+  padding: 15px 20px;
+  text-align: center;
+  font-size: 15px;
+  color: #555;
+  background: #fff;
+  margin: 0;
+}
+
+/* ---------- Mermaid 图卡片（工具栏由 article 脚本注入） ---------- */
+.diagram-card {
+  width: 100%;
+  max-width: 100%;
+  margin: 30px 0;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+}
+
+.diagram-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.diagram-toolbar .title {
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+.diagram-toolbar .btn {
+  padding: 0.3rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.diagram-toolbar .btn:hover {
+  background: #f0f0f0;
+}
+
+.diagram-container {
+  width: 100%;
+  height: 520px;
+  overflow: auto;
+  background: #fff;
+  padding: 20px;
+}
+
+.diagram-container .mermaid {
+  min-width: 1300px;
+  height: fit-content;
+  transform-origin: top left;
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.zoom-level {
+  font-size: 0.85rem;
+  min-width: 3rem;
+  text-align: center;
+  color: #666;
+}
+
+/* ---------- 面试题折叠块（旧站是 CSS hover 浮层，这里改为 <details> 折叠） ---------- */
+.interview-block {
+  margin: 20px 0 18px;
+  padding: 14px 18px;
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  border-radius: 0 8px 8px 0;
+}
+
+.interview-block h4 {
+  font-size: 15px;
+  color: #b45309;
+  margin: 0 0 10px;
+}
+
+.interview-block h4::before {
+  content: "📝 ";
+}
+
+details.iq {
+  display: block;
+  margin: 0 0 8px;
+  border: 1px solid #f0e0b8;
+  border-radius: 8px;
+  background: #fffdf5;
+  overflow: hidden;
+}
+
+details.iq:last-child {
+  margin-bottom: 0;
+}
+
+details.iq > summary {
+  cursor: pointer;
+  padding: 9px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  list-style: none;
+  position: relative;
+  padding-right: 34px;
+}
+
+details.iq > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.iq > summary::after {
+  content: "＋";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 400;
+  color: #b58a2b;
+}
+
+details.iq[open] > summary::after {
+  content: "−";
+}
+
+details.iq > summary:hover {
+  background: #fff7e0;
+}
+
+details.iq .iq-answer {
+  padding: 4px 14px 12px;
+  border-top: 1px dashed #f0e0b8;
+  font-size: 13.5px;
+  color: #555;
+  line-height: 1.75;
+}
+
+details.iq .iq-answer > :first-child {
+  margin-top: 10px;
+}
+
+details.iq .iq-answer p {
+  font-size: 13.5px;
+  margin-bottom: 10px;
+}
+
+details.iq .iq-answer ul,
+details.iq .iq-answer ol {
+  font-size: 13.5px;
+  margin: 6px 0 10px 18px;
+}
+
+/* ---------- C++ → UE 跨栏联动标签 ---------- */
+.ue-link-tag {
+  display: inline-block;
+  background: #f3f7fd;
+  color: var(--accent-ue);
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  margin-left: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: none;
+  transition: 0.2s;
+  vertical-align: middle;
+}
+
+.ue-link-tag:hover {
+  background: var(--accent-ue);
+  color: #fff;
+  border-bottom: none;
+}
+
+.ue-link-tag::before {
+  content: "🎮 ";
+}
+
+/* ---------- UE 笔记里的其他小块 ---------- */
+/* 旧站靠 .section-title 类给 UE 板块的标题上蓝色。
+   迁移成 Markdown 标题后类名没了，这里改用「标题后面紧跟 .ref-tag」
+   来命中——好处是标题本身仍是标准 Markdown 标题，能进自动生成的侧边索引。 */
+.content-area h2:has(+ p .ref-tag) {
+  font-size: 18px;
+  color: var(--accent-ue);
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e3edf7;
+}
+
+/* 手工保留的旧类名写法仍然可用 */
+.section-title {
+  font-size: 18px;
+  color: var(--accent-ue);
+  margin: 28px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e3edf7;
+  font-weight: 700;
+}
+
+.ref-tag {
+  display: inline-block;
+  background: #e8f0fe;
+  color: var(--accent-ue);
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.ref-tag::before {
+  content: "📎 对应 C++：";
+  opacity: 0.7;
+}
+
+.tip-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 14px 0 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.tip-card strong {
+  color: var(--accent-ue);
+}
+
+.formula {
+  margin: 10px 0;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+/* ==================== 响应式（沿用旧站断点） ==================== */
+@media (max-width: 1100px) and (min-width: 769px) {
+  .content-area {
+    padding: 40px 35px;
+  }
+
+  .sidebar,
+  .right-blank {
+    width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --head-h: 200px;
+  }
+
+  .main-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: static;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 25px;
+  }
+
+  .sidebar ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .sidebar li {
+    margin: 0;
+  }
+
+  .sidebar .sub-link {
+    padding-left: 8px;
+  }
+
+  .sidebar .back-link {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .content-area {
+    padding: 30px 20px;
+  }
+
+  .content-area table {
+    display: block;
+  }
+
+  .right-blank {
+    display: none;
+  }
+
+  .header-bar h1 {
+    font-size: 26px;
+  }
+
+  .header-bar h2 {
+    font-size: 15px;
+  }
+
+  .video-card {
+    width: 100%;
+  }
+
+  .image-row .image-item img {
+    height: 150px;
+  }
+
+  .diagram-container {
+    height: 380px;
+  }
+
+  .diagram-container .mermaid {
+    min-width: 900px;
+  }
+}
+
+/* ==================== 滚动条（沿用旧站） ==================== */
+.content-area::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar,
+.diagram-container::-webkit-scrollbar,
+.content-area pre::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.content-area pre::-webkit-scrollbar-track,
+.sidebar::-webkit-scrollbar-track,
+.diagram-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6px;
+}
+
+.content-area pre::-webkit-scrollbar-thumb,
+.sidebar::-webkit-scrollbar-thumb,
+.diagram-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 6px;
+}
+
+.content-area pre::-webkit-scrollbar-thumb:hover,
+.sidebar::-webkit-scrollbar-thumb:hover,
+.diagram-container::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}

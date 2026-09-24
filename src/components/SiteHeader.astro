@@ -1,0 +1,38 @@
+---
+/**
+ * 站点顶部导航（列表类页面用；长文页沿用旧站的固定头图，不叠加这个）
+ */
+import { withBase } from '../lib/site';
+
+const links = [
+  { href: withBase('/'), label: '首页', match: ['/'] },
+  { href: withBase('/blog/'), label: '笔记', match: ['/blog/'] },
+  { href: withBase('/categories/'), label: '分类', match: ['/categories/'] },
+  { href: withBase('/tags/'), label: '标签', match: ['/tags/'] },
+  { href: withBase('/about/'), label: '关于', match: ['/about/'] },
+];
+
+const current = Astro.url.pathname.endsWith('/')
+  ? Astro.url.pathname
+  : `${Astro.url.pathname}/`;
+---
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href={withBase('/')}>Aisssky<span>.</span></a>
+    <nav aria-label="主导航">
+      {
+        links.map((link) => {
+          const active = link.match.some((m) =>
+            m === '/' ? current.endsWith('/') && !current.includes('/blog') : current.includes(m)
+          );
+          return (
+            <a href={link.href} aria-current={active ? 'page' : undefined}>
+              {link.label}
+            </a>
+          );
+        })
+      }
+    </nav>
+  </div>
+</header>

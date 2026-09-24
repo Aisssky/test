@@ -1,0 +1,56 @@
+/* ==========================================================================
+   全局基础（所有页面共用）
+   旧站每个页面各带一份 reset，这里合并为一份，行为不变。
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+}
+
+/* 屏幕阅读器可见、视觉隐藏 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 跳转到主内容（键盘可达性） */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 10px 16px;
+  background: #c2185b;
+  color: #fff;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0;
+}

@@ -1,0 +1,31 @@
+---
+/**
+ * 文章侧边索引。
+ * 旧站三个长文页各自手写了一份 <ul> 目录；这里改为按渲染后的
+ * h2 / h3 自动生成，新增文章或改动标题后不需要再手工维护目录。
+ */
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+  label?: string;
+}
+
+const { headings, label = '📌 索引' } = Astro.props;
+---
+
+<h3>{label}</h3>
+<ul>
+  {
+    headings.map((heading) => (
+      <li>
+        <a
+          href={`#${heading.slug}`}
+          class={heading.depth >= 3 ? 'sub-link toc-link' : 'toc-link'}
+        >
+          {heading.text}
+        </a>
+      </li>
+    ))
+  }
+</ul>

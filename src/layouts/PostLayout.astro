@@ -1,0 +1,247 @@
+---
+/**
+ * 长文页布局。
+ *
+ * 结构 1:1 沿用旧站三个长文页的模板：
+ *   固定头图(.top-bg) + 固定标题栏(.header-bar) + 左索引导航 + 正文 + 右留白 + 页脚
+ * 差异只有两处，都是 Markdown 化的必然结果：
+ *   1. 索引改为按 h2/h3 自动生成（旧站是手写 <ul>）
+ *   2. 面试题从 CSS hover 浮层改为 <details> 折叠块
+ */
+import type { CollectionEntry } from 'astro:content';
+import type { MarkdownHeading } from 'astro';
+import Layout from './Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import Toc from '../components/Toc.astro';
+import PostMeta from '../components/PostMeta.astro';
+import { formatDate, postPath, withBase } from '../lib/site';
+import '../styles/blog.css';
+import '../styles/article.css';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  headings: MarkdownHeading[];
+  newer?: CollectionEntry<'blog'>;
+  older?: CollectionEntry<'blog'>;
+}
+
+const { post, headings, newer, older } = Astro.props;
+const { title, description, pubDate, updatedDate, cover, subtitle, copyright, toc } = post.data;
+
+const coverUrl = cover ? withBase(cover) : undefined;
+const tocItems = toc ? headings.filter((h) => h.depth === 2 || h.depth === 3) : [];
+const dateRange = updatedDate && updatedDate > pubDate
+  ? `${formatDate(pubDate)} ~ ${formatDate(updatedDate)}`
+  : formatDate(pubDate);
+---
+
+<Layout
+  title={title}
+  description={description ?? subtitle}
+  ogType="article"
+  image={coverUrl}
+  publishedTime={pubDate}
+  modifiedTime={updatedDate}
+  bodyClass="article-page"
+>
+  <div
+    class="top-bg"
+    aria-hidden="true"
+    style={coverUrl ? `--cover: url("${coverUrl}")` : undefined}
+  >
+  </div>
+
+  <header class="header-bar">
+    <h1>{title}</h1>
+    {subtitle && <h2>{subtitle}</h2>}
+    <div class="date">{dateRange}</div>
+  </header>
+
+  <main class="main-container" id="main">
+    <nav class="sidebar" aria-label="文章索引">
+      <a class="back-link" href={withBase('/blog/')}>← 返回笔记列表</a>
+
+      {tocItems.length > 1 && <Toc headings={tocItems} />}
+
+      <div class="nav-divider"></div>
+      <div class="sidebar-meta">
+        <PostMeta post={post} />
+      </div>
+    </nav>
+
+    <div class="content-area">
+      <slot />
+
+      {(newer || older) && (
+        <nav class="post-nav" aria-label="相邻文章">
+          {older ? (
+            <a href={postPath(older.id)}>
+              <span class="label">← 上一篇</span>
+              {older.data.title}
+            </a>
+          ) : (
+            <span></span>
+          )}
+          {newer ? (
+            <a class="next" href={postPath(newer.id)}>
+              <span class="label">下一篇 →</span>
+              {newer.data.title}
+            </a>
+          ) : (
+            <span></span>
+          )}
+        </nav>
+      )}
+    </div>
+
+    <div class="right-blank" aria-hidden="true"></div>
+  </main>
+
+  <SiteFooter variant="article" copyright={copyright} />
+</Layout>
+
+<script>
+  /**
+   * Mermaid 图渲染。
+   * Markdown 里写成 ```mermaid 代码块；这里把它升级成旧站同款的
+   * «图卡片 + 缩放工具栏»，并做惰性加载（没有图就不拉 mermaid.js）。
+   */
+  (function () {
+    const codes = Array.from(document.querySelectorAll('.content-area pre > code.language-mermaid'));
+    if (codes.length === 0) return;
+
+    const MERMAID_SRC = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+
+    const cards = [];
+    const targets = [];
+
+    codes.forEach(function (code) {
+      const pre = code.parentElement;
+      if (!pre) return;
+
+      const card = document.createElement('div');
+      card.className = 'diagram-card';
+      card.innerHTML =
+        '<div class="diagram-toolbar">' +
+        '<span class="title">🧠 系统逻辑图</span>' +
+        '<div class="zoom-controls">' +
+        '<button class="btn" type="button" data-act="out" aria-label="缩小">➖</button>' +
+        '<span class="zoom-level">100%</span>' +
+        '<button class="btn" type="button" data-act="in" aria-label="放大">➕</button>' +
+        '<button class="btn" type="button" data-act="reset" aria-label="重置缩放">↺ 重置</button>' +
+        '</div>' +
+        '</div>' +
+        '<div class="diagram-container"><div class="mermaid"></div></div>';
+
+      const mermaidEl = card.querySelector('.mermaid');
+      if (!mermaidEl) return;
+      mermaidEl.textContent = code.textContent || '';
+
+      pre.replaceWith(card);
+      cards.push(card);
+      targets.push(mermaidEl);
+    });
+
+    if (cards.length === 0) return;
+
+    function attachZoom(card) {
+      const container = card.querySelector('.diagram-container');
+      const mermaidEl = card.querySelector('.mermaid');
+      const levelEl = card.querySelector('.zoom-level');
+      if (!container || !mermaidEl || !levelEl) return;
+
+      let zoom = 1;
+
+      function apply() {
+        mermaidEl.style.transform = 'scale(' + zoom + ')';
+        mermaidEl.style.transformOrigin = 'top left';
+        levelEl.textContent = Math.round(zoom * 100) + '%';
+        const next = Math.max(520, mermaidEl.scrollHeight * zoom + 40);
+        container.style.height = Math.min(next, 900) + 'px';
+      }
+
+      card.querySelectorAll('[data-act]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const act = btn.getAttribute('data-act');
+          if (act === 'in') zoom = Math.min(2.2, zoom + 0.1);
+          else if (act === 'out') zoom = Math.max(0.5, zoom - 0.1);
+          else {
+            zoom = 1;
+            container.style.height = '520px';
+          }
+          apply();
+        });
+      });
+
+      container.addEventListener(
+        'wheel',
+        function (event) {
+          if (!event.ctrlKey) return;
+          event.preventDefault();
+          zoom = Math.max(0.5, Math.min(2.2, zoom + (event.deltaY > 0 ? -0.05 : 0.05)));
+          apply();
+        },
+        { passive: false }
+      );
+
+      setTimeout(function () {
+        if (mermaidEl.scrollHeight > 520) {
+          container.style.height = mermaidEl.scrollHeight + 30 + 'px';
+        }
+        apply();
+      }, 220);
+    }
+
+    function render() {
+      const mermaid = window.mermaid;
+      if (!mermaid) return;
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'base',
+        themeVariables: {
+          background: '#ffffff',
+          primaryColor: '#f4f0ff',
+          primaryBorderColor: '#6b3fa0',
+          primaryTextColor: '#2c2c2c',
+          lineColor: '#8f8f9f',
+          secondaryColor: '#fff0db',
+          tertiaryColor: '#e6f7f7',
+        },
+        securityLevel: 'loose',
+        fontFamily: 'Microsoft YaHei, -apple-system, sans-serif',
+        fontSize: 14,
+        flowchart: {
+          useMaxWidth: false,
+          htmlLabels: true,
+          nodeSpacing: 55,
+          rankSpacing: 85,
+          curve: 'basis',
+        },
+      });
+
+      Promise.resolve(mermaid.run({ nodes: targets }))
+        .then(function () {
+          cards.forEach(attachZoom);
+        })
+        .catch(function (error) {
+          console.error('[mermaid] 渲染失败：', error);
+          targets.forEach(function (el) {
+            const message = document.createElement('p');
+            message.textContent = '图表渲染失败，请检查 Mermaid 语法。';
+            message.style.color = '#c2185b';
+            el.replaceWith(message);
+          });
+        });
+    }
+
+    const script = document.createElement('script');
+    script.src = MERMAID_SRC;
+    script.async = true;
+    script.onload = render;
+    script.onerror = function () {
+      console.warn('[mermaid] CDN 加载失败，图表未渲染');
+    };
+    document.head.appendChild(script);
+  })();
+</script>

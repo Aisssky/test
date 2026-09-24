@@ -1,0 +1,36 @@
+---
+/**
+ * 站点页脚。
+ * 旧站里每个长文页各写了一份单行页脚，这里统一为一份，
+ * 长文页可以通过文章的 copyright 字段覆盖主文案（保留各自的项目组署名）。
+ */
+import { SITE, withBase } from '../lib/site';
+
+interface Props {
+  /** 覆盖默认的版权文案 */
+  copyright?: string;
+  /** 用于长文页：套用 .article-footer 而不是 .site-footer */
+  variant?: 'site' | 'article';
+}
+
+const { copyright, variant = 'site' } = Astro.props;
+const year = new Date().getFullYear();
+const cls = variant === 'article' ? 'article-footer' : 'site-footer';
+---
+
+<footer class={cls}>
+  <p>{copyright ?? `© ${year} ${SITE.author} | 仅供学习交流`}</p>
+  {
+    variant === 'site' && (
+      <p>
+        <a href={SITE.github} target="_blank" rel="noopener noreferrer">
+          GitHub
+        </a>
+        <span class="sep"> · </span>
+        <a href={`mailto:${SITE.email}`}>邮箱</a>
+        <span class="sep"> · </span>
+        <a href={withBase('/rss.xml')}>RSS</a>
+      </p>
+    )
+  }
+</footer>

@@ -1,0 +1,257 @@
+/* ==========================================================================
+   像素开屏页（pixel.html）样式
+   抽取自旧站 pixel.html 的内联 <style>，字体路径改为经 Vite 解析的本地资源，
+   这样 base=/test 的情况下也能正确带上子路径。
+   ========================================================================== */
+
+@font-face {
+  font-family: "Fusion Pixel SC";
+  src: url("../assets/fonts/fusion-pixel-12px-proportional-sc.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fusion Pixel Mono SC";
+  src: url("../assets/fonts/fusion-pixel-12px-monospaced-sc.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ==================== 基础：单屏，禁止滚动 ==================== */
+body.pixel-page {
+  background: #000;
+  color: #fff;
+  font-family: "Fusion Pixel SC", "Zpix", "Microsoft YaHei", monospace;
+  letter-spacing: 1px;
+  height: 100%;
+  overflow: hidden;
+}
+
+body.pixel-page * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+/* 旧站是 html,body { height:100%; overflow:hidden }。
+   这里页面类挂在 body 上，用 :has() 把同样的规则作用到 html。 */
+html:has(> body.pixel-page) {
+  height: 100%;
+  overflow: hidden;
+}
+
+body.pixel-page ::selection {
+  background: #fff;
+  color: #000;
+}
+
+/* ==================== CRT 覆盖层：扫描线 + 暗角 ==================== */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .5) 100%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px);
+}
+
+/* ==================== CRT 开机动画（白线展开→消失） ==================== */
+.crt-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: #fff;
+  pointer-events: none;
+  animation: crt-on .55s ease-out .05s forwards;
+}
+
+@keyframes crt-on {
+  0%   { transform: scale(1, 1);      opacity: 1; }
+  55%  { transform: scale(1, .012);   opacity: 1; }
+  90%  { transform: scale(.02, .012); opacity: 1; }
+  100% { transform: scale(0, 0);      opacity: 0; }
+}
+
+/* 点击 GO! 后的关机动画（反向：收成一条白线） */
+body.pixel-page.off .crt-flash { animation: crt-off .32s ease-in forwards; }
+
+@keyframes crt-off {
+  0%   { transform: scale(1, .012); opacity: 1; }
+  70%  { transform: scale(1, .012); opacity: 1; }
+  100% { transform: scale(.02, .012); opacity: 1; }
+}
+
+body.pixel-page.off .screen { animation: screen-die .3s steps(3) forwards; }
+
+@keyframes screen-die { to { opacity: 0; transform: scale(1, .85); } }
+
+/* ==================== 屏幕主体 ==================== */
+.screen {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.binary-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  font-size: 3rem;
+  line-height: 1.1;
+  opacity: .04;
+  word-break: break-all;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* ==================== 引导终端文字 ==================== */
+.boot {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  z-index: 2;
+  font-family: "Fusion Pixel Mono SC", monospace;
+  font-size: 12px;
+  line-height: 2;
+  text-align: left;
+  opacity: .8;
+  white-space: pre-wrap;
+  user-select: none;
+}
+
+.boot::after { content: "█"; animation: blink .8s steps(1) infinite; }
+.boot.done::after { content: ""; }
+
+/* ==================== 主舞台（怪兽+标题+GO） ==================== */
+.stage {
+  position: relative;
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stage.on {
+  display: flex;
+  animation: appear .4s steps(4) both;
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.invader {
+  font-size: 8px;
+  width: 11em;
+  height: 8em;
+  margin-bottom: 52px;
+  color: #fff;
+  position: relative;
+  animation: hover-float 1.2s steps(2, jump-none) infinite;
+}
+
+.invader::before {
+  content: "";
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  top: -1em;
+  left: -1em;
+  box-shadow: 2em 0em 0 0 currentColor, 8em 0em 0 0 currentColor, 3em 1em 0 0 currentColor, 7em 1em 0 0 currentColor, 2em 2em 0 0 currentColor, 3em 2em 0 0 currentColor, 4em 2em 0 0 currentColor, 5em 2em 0 0 currentColor, 6em 2em 0 0 currentColor, 7em 2em 0 0 currentColor, 8em 2em 0 0 currentColor, 1em 3em 0 0 currentColor, 2em 3em 0 0 currentColor, 4em 3em 0 0 currentColor, 5em 3em 0 0 currentColor, 6em 3em 0 0 currentColor, 8em 3em 0 0 currentColor, 9em 3em 0 0 currentColor, 0em 4em 0 0 currentColor, 1em 4em 0 0 currentColor, 2em 4em 0 0 currentColor, 3em 4em 0 0 currentColor, 4em 4em 0 0 currentColor, 5em 4em 0 0 currentColor, 6em 4em 0 0 currentColor, 7em 4em 0 0 currentColor, 8em 4em 0 0 currentColor, 9em 4em 0 0 currentColor, 10em 4em 0 0 currentColor, 0em 5em 0 0 currentColor, 2em 5em 0 0 currentColor, 3em 5em 0 0 currentColor, 4em 5em 0 0 currentColor, 5em 5em 0 0 currentColor, 6em 5em 0 0 currentColor, 7em 5em 0 0 currentColor, 8em 5em 0 0 currentColor, 10em 5em 0 0 currentColor, 0em 6em 0 0 currentColor, 2em 6em 0 0 currentColor, 8em 6em 0 0 currentColor, 10em 6em 0 0 currentColor, 3em 7em 0 0 currentColor, 4em 7em 0 0 currentColor, 6em 7em 0 0 currentColor, 7em 7em 0 0 currentColor;
+}
+
+@keyframes hover-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+body.pixel-page h1 { font-size: 48px; font-weight: 400; letter-spacing: 3px; }
+body.pixel-page h1::before { content: "< "; opacity: .6; }
+body.pixel-page h1::after { content: " />"; opacity: .6; }
+
+.cursor {
+  display: inline-block;
+  margin-left: 8px;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+.sub { margin-top: 22px; font-size: 16px; letter-spacing: 4px; opacity: .9; }
+.tag { margin-top: 10px; font-size: 14px; opacity: .6; }
+
+/* ==================== GO! 按钮 ==================== */
+.go {
+  display: inline-block;
+  margin-top: 52px;
+  border: 2px solid #fff;
+  padding: 14px 34px 12px;
+  font-size: 24px;
+  letter-spacing: 4px;
+  color: #fff;
+  background: #000;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 0 #fff;
+  transition: background .1s, color .1s;
+  animation: pop .3s steps(3) .25s both;
+  font-family: inherit;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.go:hover { background: #fff; color: #000; }
+.go:active { transform: translate(4px, 4px); box-shadow: 0 0 0 0 #fff; }
+
+.hint {
+  margin-top: 26px;
+  font-size: 12px;
+  letter-spacing: 3px;
+  opacity: .55;
+  animation: blink 1.6s steps(1) infinite;
+}
+
+/* ==================== 底部版权 ==================== */
+.foot {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  opacity: .45;
+  z-index: 1;
+}
+
+/* ==================== 响应式 / 减少动态 ==================== */
+@media (max-width: 600px) {
+  body.pixel-page h1 { font-size: 30px; }
+  .sub { font-size: 13px; letter-spacing: 2px; }
+  .invader { font-size: 6px; margin-bottom: 40px; }
+  .go { font-size: 20px; }
+  .boot { left: 16px; top: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-flash,
+  .invader,
+  .cursor,
+  .hint,
+  .boot::after { animation: none !important; }
+  .crt-flash { display: none; }
+}

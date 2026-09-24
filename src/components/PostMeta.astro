@@ -1,0 +1,53 @@
+---
+/**
+ * 文章元信息：日期 / 分类 / 标签。
+ */
+import type { CollectionEntry } from 'astro:content';
+import { categoryPath, formatDate, tagPath } from '../lib/site';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  showTags?: boolean;
+  showCategory?: boolean;
+}
+
+const { post, showTags = true, showCategory = true } = Astro.props;
+const { pubDate, updatedDate, category, tags } = post.data;
+---
+
+<div class="post-meta">
+  <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+
+  {
+    updatedDate && (
+      <>
+        <span class="sep">·</span>
+        <span>更新于 {formatDate(updatedDate)}</span>
+      </>
+    )
+  }
+
+  {
+    showCategory && category && (
+      <>
+        <span class="sep">·</span>
+        <a class="chip chip-cat" href={categoryPath(category)}>
+          {category}
+        </a>
+      </>
+    )
+  }
+
+  {
+    showTags && tags.length > 0 && (
+      <>
+        <span class="sep">·</span>
+        {tags.map((tag) => (
+          <a class="chip chip-tag" href={tagPath(tag)}>
+            #{tag}
+          </a>
+        ))}
+      </>
+    )
+  }
+</div>

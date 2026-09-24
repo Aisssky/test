@@ -1,0 +1,27 @@
+{
+  "name": "aisssky-blog",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "migrate:html": "node scripts/migrate-html-to-md.mjs",
+    "cms": "decap-server"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.1",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.4",
+    "rehype-raw": "^7.0.0"
+  },
+  "devDependencies": {
+    "decap-server": "^3.5.3",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2"
+  }
+}
