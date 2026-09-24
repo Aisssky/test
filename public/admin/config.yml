@@ -1,0 +1,129 @@
+# ============================================================================
+# Decap CMS 配置
+#
+# 本地开发（推荐先跑通这条链路）：
+#   终端 A: npm run dev      →  http://localhost:4321/test/
+#   终端 B: npm run cms      →  本地代理，默认 http://localhost:8081
+#   浏览器打开 http://localhost:4321/test/admin/
+#   —— 此时 CMS 会直接读写你本地的 src/content/blog/*.md 与 public/images/uploads/
+#
+# 线上使用：把下面的 backend 换成 github（已配好），
+# 但 GitHub backend 需要额外的 OAuth 代理，见 README「CMS 上线」一节。
+#
+# 字段必须与 src/content.config.ts 的 schema 保持一致，
+# 否则 Astro 构建时会因为 frontmatter 校验失败而报错。
+# ============================================================================
+
+backend:
+  name: github
+  repo: Aisssky/test
+  branch: main
+
+# 打开 /admin/ 时默认走本地代理，无需登录 GitHub
+local_backend: true
+
+# 站点地址（用于「查看已发布页面」的预览链接）
+site_url: https://aisssky.github.io/test
+display_url: https://aisssky.github.io/test/
+
+# 中文界面
+locale: zh_Hans
+
+# 图片统一存到 public/images/uploads/，正文里写 /images/uploads/xxx.jpg
+media_folder: public/images/uploads
+public_folder: /images/uploads
+
+collections:
+  - name: blog
+    label: 文章
+    label_singular: 文章
+    description: 文章源文件是普通 Markdown，提交后由 GitHub Actions 自动构建发布。
+    folder: src/content/blog
+    create: true
+    delete: true
+    # 新建文件的命名规则，与已有文章保持一致
+    slug: '{{year}}-{{month}}-{{day}}-{{slug}}'
+    preview_path: 'blog/{{slug}}/'
+    summary: '{{title}} · {{pubDate}}'
+    sortable_fields: ['pubDate', 'updatedDate', 'title']
+    view_filters:
+      - label: 只看草稿
+        field: draft
+        pattern: true
+      - label: 只看已发布
+        field: draft
+        pattern: false
+    fields:
+      - label: 标题
+        name: title
+        widget: string
+        hint: 会显示在文章页顶部和列表里
+
+      - label: 简介
+        name: description
+        widget: text
+        required: false
+        hint: 一两句话说明，会进 meta description 和列表摘要
+
+      - label: 发布日期
+        name: pubDate
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        picker_utc: true
+
+      - label: 更新日期
+        name: updatedDate
+        widget: datetime
+        required: false
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        picker_utc: true
+        hint: 留空则页面只显示发布日期
+
+      - label: 副标题
+        name: subtitle
+        widget: string
+        required: false
+        hint: 头图下方的一行小字，适合写日期区间或期数
+
+      - label: 分类
+        name: category
+        widget: string
+        required: false
+        hint: 单值，例如「技术」「图形学」「项目日志」
+
+      - label: 标签
+        name: tags
+        widget: list
+        required: false
+        default: []
+        hint: 回车逐个添加
+
+      - label: 封面图
+        name: cover
+        widget: image
+        required: false
+        allow_multiple: false
+        hint: 同时作为文章顶部的固定头图；留空则用纯色
+
+      - label: 版权署名
+        name: copyright
+        widget: string
+        required: false
+        hint: 留空则用站点默认的「© Aisssky」
+
+      - label: 草稿
+        name: draft
+        widget: boolean
+        default: false
+        hint: 打开后只在本地 dev 可见，不会进入正式构建和 RSS
+
+      - label: 显示侧边索引
+        name: toc
+        widget: boolean
+        default: true
+
+      - label: 正文
+        name: body
+        widget: markdown
