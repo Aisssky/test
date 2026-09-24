@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# GitHub Pages 项目页部署在 /test 下，sitemap 也要带前缀
+Sitemap: https://aisssky.github.io/test/sitemap-index.xml
