@@ -21,9 +21,8 @@ backend:
   # 不需要自己部署 OAuth proxy，也不需要 GitHub OAuth App。
   name: turbo-github
 
-  # ★ 唯一需要手填的值：Decap Turbo 站点详情页 Overview 标签页里的 UUID。
-  #   拿到后替换下面这行，否则 /admin/ 会在登录页之前就报 config lookup 失败。
-  turbo_site_id: REPLACE_WITH_YOUR_TURBO_SITE_ID
+  # Turbo 站点详情页 Overview 标签页里的 UUID（站点：Aisssky Blog）
+  turbo_site_id: 7ebd2b8d-eafd-41ec-bfee-789965540898
 
   # 仓库以 Turbo dashboard 里该站点的配置为准；这里保持与之一致即可，
   # 若两边不一致会报 "requested repo does not match"。
