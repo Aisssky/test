@@ -1,3 +1,18 @@
+# GitHub Pages 部署工作流（Astro 版）
+#
+# 【怎么用】把本文件内容覆盖到 .github/workflows/static.yml：
+#   GitHub 仓库页 → 打开 .github/workflows/static.yml → 铅笔 Edit
+#   → 全选删除 → 粘贴本文件内容 → Commit changes。
+#
+# 【为什么不直接 git push】本机推送用的 OAuth 凭据没有 workflow scope，
+#   会被 GitHub 拒绝（refusing to allow an OAuth App to create or update
+#   workflow ... without `workflow` scope）；本机 SSH key 也未注册到 GitHub。
+#   换用带 workflow scope 的凭据后，可把本文件移回 .github/workflows/deploy.yml。
+#
+# 【为什么必须替换】GitHub 默认生成的 "Deploy static content to Pages" 模板
+#   只把仓库源码当成品上传（path: '.'），不装 Node、不跑构建。
+#   本项目根目录没有 index.html（已移入 legacy/），会导致线上全站 404。
+
 name: Deploy Astro to GitHub Pages
 
 on:
