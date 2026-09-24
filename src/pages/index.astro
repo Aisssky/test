@@ -1,400 +1,443 @@
 ---
 /**
- * 作品集首页。
- * 从旧站 index.html 1:1 迁移：DOM 结构与全部 Tailwind 类名原样保留，
- * 只把「Notes」栏里原本是死文本的条目接上了现在的文章页面。
+ * 首页：固定背景 + Hero + Writing + Notes + Selected。
+ *
+ * 彻底去掉了 Tailwind Play CDN 与 Google Fonts ——
+ * 前者每次访问都要现编译一遍样式，后者在国内直连不通，
+ * 首屏会长时间保持无样式状态。字体改用系统栈（见 theme.css）。
  */
 import Layout from '../layouts/Layout.astro';
-import { postPath, withBase } from '../lib/site';
-import '../styles/portfolio.css';
+import SiteBackground from '../components/SiteBackground.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { getPublishedPosts } from '../lib/posts';
+import { formatDate, postPath, withBase, SITE } from '../lib/site';
 
-type GameSticker = {
-  src: string;
-  alt: string;
-  label: string;
-  shape: 'circle' | 'rounded' | 'clip';
-  rotate: string;
-  gradient?: boolean;
-};
+const posts = (await getPublishedPosts())
+  .slice()
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-const stickers: GameSticker[] = [
-  {
-    src: 'https://bkimg.cdn.bcebos.com/pic/8d5494eef01f3a29b5d7166b9125bc315c607c7c',
-    alt: '阴阳师',
-    label: '阴阳师',
-    shape: 'circle',
-    rotate: 'rotate-[-8deg]',
-  },
-  {
-    src: 'https://pic.k73.com/up/soft/2021/1220/184211_29767304.png',
-    alt: '明日方舟',
-    label: '明日方舟',
-    shape: 'rounded',
-    rotate: 'rotate-[12deg]',
-  },
-  {
-    src: 'https://pic.rmb.bdstatic.com/bjh/news/d6a37cdbaf3bb6bab37eb4324488a780.png',
-    alt: '星露谷物语',
-    label: '星露谷物语',
-    shape: 'rounded',
-    rotate: 'rotate-[12deg]',
-  },
-  {
-    src: 'https://img.ylmfwin8.com/uploadfile/2024/0422/20240422115159631.png',
-    alt: '战双',
-    label: '战双',
-    shape: 'clip',
-    rotate: 'rotate-[-15deg]',
-  },
-  {
-    src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fitem%2F201803%2F24%2F20180324045743_KrUvF.thumb.400_0.jpeg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1778438070&t=5255011e0c3ff6af25c4815ac7f42d2d',
-    alt: '原神',
-    label: '原神',
-    shape: 'circle',
-    rotate: 'rotate-[5deg]',
-    gradient: true,
-  },
-  {
-    src: 'https://gd-hbimg.huaban.com/325083dfe39ebba715625f8f41e726163751387b6738-k3Zv84_fw658',
-    alt: '洛克王国',
-    label: '洛克王国',
-    shape: 'circle',
-    rotate: 'rotate-[-8deg]',
-  },
-  {
-    src: 'https://pic.k73.com/up/soft/2024/1203/144829_40192979.png',
-    alt: '无限暖暖',
-    label: '无限暖暖',
-    shape: 'rounded',
-    rotate: 'rotate-[12deg]',
-  },
-];
-
-// 已迁移过来的文章，Notes 栏直接指过去
 const notes = [
   { label: 'Lua 脚本优化', href: null },
   { label: 'Games101/104', href: postPath('2026-05-30-games101-notes') },
   { label: '问题汇总', href: postPath('2026-02-17-ue5-qa') },
 ];
 
-const otherNotes = [{ label: '游戏渲染 & 特效研究', href: null }];
+const currently = [
+  { k: 'Building', v: '个人博客 · Astro + Decap CMS' },
+  { k: 'Working', v: '《赛博朋克：飘渺城影》UE5 / UMG' },
+  { k: 'Learning', v: 'Computer Graphics · GAMES101' },
+];
 ---
 
 <Layout
   title="Aisssky | Game Dev Portfolio"
   description="Unreal Engine Developer - My Own ONE PIECE"
-  bodyClass="text-zinc-300 selection:bg-pink-400/30 relative portfolio-page"
+  bodyClass="home"
 >
-  <!-- 旧站这里就是 Tailwind Play CDN + 内联配置；保持原样，零视觉风险 -->
-  <script is:inline slot="head" src="https://cdn.tailwindcss.com"></script>
-  <script is:inline slot="head">
-    tailwind.config = { theme: { extend: {} } };
-  </script>
-  <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
-  <link slot="head" rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    slot="head"
-    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap"
-    rel="stylesheet"
-  />
+  <SiteBackground veil={0.22} />
+  <SiteHeader />
 
-  <div class="w-full mx-auto px-10 min-h-screen md:h-screen mt-10">
-    <div class="flex flex-col md:flex-row h-full gap-6">
-      <div
-        class="w-full md:w-3/12 h-full flex items-center justify-center text-center shrink-0 py-10 md:py-0"
-      >
-        <div class="space-y-5 w-full">
-          <div class="relative w-fit mx-auto">
-            <div
-              class="w-28 h-28 rounded-full bg-zinc-800 flex items-center justify-center avatar overflow-hidden"
-            >
-              <img
-                src="https://avatars.githubusercontent.com/u/207451722?v=4"
-                alt="头像"
-                class="w-full h-full object-cover"
-              />
-            </div>
-            <div
-              class="absolute bottom-1 right-2 w-4 h-4 bg-emerald-500 border-2 border-black rounded-full shadow-[0_0_8px#10b981] animate-pulse"
-            >
-            </div>
-          </div>
-
-          <div class="space-y-1 text-center">
-            <h1 class="text-2xl font-bold text-white">
-              <span class="text-pink-400">Aisssky</span>
-            </h1>
-          </div>
-
-          <!-- Character Stats -->
-          <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg">
-            <h3 class="text-white text-sm font-bold mb-3 flex items-center justify-center">
-              <span class="w-2 h-2 bg-pink-500 rounded-full mr-2"></span> Character Stats
-            </h3>
-            <div class="space-y-3">
-              <div class="space-y-1">
-                <div class="flex justify-between text-[10px] uppercase tracking-tighter">
-                  <span class="text-zinc-400 font-bold">Passion (HP)</span>
-                  <span class="text-pink-400">100 / 100</span>
-                </div>
-                <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    class="h-full bg-gradient-to-r from-pink-600 to-pink-400 w-[100%] shadow-[0_0_8px#ec4899]"
-                  >
-                  </div>
-                </div>
-              </div>
-
-              <div class="space-y-1">
-                <div class="flex justify-between text-[10px] uppercase tracking-tighter">
-                  <span class="text-zinc-400 font-bold">Inspiration (MP)</span>
-                  <span class="text-purple-400">85 / 100</span>
-                </div>
-                <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    class="h-full bg-gradient-to-r from-purple-600 to-purple-400 w-[85%] shadow-[0_0_8px#a855f7]"
-                  >
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap gap-1 justify-center text-[9px]">
-                <span class="px-1.5 py-0.5 rounded border border-pink-500/50 text-pink-400 bg-pink-500/5"
-                  >UE5</span
-                >
-                <span
-                  class="px-1.5 py-0.5 rounded border border-emerald-500/50 text-emerald-400 bg-emerald-500/5"
-                  >C++</span
-                >
-                <span
-                  class="px-1.5 py-0.5 rounded border border-blue-500/50 text-blue-400 bg-blue-500/5"
-                  >TypeScript</span
-                >
-                <span
-                  class="px-1.5 py-0.5 rounded border border-blue-500/50 text-blue-400 bg-blue-500/5"
-                  >Lua</span
-                >
-                <span
-                  class="px-1.5 py-0.5 rounded border border-blue-500/50 text-blue-400 bg-blue-500/5"
-                  >图形学</span
-                >
-              </div>
-            </div>
-          </div>
-
-          <!-- 联系方式 -->
-          <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg">
-            <h3 class="text-white text-sm font-bold mb-2">📮 联系方式</h3>
-            <ul class="text-xs space-y-1 text-zinc-400">
-              <li>📩 aisssky09@163.com</li>
-              <li>
-                🐙
-                <a
-                  href="https://github.com/Aisssky"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="hover:text-pink-400 transition-colors">https://github.com/Aisssky</a
-                >
-              </li>
-            </ul>
-          </div>
-
-          <!-- 站点入口（旧站没有导航，这里补一个不破坏布局的入口） -->
-          <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-3 rounded-lg">
-            <div class="flex flex-wrap gap-2 justify-center text-[11px]">
-              <a
-                href={withBase('/blog/')}
-                class="px-2.5 py-1 rounded border border-pink-500/50 text-pink-400 bg-pink-500/5 hover:bg-pink-500/15 transition"
-                >笔记</a
-              >
-              <a
-                href={withBase('/tags/')}
-                class="px-2.5 py-1 rounded border border-zinc-700 text-zinc-400 hover:text-pink-400 hover:border-pink-500/50 transition"
-                >标签</a
-              >
-              <a
-                href={withBase('/about/')}
-                class="px-2.5 py-1 rounded border border-zinc-700 text-zinc-400 hover:text-pink-400 hover:border-pink-500/50 transition"
-                >关于</a
-              >
-              <a
-                href={withBase('/pixel/')}
-                class="px-2.5 py-1 rounded border border-zinc-700 text-zinc-400 hover:text-pink-400 hover:border-pink-500/50 transition"
-                >PRESS START</a
-              >
-            </div>
-          </div>
-        </div>
+  <main id="main">
+    <!-- Hero：第一屏不放任何文章卡片，让背景自己说话 -->
+    <section class="hero">
+      <div class="hero-inner">
+        <h1 class="hero-name">Aisssky</h1>
+        <p class="hero-line">Where the heart longs,<br />the soul follows.</p>
+        <p class="hero-tags">C++ · Unreal Engine</p>
+        <p class="hero-sub">Unreal Engine 5 · 独立游戏开发</p>
       </div>
+      <div class="scroll-hint" aria-hidden="true">Scroll</div>
+    </section>
 
-      <!-- ========== 看板 ========== -->
-      <div class="w-full md:w-9/12 h-full flex flex-col py-6">
-        <div class="flex items-center h-[10%]">
-          <div>
-            <h1 class="text-3xl md:text-4xl font-bold text-white">
-              My Own <span class="text-pink-400">ONE PIECE</span>
-            </h1>
-            <p class="text-lg mt-1 text-pink-300 typewriter">Develop with Unreal Engine</p>
+    <div class="sections">
+      <div class="col-main">
+        <!-- Writing -->
+        <section class="panel reveal">
+          <div class="panel-head">
+            <h2 class="eyebrow">Writing</h2>
+            <a class="view-all" href={withBase('/blog/')}>View all →</a>
           </div>
-        </div>
 
-        <div class="h-[25%] py-2 relative">
-          <h2 class="text-xl font-bold text-white mb-2 flex items-center relative z-10">
-            <span class="w-8 h-px bg-pink-500 mr-4"></span>
-            <span class="text-pink-100">Played &amp; Inspired</span>
-          </h2>
-          <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg h-[calc(100%-2rem)]">
-            <div class="relative w-fit mx-auto flex items-center justify-center w-full h-full">
-              <div class="absolute inset-0 grid grid-cols-7 grid-rows-4 -z-10 opacity-2 justify-items-center">
-                <div class="border-l border-zinc-700"></div>
-                <div class="border-l border-zinc-700"></div>
-                <div class="border-l border-zinc-700"></div>
-                <div class="border-l border-zinc-700"></div>
-                <div class="border-l border-zinc-700"></div>
-                <div class="border-l border-zinc-700"></div>
-                <div class="border-l border-zinc-700"></div>
-              </div>
-
-              <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-8">
-                {
-                  stickers.map((game) => (
-                    <div
-                      class:list={[
-                        'game-sticker w-24 h-24 border-2 overflow-hidden group',
-                        game.shape === 'circle' && 'rounded-full border-white shadow-lg hover:rotate-0 hover:scale-110 transition-all duration-300',
-                        game.shape === 'rounded' && 'rounded-xl border-zinc-100 shadow-xl hover:rotate-3 hover:scale-110 transition-all duration-300',
-                        game.shape === 'clip' && 'border-white shadow-lg hover:rotate-[-5deg] hover:scale-110 transition-all duration-300',
-                        game.rotate,
-                      ]}
-                      style={
-                        game.shape === 'clip'
-                          ? 'clip-path: polygon(0 0, 100% 10%, 95% 100%, 10% 95%);'
-                          : undefined
-                      }
-                    >
-                      {game.gradient ? (
-                        <div class="w-full h-full rounded-full p-[3px] bg-gradient-to-tr from-pink-400 to-purple-500 hover:rotate-[10deg] hover:scale-110 transition-all duration-300">
-                          <div class="w-full h-full rounded-full overflow-hidden border-2 border-zinc-950">
-                            <img src={game.src} alt={game.alt} class="w-full h-full object-cover" />
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <img
-                            src={game.src}
-                            alt={game.alt}
-                            class="w-full h-full object-cover group-hover:opacity-100 opacity-90 transition"
-                          />
-                          <div
-                            class:list={[
-                              'absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[8px] text-white p-1 text-center font-semibold',
-                              game.shape === 'rounded' ? 'bg-black/60' : 'bg-black/50',
-                            ]}
-                          >
-                            {game.label}
-                          </div>
-                        </>
+          <ul class="entry-list">
+            {
+              posts.map((post) => (
+                <li>
+                  <a class="entry" href={postPath(post.id)}>
+                    <span class="entry-date">{formatDate(post.data.pubDate)}</span>
+                    <span class="entry-body">
+                      <span class="entry-title">{post.data.title}</span>
+                      {post.data.description && (
+                        <span class="entry-desc">{post.data.description}</span>
                       )}
-                    </div>
-                  ))
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="h-[25%] py-2">
-          <h2 class="text-xl font-bold text-white mb-2 flex items-center">
-            <span class="w-8 h-px bg-pink-500 mr-4"></span>
-            <span class="text-pink-100">Demo</span>
-          </h2>
-          <div class="grid grid-cols-1 gap-3 h-[calc(100%-2rem)]">
-            <div
-              class="game-card bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg overflow-hidden transition-all duration-300"
-            >
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-bold text-pink-400">完善中</h3>
-                <span class="text-xs bg-pink-500/10 text-pink-400 px-2 py-1 rounded">Unreal</span>
-              </div>
-              <p class="text-sm text-zinc-400"></p>
-            </div>
-
-            <a
-              href={withBase('/blog/2026-04-21-cyberpunk-devlog/')}
-              title="查看开发日志"
-              class="game-card bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-lg overflow-hidden transition-all duration-300 block hover:border-pink-500/50"
-            >
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-bold text-pink-400">《赛博朋克：飘渺城影》</h3>
-                <span class="text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded"
-                  >Unreal 5.2</span
-                >
-              </div>
-              <p class="text-sm text-zinc-400"></p>
-            </a>
-          </div>
-        </div>
-
-        <div class="h-[40%] py-2">
-          <h2 class="text-xl font-bold text-white mb-2 flex items-center">
-            <span class="w-8 h-px bg-pink-500 mr-4"></span>
-            <span class="text-pink-100">Notes</span>
-          </h2>
-          <div
-            class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-5 rounded-lg h-[calc(100%-2rem)] grid grid-cols-2 gap-4"
-          >
-            <div class="space-y-3">
-              <p class="text-[10px] uppercase tracking-widest text-zinc-500">Engine &amp; Language</p>
-              <ul class="text-sm space-y-2 text-pink-300">
-                {
-                  notes.map((note) => (
-                    <li class="hover:translate-x-1 transition-transform">
-                      {note.href ? (
-                        <a href={note.href} class="notes-link">
-                          <span class="text-pink-500 mr-2">✦</span>
-                          <span>{note.label}</span>
-                        </a>
-                      ) : (
-                        <span class="notes-link cursor-default">
-                          <span class="text-pink-500 mr-2">✦</span>
-                          <span>{note.label}</span>
+                      {(post.data.category || post.data.tags?.length) && (
+                        <span class="entry-tags">
+                          {post.data.category}
+                          {post.data.category && post.data.tags?.length ? ' · ' : ''}
+                          {post.data.tags?.slice(0, 2).join(' · ')}
                         </span>
                       )}
-                    </li>
-                  ))
-                }
-              </ul>
-            </div>
-            <div class="space-y-3 border-l border-zinc-800 pl-4">
-              <p class="text-[10px] uppercase tracking-widest text-zinc-500">Other</p>
-              <ul class="text-sm space-y-2 text-pink-300">
-                {
-                  otherNotes.map((note) => (
-                    <li class="hover:translate-x-1 transition-transform">
-                      <span class="notes-link cursor-default">
-                        <span class="text-pink-500 mr-2">✦</span>
-                        <span>{note.label}</span>
-                      </span>
-                    </li>
-                  ))
-                }
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+                    </span>
+                    <span class="entry-arrow" aria-hidden="true">→</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
 
-  <!-- 访问统计：不蒜子 -->
-  <script is:inline async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-  <div style="text-align:center; margin-top:20px; font-size:14px; color:#666;">
-    <span id="busuanzi_container_site_pv"
-      >总访问：<span id="busuanzi_value_site_pv"></span> 次</span
-    >
-    &nbsp;&nbsp;
-    <span id="busuanzi_container_site_uv"
-      >访客：<span id="busuanzi_value_site_uv"></span> 人</span
-    >
-  </div>
+        <!-- Notes：碎片化思考，和正式长文分开 -->
+        <section class="panel reveal" id="notes">
+          <div class="panel-head">
+            <h2 class="eyebrow">Notes</h2>
+          </div>
+          <ul class="entry-list entry-list--plain">
+            {
+              notes.map((note) => (
+                <li>
+                  {note.href ? (
+                    <a class="entry entry--plain" href={note.href}>
+                      <span class="entry-title">{note.label}</span>
+                      <span class="entry-arrow" aria-hidden="true">→</span>
+                    </a>
+                  ) : (
+                    <span class="entry entry--plain is-muted">
+                      <span class="entry-title">{note.label}</span>
+                      <span class="entry-note">待整理</span>
+                    </span>
+                  )}
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <!-- Selected work -->
+        <section class="panel reveal">
+          <div class="panel-head">
+            <h2 class="eyebrow">Selected</h2>
+          </div>
+          <a
+            class="entry entry--plain"
+            href="https://store.steampowered.com/app/3552700/_/"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="entry-body">
+              <span class="entry-title">《赛博朋克：飘渺城影》</span>
+              <span class="entry-desc">对话系统 / 文本收集 / 教程系统 · UE5 C++ · UMG</span>
+            </span>
+            <span class="entry-arrow" aria-hidden="true">↗</span>
+          </a>
+        </section>
+      </div>
+
+      <!-- Currently：桌面端右侧，移动端自动落到最下面 -->
+      <aside class="col-side">
+        <section class="panel reveal">
+          <div class="panel-head">
+            <h2 class="eyebrow">Currently</h2>
+          </div>
+          <dl class="currently">
+            {
+              currently.map((item) => (
+                <div>
+                  <dt>{item.k}</dt>
+                  <dd>{item.v}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="home-foot">
+    <span>© {new Date().getFullYear()} Aisssky</span>
+    <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    <a href={SITE.github} target="_blank" rel="noopener">GitHub ↗</a>
+  </footer>
 </Layout>
+
+<style>
+  main {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 0 var(--page-pad) 80px;
+  }
+
+  /* ---- Hero ---- */
+  .hero {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-top: var(--header-h);
+  }
+
+  .hero-name {
+    font-family: var(--ff-sans);
+    font-size: clamp(38px, 7vw, 74px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--c-text);
+    margin: 0 0 18px;
+  }
+
+  .hero-line {
+    font-family: var(--ff-serif);
+    font-size: clamp(19px, 2.6vw, 27px);
+    line-height: 1.45;
+    color: var(--c-text);
+    margin: 0 0 26px;
+  }
+
+  .hero-tags {
+    font-family: var(--ff-mono);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--c-accent);
+    margin: 0 0 6px;
+  }
+
+  .hero-sub {
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    color: var(--c-text-dim);
+    margin: 0;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 38px;
+    font-family: var(--ff-sans);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--c-text-faint);
+  }
+
+  .hero {
+    position: relative;
+  }
+
+  /* ---- 区块布局 ---- */
+  .sections {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .col-main,
+  .col-side {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .col-side {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+
+  .panel {
+    background: var(--c-glass);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 26px 28px;
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .view-all {
+    font-family: var(--ff-sans);
+    font-size: 12px;
+    color: var(--c-accent);
+    text-decoration: none;
+  }
+
+  .view-all:hover {
+    color: var(--c-accent-hover);
+  }
+
+  /* ---- 条目：靠间距和细线分层，不做卡片 ---- */
+  .entry-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .entry-list li + li {
+    border-top: 1px solid var(--c-border-soft);
+  }
+
+  .entry {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    padding: 16px 0;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .entry--plain {
+    align-items: center;
+  }
+
+  .entry-date {
+    font-family: var(--ff-mono);
+    font-size: 12px;
+    color: var(--c-text-faint);
+    flex: 0 0 62px;
+  }
+
+  .entry-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .entry-title {
+    font-family: var(--ff-sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--c-text);
+  }
+
+  .entry-desc {
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    color: var(--c-text-dim);
+    line-height: 1.55;
+  }
+
+  .entry-tags {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--c-text-faint);
+    margin-top: 2px;
+  }
+
+  .entry-note {
+    font-family: var(--ff-sans);
+    font-size: 11px;
+    color: var(--c-text-faint);
+  }
+
+  .entry-arrow {
+    flex: 0 0 auto;
+    font-size: 14px;
+    color: var(--c-text-faint);
+    transition: transform 0.18s ease;
+  }
+
+  .entry:hover .entry-arrow {
+    transform: translateX(4px);
+    color: var(--c-accent-hover);
+  }
+
+  .entry:hover .entry-title {
+    color: var(--c-accent-hover);
+  }
+
+  .is-muted .entry-title {
+    color: var(--c-text-faint);
+  }
+
+  /* ---- Currently ---- */
+  .currently {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .currently dt {
+    font-family: var(--ff-sans);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-text-faint);
+    margin-bottom: 3px;
+  }
+
+  .currently dd {
+    margin: 0;
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--c-text);
+  }
+
+  /* ---- 页脚 ---- */
+  .home-foot {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 0 var(--page-pad) 48px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-family: var(--ff-sans);
+    font-size: 12px;
+    color: var(--c-text-faint);
+  }
+
+  .home-foot a {
+    color: var(--c-text-faint);
+    text-decoration: none;
+  }
+
+  .home-foot a:hover {
+    color: var(--c-accent-hover);
+  }
+
+  /* ---- 进入动画：只做 opacity + 轻微位移 ---- */
+  .reveal {
+    animation: rise 0.5s ease both;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 880px) {
+    .sections {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .col-side {
+      position: static;
+    }
+    .hero {
+      min-height: 90svh;
+    }
+    .panel {
+      padding: 22px 20px;
+    }
+  }
+</style>

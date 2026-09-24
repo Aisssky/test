@@ -1,0 +1,30 @@
+---
+/**
+ * 全站固定背景。
+ *
+ * 图放在 public/images/background/main.webp（由 dist 里那张 jpg 转出，
+ * 530KB → 148KB）。路径经 withBase() 拼上 /test 前缀，
+ * 否则部署到 GitHub Pages 项目页会 404。
+ *
+ * veil 控制遮罩浓度：0.12 背景最抢眼，0.32 正文最舒服。
+ */
+import { withBase } from '../lib/site';
+import '../styles/background.css';
+
+interface Props {
+  /** 遮罩透明度 0 ~ 1，默认 0.22 */
+  veil?: number;
+  /** 覆盖默认底图（站内绝对路径） */
+  src?: string;
+}
+
+const { veil = 0.22, src = '/images/background/main.webp' } = Astro.props;
+const url = withBase(src);
+---
+
+<div
+  class="site-background"
+  style={`--bg-url: url('${url}'); --bg-veil: ${veil};`}
+  aria-hidden="true"
+>
+</div>

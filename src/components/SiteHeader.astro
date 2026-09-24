@@ -1,38 +1,111 @@
 ---
 /**
- * 站点顶部导航（列表类页面用；长文页沿用旧站的固定头图，不叠加这个）
+ * 站点顶部导航。
+ * fixed + 半透明 + blur + 一条极细底边，不做按钮、不做大高度。
+ *
+ * 注意：class 从旧的 .site-header 换成 .gh-header，
+ * blog.css 里那条旧规则自然失效，不需要去改它。
  */
-import { withBase } from '../lib/site';
+import { withBase, SITE } from '../lib/site';
 
 const links = [
-  { href: withBase('/'), label: '首页', match: ['/'] },
-  { href: withBase('/blog/'), label: '笔记', match: ['/blog/'] },
-  { href: withBase('/categories/'), label: '分类', match: ['/categories/'] },
-  { href: withBase('/tags/'), label: '标签', match: ['/tags/'] },
-  { href: withBase('/about/'), label: '关于', match: ['/about/'] },
+  { href: withBase('/blog/'), label: 'Writing' },
+  { href: `${withBase('/')}#notes`, label: 'Notes' },
+  { href: withBase('/about/'), label: 'About' },
 ];
 
-const current = Astro.url.pathname.endsWith('/')
-  ? Astro.url.pathname
-  : `${Astro.url.pathname}/`;
+const path = Astro.url.pathname;
 ---
 
-<header class="site-header">
-  <div class="inner">
-    <a class="brand" href={withBase('/')}>Aisssky<span>.</span></a>
+<header class="gh-header">
+  <div class="gh-inner">
+    <a class="gh-brand" href={withBase('/')}>✦ Aisssky</a>
+
     <nav aria-label="主导航">
       {
-        links.map((link) => {
-          const active = link.match.some((m) =>
-            m === '/' ? current.endsWith('/') && !current.includes('/blog') : current.includes(m)
-          );
-          return (
-            <a href={link.href} aria-current={active ? 'page' : undefined}>
-              {link.label}
-            </a>
-          );
-        })
+        links.map((link) => (
+          <a
+            href={link.href}
+            aria-current={path.startsWith(link.href.split('#')[0]) && link.href !== withBase('/') + '#notes' ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
       }
+      <a class="gh-ext" href={SITE.github} target="_blank" rel="noopener">
+        GitHub <span aria-hidden="true">↗</span>
+      </a>
     </nav>
   </div>
 </header>
+
+<style>
+  .gh-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    height: var(--header-h);
+
+    background: rgba(248, 250, 253, 0.72);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border-bottom: 1px solid rgba(23, 32, 51, 0.07);
+  }
+
+  .gh-inner {
+    max-width: var(--page-max);
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 var(--page-pad);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .gh-brand {
+    font-family: var(--ff-sans);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--c-text);
+    text-decoration: none;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  nav a {
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    color: var(--c-text-dim);
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+
+  nav a:hover {
+    color: var(--c-accent-hover);
+  }
+
+  nav a[aria-current='page'] {
+    color: var(--c-text);
+  }
+
+  .gh-ext {
+    color: var(--c-text-faint);
+  }
+
+  @media (max-width: 560px) {
+    nav {
+      gap: 14px;
+    }
+    nav a {
+      font-size: 12px;
+    }
+  }
+</style>

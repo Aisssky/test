@@ -1,0 +1,37 @@
+/* ==========================================================================
+   背景系统：固定不动的二次元底图 + 可调遮罩
+   原则 —— 背景不动，内容动。
+   ========================================================================== */
+
+.site-background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+
+  background-image: var(--bg-url);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  /* 底图本身略微压暗降饱和，避免和正文抢注意力 */
+  filter: saturate(0.92);
+}
+
+/* 遮罩：让背景有存在感，但保证正文可读。
+   想调氛围只改 --bg-veil 这一个值：
+   0.12 最透（背景强）→ 0.32 最实（文字最舒服） */
+.site-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(240, 245, 250, var(--bg-veil, 0.22));
+}
+
+/*  prefers-reduced-motion 下不做任何视差/缩放 */
+@media (prefers-reduced-motion: no-preference) {
+  .site-background {
+    transform: translateZ(0);
+  }
+}

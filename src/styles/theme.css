@@ -1,0 +1,73 @@
+/* ==========================================================================
+   主题变量：颜色 / 字体 / 玻璃质感
+   所有视觉常量集中在这里，改风格只动本文件。
+   ========================================================================== */
+
+:root {
+  /* ---- 颜色 ------------------------------------------------------------
+     主色取自背景图：蓝发 / 黄窗 / 粉衣 / 深蓝建筑。
+     UI 只用低饱和的蓝灰与中性色，让背景里的高饱和色自己说话。 */
+  --c-text: #172033;
+  --c-text-dim: #526078;
+  --c-text-faint: #8a94a6;
+
+  --c-glass: rgba(245, 248, 252, 0.68);
+  --c-glass-strong: rgba(248, 250, 253, 0.86);
+  --c-border: rgba(255, 255, 255, 0.55);
+  --c-border-soft: rgba(23, 32, 51, 0.09);
+
+  --c-code: #111827;
+  --c-accent: #6289c7;
+  --c-accent-hover: #426faf;
+
+  /* ---- 字体 ------------------------------------------------------------
+     渐进增强：网络字体加载成功就用，失败则回退到本地字体。
+     刻意不依赖 Google Fonts —— 国内直连不通，首屏会长时间空白或排版跳变。
+     若以后要接网络字体，只需在 <head> 加 <link>，变量名不用改。 */
+  --ff-sans: system-ui, -apple-system, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  --ff-serif: 'Cormorant Garamond', 'Noto Serif', Georgia, 'Times New Roman',
+    'Songti SC', 'Source Han Serif SC', serif;
+  --ff-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular,
+    Consolas, 'Courier New', monospace;
+
+  /* ---- 尺寸 ---- */
+  --header-h: 60px;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --page-max: 1080px;
+  --page-pad: 24px;
+}
+
+/* ---- 玻璃面板 ----------------------------------------------------------
+   只给大块内容区用（Writing / Notes / Article / About）。
+   小元素套玻璃会变成"一堆廉价卡片"。 */
+.glass-panel {
+  background: var(--c-glass);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+}
+
+/* ---- 通用排版原子 ---- */
+.eyebrow {
+  font-family: var(--ff-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-text-faint);
+}
+
+.rule {
+  height: 1px;
+  background: var(--c-border-soft);
+  border: 0;
+  margin: 0;
+}
+
+/* Header 是 fixed 的，列表页要给顶部让出空间 */
+.page-shell .page-main {
+  padding-top: calc(var(--header-h) + 28px);
+}
