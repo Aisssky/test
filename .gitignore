@@ -1,0 +1,19 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+.astro/
+
+# 环境与缓存
+.env
+.env.production
+*.log
+.DS_Store
+Thumbs.db
+
+# Decap CMS 本地代理缓存
+.decap/
+
+# 工作台数据
+.workbuddy/

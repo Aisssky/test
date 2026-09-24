@@ -1,0 +1,2680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>C++/UE5 技术笔记 · 纯血C++全覆盖</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8f8f8;
+        }
+
+        /* ==================== 顶部 ==================== */
+        .top-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 220px;
+            background: url("image/promo.webp") center/cover no-repeat; z-index: 0;
+        }
+        .header-bar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 220px;
+            background-color: rgba(0,0,0,0.45); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: #fff; z-index: 1;
+            backdrop-filter: blur(2px);
+        }
+        .header-bar h1 { font-size: 36px; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.4); margin-bottom: 10px; letter-spacing: 1px; }
+        .header-bar h2 { font-size: 17px; font-weight: 400; color: #e0e0e0; text-shadow: 0 1px 4px rgba(0,0,0,0.3); margin-bottom: 6px; }
+        .header-bar .date { font-size: 14px; color: #ccc; }
+
+        /* ==================== 主体容器 ==================== */
+        .main-container {
+            position: relative; z-index: 2; display: flex; width: 100%;
+            margin-top: 220px; background: #fff; min-height: calc(100vh - 220px);
+        }
+
+        /* ==================== 左侧导航栏 ==================== */
+        .sidebar {
+            width: 210px; background-color: #ffffff; padding: 28px 14px;
+            border-right: 1px solid #eee; flex-shrink: 0; align-self: flex-start;
+            position: sticky; top: 0; height: fit-content; max-height: 100vh;
+            overflow-y: auto; z-index: 3;
+        }
+        .sidebar h3 { font-size: 15px; margin-bottom: 16px; color: #333; font-weight: 700; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin: 7px 0; }
+        .sidebar a { color: #555; text-decoration: none; font-size: 13px; display: block; padding: 4px 8px; border-radius: 4px; transition: 0.2s; }
+        .sidebar a:hover { background-color: #f5f0f0; color: #000; }
+        .sidebar .sub-link { padding-left: 18px; font-size: 12px; }
+        .sidebar .nav-divider { margin: 14px 0 10px; border-top: 1px dashed #e0e0e0; }
+        .sidebar .ue-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; padding-left: 4px; }
+
+        /* ==================== 双栏内容区 (7:3) ==================== */
+        .content-wrapper { flex: 1; display: flex; min-width: 0; }
+        .cpp-panel { flex: 7; background-color: #ffffff; padding: 50px 55px; overflow-x: hidden; word-wrap: break-word; min-width: 0; }
+        .ue-panel { flex: 3; background-color: #fafafa; padding: 50px 35px; border-left: 2px solid #e8e8e8; overflow-x: hidden; word-wrap: break-word; min-width: 0; }
+
+        /* ==================== 通用内容样式 ==================== */
+        .cpp-panel h2, .ue-panel h2 { font-size: 22px; margin: 40px 0 20px; color: #222; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; }
+        .cpp-panel h2:first-child, .ue-panel h2:first-child { margin-top: 0; }
+        .cpp-panel h3, .ue-panel h3 { font-size: 18px; color: #333; margin: 25px 0 10px; }
+        .cpp-panel h4, .ue-panel h4 { font-size: 16px; color: #444; margin: 20px 0 8px; }
+        .cpp-panel p, .ue-panel p { font-size: 15px; line-height: 1.8; color: #444; margin-bottom: 18px; text-align: left; }
+        .ue-panel p { font-size: 14px; line-height: 1.75; }
+        .cpp-panel ul, .ue-panel ul, .cpp-panel ol, .ue-panel ol { margin: 10px 0 18px 20px; font-size: 15px; line-height: 1.8; color: #444; }
+        .ue-panel ul, .ue-panel ol { font-size: 14px; }
+        .cpp-panel a, .ue-panel a { color: #c2185b; text-decoration: none; border-bottom: 1px dotted #e0a5b9; }
+        .cpp-panel a:hover, .ue-panel a:hover { border-bottom: 1px solid #c2185b; }
+
+        .cpp-panel pre, .ue-panel pre {
+            background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px 18px;
+            overflow-x: auto; font-family: 'Fira Code','Consolas','Monaco','Courier New',monospace;
+            font-size: 13px; line-height: 1.7; margin: 14px 0 18px; white-space: pre; color: #2c2c2c;
+        }
+        .ue-panel pre { font-size: 12px; padding: 12px 14px; }
+        .cpp-panel code, .ue-panel code {
+            font-family: 'Fira Code','Consolas','Monaco','Courier New',monospace;
+            background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.92em; color: #c2185b;
+        }
+        .cpp-panel pre code, .ue-panel pre code { background: transparent; padding: 0; border-radius: 0; font-size: inherit; color: inherit; }
+
+        .cpp-panel table, .ue-panel table { border-collapse: collapse; width: 100%; margin: 14px 0 18px; font-size: 14px; }
+        .ue-panel table { font-size: 13px; }
+        .cpp-panel th, .cpp-panel td, .ue-panel th, .ue-panel td { border: 1px solid #ddd; padding: 9px 12px; text-align: left; vertical-align: top; }
+        .cpp-panel th, .ue-panel th { background: #f5f5f5; font-weight: 600; color: #333; }
+        .cpp-panel td, .ue-panel td { color: #444; }
+
+        .cpp-panel blockquote, .ue-panel blockquote {
+            border-left: 4px solid #c2185b; background: #fdf5f7; padding: 12px 18px;
+            margin: 14px 0 18px; border-radius: 0 8px 8px 0; color: #555; font-style: normal; line-height: 1.8;
+        }
+        .ue-panel blockquote { border-left-color: #1565c0; background: #f3f7fd; padding: 10px 14px; font-size: 13px; }
+        .cpp-panel blockquote p, .ue-panel blockquote p { margin-bottom: 0; color: #555; }
+        .ue-panel blockquote p { font-size: 13px; }
+
+        .cpp-panel img, .ue-panel img { max-width: 100%; height: auto; border-radius: 8px; margin: 14px 0; display: block; }
+        .img-caption { text-align: center; font-size: 13px; color: #888; margin: 4px 0 16px; }
+
+        /* ==================== UE 面板特有样式 ==================== */
+        .ue-panel .section-title { font-size: 18px; color: #1565c0; margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #e3edf7; font-weight: 700; }
+        .ue-panel .section-title:first-child { margin-top: 0; }
+        .ue-panel .ref-tag { display: inline-block; background: #e8f0fe; color: #1565c0; font-size: 12px; padding: 3px 10px; border-radius: 12px; margin-bottom: 10px; font-weight: 500; }
+        .ue-panel .ref-tag::before { content: "📎 对应 C++："; opacity: 0.7; }
+        /* C++ → UE 跨栏联动标签 */
+        .ue-link-tag { display: inline-block; background: #f3f7fd; color: #1565c0; font-size: 13px; padding: 4px 12px; border-radius: 12px; margin-left: 12px; font-weight: 500; text-decoration: none; border-bottom: none !important; transition: 0.2s; vertical-align: middle; }
+        .ue-link-tag:hover { background: #1565c0; color: #fff; }
+        .ue-link-tag::before { content: "🎮 "; }
+        .ue-panel .tip-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px 16px; margin: 14px 0 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .ue-panel .tip-card strong { color: #1565c0; }
+
+        /* ==================== 页脚 ==================== */
+        footer { text-align: center; padding: 1.5rem; background: #fff; border-top: 1px solid #eee; font-size: 0.85rem; color: #888; }
+
+        /* ==================== 响应式 ==================== */
+        @media (max-width: 1100px) { .sidebar { width: 160px; padding: 20px 12px; } .cpp-panel { padding: 30px 25px; } .ue-panel { padding: 30px 20px; } }
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #eee; padding: 16px 20px; }
+            .sidebar ul { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+            .sidebar li { margin: 0; }
+            .content-wrapper { flex-direction: column; }
+            .cpp-panel, .ue-panel { flex: auto; width: 100%; padding: 25px 18px; }
+            .ue-panel { border-left: none; border-top: 2px solid #e8e8e8; }
+            .header-bar h1 { font-size: 24px; text-align: center; padding: 0 12px; }
+            .header-bar h2 { font-size: 15px; text-align: center; padding: 0 12px; }
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+        /* ==================== 面试题悬浮卡片 ==================== */
+        .interview-block { margin: 20px 0 18px; padding: 14px 18px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; }
+        .interview-block h4 { font-size: 15px; color: #b45309; margin: 0 0 10px 0; }
+        .interview-block h4::before { content: "📝 "; }
+        .iq-trigger { display: inline-block; color: #c2185b; text-decoration: underline; text-decoration-style: dashed; text-underline-offset: 3px; cursor: pointer; position: relative; font-weight: 500; }
+        .iq-trigger:hover { color: #880e4f; text-decoration-style: solid; }
+        .iq-popup { display: none; position: absolute; left: 0; bottom: calc(100% + 10px); width: 420px; max-width: 90vw; background: #fff; border: 2px solid #c2185b; border-radius: 10px; padding: 16px 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.18); z-index: 999; font-weight: 400; text-align: left; line-height: 1.7; }
+        .iq-popup::after { content: ''; position: absolute; top: 100%; left: 20px; border: 8px solid transparent; border-top-color: #c2185b; }
+        .iq-popup .q-label { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .iq-popup .q-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 8px; }
+        .iq-popup .q-answer { font-size: 13px; color: #555; }
+        .iq-popup .q-answer p { font-size: 13px; margin-bottom: 8px; }
+        .iq-popup .q-answer ul, .iq-popup .q-answer ol { font-size: 13px; margin: 6px 0 8px 16px; }
+        .iq-trigger:hover .iq-popup, .iq-trigger:focus-within .iq-popup { display: block; }
+        .iq-trigger-tag { display: inline-block; background: #fef3c7; color: #92400e; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin: 0 4px 4px 0; font-weight: 600; cursor: default; }
+        .iq-trigger-tag::before { content: "⭐"; margin-right: 2px; }
+    </style>
+</head>
+<body>
+    <div class="top-bg"></div>
+    <header class="header-bar">
+        <h1>C++/UE5 技术笔记</h1>
+        <h2>纯血 C++ 全覆盖 · 从编译到 STL · UE C++ 落地应用</h2>
+        <div class="date">2026-04-21 ~ 2026-07-11</div>
+    </header>
+
+    <main class="main-container">
+        <!-- ========== 导航 ========== -->
+        <nav class="sidebar">
+            <h3>📌 纯血 C++</h3>
+            <ul>
+                <li><a href="#cpp-compile">🔨 编译与链接</a></li>
+                <li><a href="#interview-cpp-compile" class="sub-link">📝 面试题</a></li>
+                <li><a href="#cpp-header">📋 头文件与预处理器</a></li>
+                <li><a href="#interview-cpp-header" class="sub-link">📝 面试题</a></li>
+                <li><a href="#cpp-types">📐 变量与数据类型</a></li>
+                <li><a href="#interview-cpp-types" class="sub-link">📝 面试题</a></li>
+                <li><a href="#cpp-pointer">👉 指针与引用</a></li>
+                <li><a href="#interview-cpp-pointer" class="sub-link">📝 面试题</a></li>
+                <li><a href="#cpp-function">⚡ 函数进阶</a></li>
+                <li><a href="#interview-cpp-function" class="sub-link">📝 面试题</a></li>
+                <li><a href="#cpp-memory">🧠 内存管理</a></li>
+                <li><a href="#interview-cpp-memory" class="sub-link">📝 面试题</a></li>
+                <li><a href="#cpp-oop">🏛️ 面向对象</a></li>
+                <li><a href="#interview-cpp-oop" class="sub-link">📝 面试题</a></li>
+                <li><a href="#cpp-template">📦 模板与泛型</a></li>
+                <li><a href="#interview-cpp-template" class="sub-link">📝 面试题</a></li>
+                <li><a href="#cpp-stl">🗂️ STL 标准库</a></li>
+                <li><a href="#interview-cpp-stl" class="sub-link">📝 面试题</a></li>
+                <li><a href="#cpp-modern">🚀 现代 C++</a></li>
+                <li><a href="#interview-cpp-modern" class="sub-link">📝 面试题（含设计模式）</a></li>
+            </ul>
+            <div class="nav-divider"></div>
+            <div class="ue-label">🎮 UE C++ 应用</div>
+            <ul>
+                <li><a href="#ue-build">UE5 构建体系</a></li>
+                <li><a href="#ue-uht-guard">UHT 与防卫式声明</a></li>
+                <li><a href="#ue-types">UE5 类型体系</a></li>
+                <li><a href="#ue-pointer">指针与智能指针</a></li>
+                <li><a href="#ue-delegate">委托系统</a></li>
+                <li><a href="#ue-memory">UObject GC 内存管理</a></li>
+                <li><a href="#ue-oop">对象模型与反射</a></li>
+                <li><a href="#ue-template">模板与泛型</a></li>
+                <li><a href="#ue-containers">UE5 容器 vs STL</a></li>
+                <li><a href="#ue-modern">现代 C++ 在 UE5</a></li>
+            </ul>
+            <div class="nav-divider"></div>
+            <div class="ue-label">💻 计算机基础</div>
+            <ul>
+                <li><a href="#cs-os">操作系统</a></li>
+                <li><a href="#cs-arch">计算机组成</a></li>
+                <li><a href="#cs-net">计算机网络</a></li>
+            </ul>
+        </nav>
+
+        <div class="content-wrapper">
+
+            <!-- ================================================================ -->
+            <!--                    左栏：纯血 C++ 知识 (70%)                      -->
+            <!-- ================================================================ -->
+            <article class="cpp-panel">
+
+                <!-- ========== 1. 编译与链接 ========== -->
+                <section id="cpp-compile">
+                    <h2>🔨 编译与链接 — C++ 如何工作 <a href="#ue-build" class="ue-link-tag">UE5 构建体系</a></h2>
+                    <p>理解 C++ 程序从源码到可执行文件的完整旅程，是掌握这门语言的<strong>第一性原理</strong>。整个流程分为<strong>四个阶段</strong>：</p>
+
+                    <pre><code>┌──────────────┐    ┌──────────┐    ┌───────────┐    ┌────────┐
+│ 预处理       │ → │ 编译     │ → │ 汇编      │ → │ 链接   │ → 可执行文件
+│ Preprocessor │    │ Compiler │    │ Assembler │    │ Linker │
+└──────────────┘    └──────────┘    └───────────┘    └────────┘
+  输入: .cpp+H      AST+优化      汇编→机器码      符号解析+重定位</code></pre>
+
+                    <h3>Stage 1：预处理（Preprocessing）</h3>
+                    <p>预处理器只处理<strong>文本</strong>，完全不懂 C++ 语法：</p>
+                    <table>
+                        <tr><th>指令</th><th>行为</th></tr>
+                        <tr><td><code>#include</code></td><td>将头文件内容<strong>完整粘贴</strong>到当前位置（递归展开）</td></tr>
+                        <tr><td><code>#define</code></td><td>宏定义——纯文本替换，无类型检查，无作用域</td></tr>
+                        <tr><td><code>#if / #ifdef / #ifndef</code></td><td>条件编译——根据宏是否定义选择性保留/删除代码块</td></tr>
+                        <tr><td>注释删除</td><td><code>//</code> 和 <code>/* */</code> 被替换为空格</td></tr>
+                    </table>
+                    <p>用 <code>g++ -E main.cpp -o main.i</code> 可以看到预处理后的结果。</p>
+
+                    <h3>Stage 2：编译（Compilation）</h3>
+                    <p>将预处理后的 C++ 翻译为<strong>汇编语言</strong>。内部又分三个子阶段：</p>
+                    <ol>
+                        <li><strong>前端（Frontend）</strong>：词法分析 → 语法分析 → 语义分析 → 类型检查 → 生成 AST（抽象语法树）</li>
+                        <li><strong>中端（Middle-end）</strong>：与架构无关的优化（内联展开、死代码消除、循环优化等）</li>
+                        <li><strong>后端（Backend）</strong>：将优化后的 IR 翻译为目标平台的汇编代码</li>
+                    </ol>
+                    <blockquote>
+                        <p>每个 <code>.cpp</code> 文件<strong>独立编译</strong>成一个 <code>.o</code>（目标文件）。编译器只看到当前翻译单元的内容——它<strong>不知道</strong>其他 <code>.cpp</code> 里定义了什么函数，只认识从头文件里读到的<strong>声明</strong>。</p>
+                    </blockquote>
+
+                    <h3>Stage 3：汇编（Assembly）</h3>
+                    <p>把汇编代码转为<strong>二进制机器码</strong>（目标文件 <code>.o</code> / <code>.obj</code>）。同时生成<strong>符号表</strong>——记录"我提供了哪些函数/变量"和"我还需要哪些外部符号"。</p>
+
+                    <h3>Stage 4：链接（Linking）</h3>
+                    <p>链接器把所有 <code>.o</code> 文件和库<strong>拼接</strong>成一个可执行文件：</p>
+                    <ul>
+                        <li><strong>符号解析</strong>：把每个"我需要 xxx 函数"与"我提供了 xxx 函数"对上号</li>
+                        <li><strong>重定位</strong>：调整所有地址，使它们在最终内存布局中正确</li>
+                        <li><strong>库链接</strong>：静态库（<code>.a</code>/<code>.lib</code>）的代码复制进可执行文件；动态库（<code>.so</code>/<code>.dll</code>）运行时加载</li>
+                    </ul>
+
+                    <h3>常见链接错误</h3>
+                    <table>
+                        <tr><th>错误</th><th>原因</th><th>典型场景</th></tr>
+                        <tr><td><code>undefined reference to 'xxx'</code></td><td>函数被声明了但<strong>没有定义</strong></td><td>头文件里写了声明，忘了在 .cpp 中实现</td></tr>
+                        <tr><td><code>multiple definition of 'xxx'</code></td><td>同一个符号在多个 .o 中<strong>重复定义</strong></td><td>在头文件里定义了非 inline 函数，多个 .cpp include 了它</td></tr>
+                    </table>
+
+                    <h3>翻译单元（Translation Unit）</h3>
+                    <p>这是 C++ 编译模型中最核心的概念：</p>
+                    <blockquote>
+                        <p><strong>一个翻译单元 = 一个 .cpp 文件 + 它直接/间接 include 的所有头文件 + 展开的宏 - 被条件编译排除的代码</strong></p>
+                    </blockquote>
+                <div class="interview-block" id="interview-cpp-compile">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">从C++源文件到可执行文件的过程？ ⭐⭐
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">编译链接原理，从C++源文件到可执行文件的过程？</div>
+                            <div class="q-answer">
+                                <p>包括四个阶段：<strong>预处理阶段、编译阶段、汇编阶段、连接阶段</strong>。</p>
+                                <p>（1）<strong>预处理阶段</strong>：处理头文件包含关系，对预编译命令进行替换，生成预编译文件；</p>
+                                <p>（2）<strong>编译阶段</strong>：将预编译文件编译，生成汇编文件（编译的过程就是把预处理完的文件进行一系列的词法分析，语法分析，语义分析及优化后生成相应的汇编代码）；</p>
+                                <p>（3）<strong>汇编阶段</strong>：将汇编文件转换成机器码，生成可重定位目标文件（.obj文件）（汇编器是将汇编代码转变成机器可以执行的命令，每一个汇编语句几乎都对应一条机器指令。汇编相对于编译过程比较简单，根据汇编指令和机器指令的对照表一一翻译即可）；</p>
+                                <p>（4）<strong>链接阶段</strong>：将多个目标文件和所需要的库连接成可执行文件（.exe文件）。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">动态库与静态库的区别？如何选择？ ⭐
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">动态库静态库，二者的含义、区别，以及如何选择？</div>
+                            <div class="q-answer">
+                                <p>参考：《C++静态库与动态库 - 吴秦》、计算机那些事(5)——链接、静态链接、动态链接、动态链接库与静态链接库有什么区别？ - 知乎</p>
+                                <p>简单来说：<strong>静态库</strong>在链接阶段会被直接链接进可执行文件中，随可执行文件一同发布，体积较大，但执行时无需外部依赖；<strong>动态库</strong>在链接阶段只记录符号引用关系，不实际复制代码，运行时由操作系统动态加载到内存，多个程序可以共享同一份动态库，减小磁盘和内存占用，更新库时只需替换动态库文件而无需重新编译主程序。</p>
+                                <p><strong>如何选择</strong>：需要热更新、多程序共享、减少磁盘内存占用→动态库；追求启动速度（避免运行时加载开销）、单机单程序部署、不希望暴露库实现→静态库。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">如何拷贝一段数据？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">如何拷贝一段数据？</div>
+                            <div class="q-answer">
+                                <p>（1）C++语法：<code>std::copy(src.begin(), src.end(), dest.begin());</code></p>
+                                <p>或者 <code>std::copy_n(src.begin(), int n, dest.begin());</code></p>
+                                <p>（2）C风格语法：<code>memcpy(void* dest, const void* src, size_t num);</code></p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+                <!-- ========== 2. 头文件与预处理器 ========== -->
+                <section id="cpp-header">
+                    <h2>📋 头文件与预处理器 <a href="#ue-uht-guard" class="ue-link-tag">UE5 宏系统</a></h2>
+
+                    <h3>#include 的本质</h3>
+                    <p><code>#include</code> 就是<strong>文本复制粘贴</strong>——预处理器把整个头文件内容原封不动地插入到 <code>#include</code> 的位置。这带来两个关键后果：</p>
+                    <ol>
+                        <li>同一个头文件被多次 include → 内容重复 → <strong>重复定义错误</strong></li>
+                        <li>头文件中的任何改动 → 所有 include 它的 .cpp <strong>全部重新编译</strong></li>
+                    </ol>
+
+                    <h3>防卫式声明（Include Guard）</h3>
+                    <p>防止同一个头文件在一个翻译单元中被多次包含：</p>
+                    <pre><code>// 传统写法（C/C++ 标准）
+#ifndef MY_HEADER_H
+#define MY_HEADER_H
+// ... 头文件内容 ...
+#endif
+
+// 现代写法（编译器扩展，几乎通用）
+#pragma once</code></pre>
+                    <table>
+                        <tr><th></th><th><code>#ifndef</code> 宏守卫</th><th><code>#pragma once</code></th></tr>
+                        <tr><td>标准</td><td>C/C++ 标准</td><td>编译器扩展（GCC/MSVC/Clang 都支持）</td></tr>
+                        <tr><td>原理</td><td>检查宏是否已定义</td><td>编译器记住文件路径，不重复打开</td></tr>
+                        <tr><td>风险</td><td>宏名可能冲突</td><td>硬链接/符号链接可能被当成不同文件</td></tr>
+                    </table>
+
+                    <h3>宏（Macro）</h3>
+                    <pre><code>#define PI 3.14159           // 对象宏
+#define SQUARE(x) ((x)*(x))  // 函数宏——注意括号！没有括号会有优先级bug
+#define MAX(a,b) ((a)>(b)?(a):(b))
+
+// 预定义宏
+__FILE__   // 当前文件名
+__LINE__   // 当前行号
+__DATE__   // 编译日期
+__FUNCTION__ // 当前函数名（非标准但广泛支持）</code></pre>
+                    <blockquote>
+                        <p>⚠️ 宏是<strong>纯文本替换</strong>——没有类型检查、没有作用域、不懂 C++ 语义。现代 C++ 推荐用 <code>constexpr</code> 和 <code>inline</code> 函数替代大多数宏。</p>
+                    </blockquote>
+
+                    <h3>条件编译</h3>
+                    <pre><code>#ifdef DEBUG
+    std::cout &lt;&lt; "Debug mode\n";
+#endif
+
+#if defined(_WIN32)
+    // Windows 代码
+#elif defined(__linux__)
+    // Linux 代码
+#endif</code></pre>
+                <div class="interview-block" id="interview-cpp-header">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">内联函数 vs 宏的区别？ ⭐
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">内联函数和宏有什么区别？有了宏为什么还需要内联函数？</div>
+                            <div class="q-answer">
+                                <p>（1）define宏命令是在<strong>预处理阶段</strong>对命令进行替换，inline是在<strong>编译阶段</strong>在函数调用点处直接展开函数，节省了函数调用的开销；</p>
+                                <p>（2）define的话是<strong>不会对参数的类型进行检查</strong>的，因此会出现类型安全的问题，比如定义一个max命令，但是传递的时候可能会传递一个整数和一个字符串，就会出错，但是内联函数在编译阶段会<strong>进行类型检查</strong>；</p>
+                                <p>（3）使用宏的时候可能要添加<strong>很多括号</strong>，比较容易出错。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">内联函数的优缺点？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">内联函数有什么作用？存不存在什么缺点？</div>
+                            <div class="q-answer">
+                                <p>（1）作用是使编译器在函数调用点上展开函数，可以<strong>避免函数调用的开销</strong>；</p>
+                                <p>（2）内联函数的缺点是可能造成<strong>代码膨胀</strong>，尤其是递归的函数，会造成大量内存开销，exe太大，占用CPU资源。此外，内联函数<strong>不方便调试</strong>，每次修改会重新编译头文件，增加编译时间。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+                <!-- ========== 3. 变量与数据类型 ========== -->
+                <section id="cpp-types">
+                    <h2>📐 变量与数据类型 <a href="#ue-types" class="ue-link-tag">UE5 类型体系</a></h2>
+
+                    <h3>基础类型表</h3>
+                    <table>
+                        <tr><th>类型</th><th>大小 (字节)</th><th>范围</th><th>说明</th></tr>
+                        <tr><td><code>char</code></td><td>1</td><td>-128 ~ 127</td><td>字符/最小整数。'a'=97, 'A'=65</td></tr>
+                        <tr><td><code>short</code></td><td>2</td><td>-32768 ~ 32767</td><td>短整数</td></tr>
+                        <tr><td><code>int</code></td><td>4</td><td>~ ±21 亿</td><td>默认整数类型</td></tr>
+                        <tr><td><code>long</code></td><td>4 (Win) / 8 (Linux)</td><td>—</td><td>平台相关</td></tr>
+                        <tr><td><code>long long</code></td><td>8</td><td>~ ±9×10¹⁸</td><td>64 位整数</td></tr>
+                        <tr><td><code>float</code></td><td>4</td><td>~7 位有效数字</td><td>单精度浮点，后缀 <code>f</code></td></tr>
+                        <tr><td><code>double</code></td><td>8</td><td>~15 位有效数字</td><td>双精度浮点，默认</td></tr>
+                        <tr><td><code>bool</code></td><td>1</td><td>true / false</td><td>布尔值</td></tr>
+                    </table>
+                    <p>用 <code>sizeof(类型/变量)</code> 可以求出任意类型占用的字节数。</p>
+
+                    <h3>转义字符</h3>
+                    <table>
+                        <tr><td><code>\n</code></td><td>换行</td><td><code>\t</code></td><td>水平制表</td><td><code>\\</code></td><td>反斜杠</td></tr>
+                        <tr><td><code>\"</code></td><td>双引号</td><td><code>\'</code></td><td>单引号</td><td><code>\0</code></td><td>空字符(=0)</td></tr>
+                    </table>
+
+                    <h3>const 与 constexpr</h3>
+                    <pre><code>const int MAX = 100;          // 运行期或编译期常量（取决于上下文）
+constexpr int SIZE = 1024;    // 强制编译期求值
+constexpr int Double(int x) { return x * 2; }  // 编译期函数</code></pre>
+                    <p><code>const</code> 表示"我不会修改它"，<code>constexpr</code> 表示"编译器<strong>必须</strong>在编译期算出它的值"。</p>
+
+                    <h3>static 关键字（三种含义）</h3>
+                    <table>
+                        <tr><th>场景</th><th>含义</th></tr>
+                        <tr><td>函数内的 <code>static</code> 局部变量</td><td>生命周期 = 整个程序，但作用域限于函数内。只初始化一次。</td></tr>
+                        <tr><td>类中的 <code>static</code> 成员</td><td>属于类本身，所有对象共享。static 方法没有 <code>this</code> 指针。</td></tr>
+                        <tr><td>全局/命名空间的 <code>static</code></td><td>内部链接——只在当前翻译单元可见，其他 .cpp 访问不到。</td></tr>
+                    </table>
+                <div class="interview-block" id="interview-cpp-types">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">const 的作用？指针常量 vs 常量指针？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">const的作用？指针常量和常量指针的区别？const修饰的函数能否重载？</div>
+                            <div class="q-answer">
+                                <p>（1）const修饰符用来定义常量，具有不可变性。在类中，被const修饰的成员函数，不能修改类中的数据成员；</p>
+                                <p>（2）<strong>指针常量</strong>指的是该指针本身是一个常量，不能被修改，但是指针指向的对象可以被修改；<strong>常量指针</strong>指的是这个指针指向的对象是一个常量，不能被修改，但是指针本身可以被修改。这涉及到一个顶层const和底层const的概念：顶层const，本身是const；底层const，指向的对象是const；</p>
+                                <p>（3）const修饰的函数<strong>可以重载</strong>。const成员函数既不能改变类内的数据成员，也无法调用非const的成员函数；const类对象只能调用const成员函数，非const对象无论是否是const成员函数都能调用，但是如果有重载的非const函数，非const对象会优先调用重载后的非const函数。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">static 的三种含义？何时初始化？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">static的作用？static变量什么时候初始化？</div>
+                            <div class="q-answer">
+                                <p>1) <strong>文件域</strong>：内部链接，仅本文件可见，避免重定义</p>
+                                <p>2) <strong>函数内局部</strong>：全局生命周期，只初始化一次，函数内可见</p>
+                                <p>3) <strong>类静态成员</strong>：所有对象共享，static方法无this指针</p>
+                                <p>文件域和类静态成员在<strong>main()执行前</strong>初始化；局部静态变量在<strong>第一次使用时</strong>初始化。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">extern 的作用？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">extern的作用是什么？</div>
+                            <div class="q-answer">
+                                <p>1) <strong>extern "C"</strong>：告诉编译器用C的规则编译函数名（而非C++名称修饰），用于C/C++混合编程。</p>
+                                <p>2) <strong>外部声明</strong>：提示编译器此变量或函数在<strong>其他模块中定义</strong>，本文件只是引用。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">explicit 的作用？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">explicit的作用是什么？</div>
+                            <div class="q-answer">
+                                <p>标明类的构造函数是<strong>显式</strong>的，<strong>禁止隐式类型转换</strong>。防止如 <code>MyClass obj = 5;</code> 这种隐式调用单参构造函数的情况，避免意外的类型转换bug。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">constexpr 的作用？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">constexpr的作用是什么？和const的区别？</div>
+                            <div class="q-answer">
+                                <p>明确告诉编译器去验证函数或变量在<strong>编译期是否应该是一个常数</strong>，以便编译器大胆优化。</p>
+                                <p>const只表示"我不会修改"，但值可能是运行期确定的；constexpr强制<strong>编译期求值</strong>。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">volatile 的作用？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">volatile的作用是什么？</div>
+                            <div class="q-answer">
+                                <p>告诉编译器<strong>每次操作该变量时一定要从内存中真正取出</strong>，而不是使用已经存在寄存器中的备份。常用于硬件寄存器访问、多线程共享变量（但C++11后多线程建议用atomic）。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">mutable 的作用？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">mutable的作用是什么？</div>
+                            <div class="q-answer">
+                                <p>允许被声明为const的成员函数<strong>修改</strong>类中被mutable修饰的非静态成员变量。典型场景：缓存、互斥锁等"逻辑上不改变对象状态"但需要修改的成员。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+                <section id="cpp-pointer">
+                    <h2>👉 指针与引用 <a href="#ue-pointer" class="ue-link-tag">UE5 智能指针</a></h2>
+                    <p>指针和引用是 C++ 区别于大多数高级语言的<strong>核心特性</strong>——它们让你直接操作内存地址。</p>
+
+                    <h3>指针基础</h3>
+                    <pre><code>int x = 42;
+int* ptr = &amp;x;       // &amp; = 取地址，ptr 存储 x 的内存地址
+int y = *ptr;        // * = 解引用，读取 ptr 指向的值（y = 42）
+*ptr = 100;          // 通过指针修改 x 的值（x 变成 100）
+
+int* nullPtr = nullptr;  // C++11：空指针，替代 NULL 和 0</code></pre>
+
+                    <h3>指针与数组</h3>
+                    <pre><code>int arr[5] = {1, 2, 3, 4, 5};
+int* p = arr;         // 数组名退化为指向首元素的指针
+p[2] == arr[2];       // true —— 指针可以用下标访问
+*(p + 2) == arr[2];   // true —— 指针算术：+n 移动 n 个元素的距离</code></pre>
+
+                    <h3>引用</h3>
+                    <pre><code>int a = 10;
+int&amp; ref = a;         // ref 是 a 的别名——不能为 null，不能重新绑定
+ref = 20;             // 等价于 a = 20</code></pre>
+
+                    <h3>指针 vs 引用</h3>
+                    <table>
+                        <tr><th>指针</th><th>引用</th></tr>
+                        <tr><td>可以 <code>nullptr</code></td><td>必须有初始值，不能为空</td></tr>
+                        <tr><td>可以重新指向别的变量</td><td>一旦绑定，终身不可更改</td></tr>
+                        <tr><td>需要 <code>*</code> 解引用</td><td>直接使用，语法更干净</td></tr>
+                        <tr><td>有自己独立的地址</td><td>只是别名，不占独立内存（通常实现为指针）</td></tr>
+                        <tr><td>用于：可选参数、动态内存、遍历</td><td>用于：参数传递避免拷贝、链式调用</td></tr>
+                    </table>
+
+                    <h3>函数指针</h3>
+                    <pre><code>void Print(int x) { std::cout &lt;&lt; x; }
+void (*funcPtr)(int) = Print;   // 函数指针：存储函数地址
+funcPtr(42);                     // 通过指针调用函数
+
+// 现代替代：std::function + lambda
+#include &lt;functional&gt;
+std::function&lt;void(int)&gt; f = Print;</code></pre>
+                <div class="interview-block" id="interview-cpp-pointer">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">智能指针有哪些？各自作用？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐⭐</div>
+                            <div class="q-title">C++的智能指针有哪些？各自有什么作用？shared_ptr的原理？</div>
+                            <div class="q-answer">
+                                <p>智能指针主要解决一个<strong>内存泄露</strong>的问题，它可以自动地释放内存空间。因为它本身是一个类，当函数结束的时候会调用析构函数，并由析构函数释放内存空间。智能指针分为共享指针(shared_ptr)，独占指针(unique_ptr)和弱指针(weak_ptr)：</p>
+                                <p>（1）<strong>shared_ptr</strong>，多个共享指针可以指向相同的对象，采用了<strong>引用计数的机制</strong>，当最后一个引用销毁时，释放内存空间；</p>
+                                <p>（2）<strong>unique_ptr</strong>，保证同一时间段内只有一个智能指针能指向该对象（可通过move操作来传递unique_ptr）；</p>
+                                <p>（3）<strong>weak_ptr</strong>，用来解决shared_ptr相互引用时的<strong>死锁问题</strong>，如果说两个shared_ptr相互引用，那么这两个指针的引用计数永远不可能下降为0，资源永远不会释放。它是对对象的一种弱引用，不会增加对象的引用计数，和shared_ptr之间可以相互转化，shared_ptr可以直接赋值给它，它可以通过调用lock函数来获得shared_ptr。</p>
+                                <p><strong>shared_ptr实现原理</strong>：通过引用计数机制实现，引用计数存储着有几个shared_ptr指向相同的对象，当引用计数下降至0时就会自动销毁这个对象。具体实现：1）构造函数将指针指向该对象，引用计数置为1；2）拷贝构造函数将指针指向该对象，引用计数++；3）赋值运算符=号左边的shared_ptr的引用计数-1，右边的shared_ptr的引用计数+1，如果左边的引用计数降为0，还要销毁shared_ptr指向对象，释放内存空间。</p>
+                                <p>shared_ptr的引用计数本身是<strong>安全且无锁</strong>的，但是它指向的对象的读写则不是，因此可以说shared_ptr<strong>不是线程安全</strong>的。</p>
+                                <p><strong>为什么不用raw ptr解决循环引用？</strong>一个weak_ptr绑定到shared_ptr之后不会增加引用计数，一旦最后一个指向对象的shared_ptr被销毁，对象就会被释放，即使weak_ptr指向对象，也还是会释放；raw指针，当对象销毁之后会变成悬浮指针。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">指针和引用的区别？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">指针和引用的区别（4点）</div>
+                            <div class="q-answer">
+                                <p>1) 指针是地址，有独立内存空间；引用只是别名</p>
+                                <p>2) 指针可重新指向；引用初始化后不可改变绑定</p>
+                                <p>3) 指针可为nullptr；引用必须初始化为已有对象</p>
+                                <p>4) 指针可多级（int**）；引用只能一级</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+                <!-- ========== 5. 函数进阶 ========== -->
+                <section id="cpp-function">
+                    <h2>⚡ 函数进阶 <a href="#ue-delegate" class="ue-link-tag">UE5 委托系统</a></h2>
+
+                    <h3>函数重载（Overloading）</h3>
+                    <p>C++ 允许<strong>同名函数</strong>，只要参数列表不同（类型、数量、顺序）。编译器通过参数类型自动选择正确的版本：</p>
+                    <pre><code>void Log(int x)    { std::cout &lt;&lt; "int: " &lt;&lt; x; }
+void Log(float x)  { std::cout &lt;&lt; "float: " &lt;&lt; x; }
+void Log(int x, int y) { std::cout &lt;&lt; x &lt;&lt; ", " &lt;&lt; y; }
+
+Log(5);       // 调用 Log(int)
+Log(3.14f);   // 调用 Log(float)
+Log(1, 2);    // 调用 Log(int, int)</code></pre>
+                    <blockquote>
+                        <p>注意：返回值类型不同<strong>不能</strong>构成重载。编译器通过参数推断，不是返回值。</p>
+                    </blockquote>
+
+                    <h3>默认参数</h3>
+                    <pre><code>void DrawCircle(float radius, int segments = 32, float r = 1.0f, float g = 1.0f, float b = 1.0f);
+// 调用：DrawCircle(10.0f) 使用默认 segments=32, 白色
+// 调用：DrawCircle(10.0f, 64) 使用默认白色</code></pre>
+                    <p>默认参数<strong>必须从右向左连续</strong>设置。声明和定义不能同时指定默认参数。</p>
+
+                    <h3>InLine 内联</h3>
+                    <pre><code>inline int Add(int a, int b) { return a + b; }
+// 调用 Add(3, 5) → 编译器可能直接替换为 3 + 5，消除函数调用开销</code></pre>
+                    <p>函数调用有开销（压栈、跳转、返回、出栈）。对于<strong>极短小、频繁调用</strong>的函数，<code>inline</code> 可以消除这个开销。</p>
+                    <p>但 <code>inline</code> 的<strong>现代核心意义</strong>已经不是"展开优化"，而是：</p>
+                    <blockquote>
+                        <p><strong>允许同一个函数定义出现在多个翻译单元中，而不违反 ODR（单一定义规则）</strong>。这让短函数可以安全地写在头文件里。</p>
+                    </blockquote>
+
+                    <h3>Lambda 表达式（C++11）</h3>
+                    <pre><code>// 完整语法：[捕获列表](参数列表) -> 返回类型 { 函数体 }
+auto add = [](int a, int b) -> int { return a + b; };
+auto result = add(3, 5);  // 8
+
+// 捕获外部变量
+int base = 10;
+auto plus = [base](int x) { return base + x; };  // 值捕获
+auto inc  = [&amp;base](int x) { base += x; };        // 引用捕获
+auto all  = [=](int x) { /* 所有外部变量值捕获 */ };
+auto allRef = [&amp;](int x) { /* 所有外部变量引用捕获 */ };</code></pre>
+                    <table>
+                        <tr><th>捕获方式</th><th>语法</th><th>含义</th></tr>
+                        <tr><td>值捕获</td><td><code>[x]</code></td><td>拷贝一份，lambda 内外互不影响</td></tr>
+                        <tr><td>引用捕获</td><td><code>[&amp;x]</code></td><td>外部变量变化影响 lambda 内部，反之亦然</td></tr>
+                        <tr><td>全部值捕获</td><td><code>[=]</code></td><td>所有用到外部变量都拷贝</td></tr>
+                        <tr><td>全部引用捕获</td><td><code>[&amp;]</code></td><td>所有用到外部变量都引用</td></tr>
+                    </table>
+                <div class="interview-block" id="interview-cpp-function">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">左值右值？右值引用？为什么引入？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">什么是左值和右值？什么是右值引用？为什么要引入右值引用？</div>
+                            <div class="q-answer">
+                                <p>（1）<strong>左值</strong>就是具有可寻址的存储单元，并且能由用户改变其值的量，比如常见的变量：一个int，float，class等。左值具有持久的状态，直到离开作用域才销毁；<strong>右值</strong>表示即将销毁的临时对象，具有短暂的状态，比如字面值常量"hello"，返回非引用类型的表达式int func()等，都会生成右值；</p>
+                                <p>（2）<strong>右值引用</strong>就是必须绑定到右值的引用，可以通过&&（两个取地址符）来获得右值引用；右值引用只能绑定到即将销毁的对象，因此可以自由地移动其资源；</p>
+                                <p>（3）右值引用是为了<strong>支持移动操作</strong>而引出的一个概念，它只能绑定到一个将要销毁的对象，使用右值引用的移动操作可以避免无谓的拷贝，提高性能。使用std::move()函数可以将一个左值转换为右值引用。（可以通过两个很长的字符串的直接赋值和移动赋值来测试一下性能的差距）。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">深拷贝 vs 浅拷贝？移动构造？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">为什么要自定义拷贝构造函数？深拷贝和浅拷贝的区别？移动构造函数？</div>
+                            <div class="q-answer">
+                                <p><strong>为什么要自己定义拷贝构造函数？</strong>拷贝构造函数的作用就是定义了当我们用同类型的另外一个对象初始化本对象的时候做了什么，在某些情况下，如果我们不自己定义拷贝构造函数，使用默认的拷贝构造函数，就会出错。比如一个类里面有一个指针，如果使用默认的拷贝构造函数，会将指针拷贝过去，即两个指针指向同个对象，那么其中一个类对象析构之后，这个指针也会被delete掉，那么另一个类里面的指针就会变成<strong>野指针（悬浮指针）</strong>；</p>
+                                <p>这也正是<strong>深拷贝和浅拷贝</strong>的区别，浅拷贝只是简单直接地复制指向某个对象的指针，而不复制对象本身，新旧对象还是共享同一块内存。但深拷贝会另外创造一个一模一样的对象，新对象跟原对象不共享内存，修改新对象不会改到原对象；</p>
+                                <p><strong>移动构造函数</strong>需要传递的参数是一个右值引用，移动构造函数<strong>不分配新内存</strong>，而是接管传递而来对象的内存，并在移动之后把源对象销毁；拷贝构造函数需要传递一个左值引用，可能会造成重新分配内存，性能更低。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">重载、重写和隐藏的区别？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">重载、重写和隐藏的区别</div>
+                            <div class="q-answer">
+                                <p>（1）<strong>重载</strong>：同一个名字的函数，具有不同的参数列表（参数类型、个数），根据参数列表决定调用哪一个函数；</p>
+                                <p>（2）<strong>重写（覆盖）</strong>：派生类中的函数重写了基类中的虚函数，重写的基类的中函数必须被声明为virtual，并且返回值、参数列表和基类中的函数一致；</p>
+                                <p>（3）<strong>隐藏</strong>：派生类中的同名函数把基类中的同名函数隐藏了，即基类同名函数被屏蔽掉；此时基类函数不能声明为virtual。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+                <!-- ========== 6. 内存管理 ========== -->
+                <section id="cpp-memory">
+                    <h2>🧠 内存管理 <a href="#ue-memory" class="ue-link-tag">UE5 GC 系统</a></h2>
+
+                    <h3>栈 vs 堆</h3>
+                    <table>
+                        <tr><th></th><th>栈 (Stack)</th><th>堆 (Heap)</th></tr>
+                        <tr><td>分配方式</td><td>自动：进入作用域自动分配，离开自动释放</td><td>手动：<code>new</code> 分配，<code>delete</code> 释放</td></tr>
+                        <tr><td>速度</td><td>极快（移动栈指针）</td><td>慢（需要在空闲链表中找合适的块）</td></tr>
+                        <tr><td>大小</td><td>较小（通常 ~1-8 MB）</td><td>很大（受物理内存限制）</td></tr>
+                        <tr><td>生命周期</td><td>作用域结束即销毁</td><td>手动 delete 或程序结束时回收</td></tr>
+                        <tr><td>碎片</td><td>无碎片</td><td>可能产生内存碎片</td></tr>
+                        <tr><td>典型用途</td><td>局部变量、函数参数、小型对象</td><td>大型对象、动态数组、生命周期不确定的对象</td></tr>
+                    </table>
+
+                    <h3>new / delete</h3>
+                    <pre><code>// 单个对象
+int* p = new int(42);    // 在堆上分配，初始化为 42
+delete p;                 // 释放内存
+
+// 数组
+int* arr = new int[100];  // 分配 100 个 int
+delete[] arr;              // 释放数组——注意 delete[] 不是 delete
+
+// 带定位的 new（placement new）
+#include &lt;new&gt;
+char buffer[sizeof(MyClass)];
+MyClass* obj = new (buffer) MyClass();  // 在指定内存地址构造对象</code></pre>
+
+                    <h3>RAII（Resource Acquisition Is Initialization）</h3>
+                    <p>这是 C++ <strong>最重要的资源管理范式</strong>：</p>
+                    <blockquote>
+                        <p><strong>在构造函数中获取资源，在析构函数中释放资源。让对象的生命周期来管理资源。</strong></p>
+                    </blockquote>
+                    <pre><code>class FileHandle {
+    FILE* file;
+public:
+    FileHandle(const char* path) : file(fopen(path, "r")) {}  // 构造时获取
+    ~FileHandle() { if (file) fclose(file); }                  // 析构时释放
+    // 禁止拷贝，允许移动...
+};</code></pre>
+                    <p>RAII 保证了<strong>即使发生异常</strong>，资源也能被正确释放。这是 C++ 不需要 GC（垃圾回收）的关键原因。</p>
+
+                    <h3>智能指针（C++11）</h3>
+                    <pre><code>#include &lt;memory&gt;
+
+// unique_ptr：独占所有权，不能拷贝，只能移动
+std::unique_ptr&lt;int&gt; p1 = std::make_unique&lt;int&gt;(42);
+auto p2 = std::move(p1);  // p1 为空，p2 接管所有权
+
+// shared_ptr：共享所有权，引用计数
+std::shared_ptr&lt;int&gt; s1 = std::make_shared&lt;int&gt;(100);
+auto s2 = s1;  // 引用计数 = 2，两个指针共享同一个对象
+// 最后一个 shared_ptr 销毁时自动 delete
+
+// weak_ptr：观察者，不影响引用计数，用于打破循环引用
+std::weak_ptr&lt;int&gt; w = s1;
+if (auto sp = w.lock()) { /* 使用 sp */ }</code></pre>
+                    <table>
+                        <tr><th>类型</th><th>所有权</th><th>何时使用</th></tr>
+                        <tr><td><code>unique_ptr</code></td><td>独占</td><td>默认首选——工厂函数、PIMPL、容器中的指针</td></tr>
+                        <tr><td><code>shared_ptr</code></td><td>共享</td><td>多个所有者（少用——通常设计问题）</td></tr>
+                        <tr><td><code>weak_ptr</code></td><td>观察</td><td>缓存、观察者模式、打破 <code>shared_ptr</code> 循环引用</td></tr>
+                    </table>
+                    <blockquote>
+                        <p>💡 经验法则：默认用 <strong>栈对象</strong>；需要堆分配时用 <code>unique_ptr</code>；只有在真正需要共享所有权时才用 <code>shared_ptr</code>。</p>
+                    </blockquote>
+                <div class="interview-block" id="interview-cpp-memory">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">C++有哪些内存区域？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐⭐</div>
+                            <div class="q-title">C++是如何做内存管理的？有哪些内存区域？</div>
+                            <div class="q-answer">
+                                <p>（1）<strong>堆</strong>，使用malloc、free动态分配和释放空间，能分配较大的内存；</p>
+                                <p>（2）<strong>栈</strong>，为函数的局部变量分配内存，能分配较小的内存；</p>
+                                <p>（3）<strong>全局/静态存储区</strong>，用于存储全局变量和静态变量；</p>
+                                <p>（4）<strong>常量存储区</strong>，专门用来存放常量；</p>
+                                <p>（5）<strong>自由存储区</strong>：通过new和delete分配和释放空间的内存，具体实现可能是堆或者内存池。</p>
+                                <p><strong>补充</strong>：堆是C和操作系统的术语，自由存储区是C++的术语，指的是通过new和delete动态分配和释放对象的抽象概念；基本上C++也会用堆区实现自由存储，但程序员可以通过重载操作符，改用其他内存实现自由存储，比如全局变量做的对象池。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">堆和栈的区别？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">堆和栈的内存有什么区别？</div>
+                            <div class="q-answer">
+                                <p>（1）堆中的内存需要<strong>手动申请和手动释放</strong>，栈中内存是由<strong>OS自动申请和自动释放</strong>；</p>
+                                <p>（2）堆能分配的内存较大（<strong>4G</strong>，32位机器），栈能分配的内存较小（<strong>1M</strong>）；</p>
+                                <p>（3）在堆中分配和释放内存<strong>会产生内存碎片</strong>，栈不会产生内存碎片；</p>
+                                <p>（4）堆的<strong>分配效率低</strong>，栈的<strong>分配效率高</strong>；</p>
+                                <p>（5）堆地址从低向上，栈由高向下。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">new/delete vs malloc/free？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">C++和C分别用什么做内存分配释放？区别是什么？能否混用？</div>
+                            <div class="q-answer">
+                                <p>C使用<strong>malloc/free</strong>，C++使用<strong>new/delete</strong>，前者是C语言中的库函数，后者是C++语言的运算符。对于自定义对象，malloc/free只进行分配内存和释放内存，无法调用其构造函数和析构函数，只有new/delete能做到，完成对象的空间分配和初始化，以及对象的销毁和释放空间。具体区别如下：</p>
+                                <p>（1）new分配内存空间<strong>无需指定</strong>分配内存大小，malloc需要；</p>
+                                <p>（2）new返回<strong>类型指针</strong>，类型安全，malloc返回void*，再强制转换成所需要的类型；</p>
+                                <p>（3）new是从<strong>自由存储区</strong>获得内存，malloc从<strong>堆</strong>中获取内存；</p>
+                                <p>（4）对于类对象，new会<strong>调用构造函数和析构函数</strong>，malloc不会（核心区别）；</p>
+                                <p>（5）<strong>不能混用</strong>。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">什么是内存对齐？为什么需要？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐⭐</div>
+                            <div class="q-title">什么是内存对齐？为什么要做？如何对齐？</div>
+                            <div class="q-answer">
+                                <p>（1）<strong>内存对齐的原因</strong>：关键在于CPU存取数据的效率问题。为了提高效率，计算机从内存中取数据是按照一个固定长度的。比如在32位机上，CPU每次都是取32bit数据的，也就是4字节；若不进行对齐，要取出两块地址中的数据，进行掩码和移位等操作，写入目标寄存器内存，效率很低。内存对齐一方面可以节省内存，一方面可以提升数据读取的速度；</p>
+                                <p>（2）<strong>内容</strong>：内存对齐指的是C++结构体中的数据成员，其内存地址是否为其对齐字节大小的倍数；</p>
+                                <p>（3）<strong>对齐原则</strong>：1）结构体变量的首地址能够被其最宽基本类型成员的对齐值所整除；2）结构体内每一个成员的相对于起始地址的偏移量能够被该变量的大小整除；3）结构体总体大小能够被最宽成员大小整除；如果不满足这些条件，编译器就会进行一个填充(padding)；</p>
+                                <p>（4）<strong>如何对齐</strong>：声明数据结构时，字节对齐的数据依次声明，然后小成员组合在一起，能省去一些浪费的空间，不要把小成员参杂声明在字节对齐的数据之间。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">什么是对象池？有什么作用？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">对象池思想是什么？</div>
+                            <div class="q-answer">
+                                <p>对于<strong>需要频繁创建和销毁</strong>的对象，预先创建一批对象放入"池"中。使用时从池中取出（激活），用完后<strong>不删除</strong>，而是设为不激活状态放回池中等待复用。</p>
+                                <p>优势：避免频繁new/delete的开销和内存碎片。在游戏开发中广泛用于子弹、粒子、音效等高频短生命周期对象。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+                <!-- ========== 7. 面向对象 ========== -->
+                <section id="cpp-oop">
+                    <h2>🏛️ 面向对象编程 <a href="#ue-oop" class="ue-link-tag">UE5 对象模型</a></h2>
+
+                    <h3>类与对象</h3>
+                    <pre><code>class Player {
+private:          // 只有本类可访问
+    int health;
+    std::string name;
+
+public:           // 所有人都可访问
+    Player(const std::string&amp; n, int h) : health(h), name(n) {}  // 构造函数
+
+    void TakeDamage(int damage) { health -= damage; }
+    int GetHealth() const { return health; }  // const 方法：不修改成员
+
+    ~Player() { /* 析构：清理资源 */ }
+};</code></pre>
+
+                    <h3>class vs struct</h3>
+                    <p><strong>唯一的区别</strong>：<code>class</code> 默认访问权限是 <code>private</code>，<code>struct</code> 默认是 <code>public</code>。除此之外完全一样。</p>
+                    <p>惯用法：<code>struct</code> 用于纯数据容器（POD），<code>class</code> 用于有行为逻辑的对象。</p>
+
+                    <h3>构造函数与析构函数</h3>
+                    <pre><code>class MyClass {
+public:
+    MyClass() = default;                    // 默认构造
+    MyClass(int x) : value(x) {}            // 带参构造
+    MyClass(const MyClass&amp; other) = delete; // 禁止拷贝
+    MyClass(MyClass&amp;&amp; other) noexcept;      // 移动构造（C++11）
+    ~MyClass();                              // 析构函数（最多一个）
+private:
+    int value;
+};</code></pre>
+                    <p><strong>成员初始化列表</strong>（<code>: value(x)</code>）比在函数体内赋值<strong>更高效</strong>——直接初始化，跳过了"默认初始化 + 赋值"两步。</p>
+
+                    <h3>访问控制</h3>
+                    <table>
+                        <tr><th>修饰符</th><th>本类</th><th>派生类</th><th>外部</th></tr>
+                        <tr><td><code>public</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                        <tr><td><code>protected</code></td><td>✅</td><td>✅</td><td>❌</td></tr>
+                        <tr><td><code>private</code></td><td>✅</td><td>❌</td><td>❌</td></tr>
+                    </table>
+
+                    <h3>继承</h3>
+                    <pre><code>class Animal {
+protected:
+    int age;
+public:
+    Animal(int a) : age(a) {}
+    virtual ~Animal() {}         // 基类析构函数必须 virtual！
+};
+
+class Dog : public Animal {      // public 继承：is-a 关系
+    std::string breed;
+public:
+    Dog(int a, const std::string&amp; b) : Animal(a), breed(b) {}
+};</code></pre>
+
+                    <h3>虚函数与多态</h3>
+                    <p>这是面向对象<strong>最核心</strong>的机制——在运行时根据对象的<strong>实际类型</strong>选择正确的函数：</p>
+                    <pre><code>class Animal {
+public:
+    virtual void Speak() const { std::cout &lt;&lt; "???\n"; }
+    virtual ~Animal() {}  // 虚析构：确保派生类析构函数被正确调用
+};
+
+class Dog : public Animal {
+public:
+    void Speak() const override { std::cout &lt;&lt; "Woof!\n"; }
+};
+
+class Cat : public Animal {
+public:
+    void Speak() const override { std::cout &lt;&lt; "Meow!\n"; }
+};
+
+Animal* ptr = new Dog();
+ptr->Speak();   // 输出 "Woof!" —— 虽然 ptr 是 Animal*，但调用了 Dog::Speak
+delete ptr;     // 正确调用 ~Dog() 再 ~Animal()</code></pre>
+
+                    <h3>虚函数表（VTable）——多态的实现原理</h3>
+                    <pre><code>┌─────────────────────┐       ┌──────────────────────┐
+│  Animal 对象        │       │  Animal vtable       │
+│  ┌───────────────┐  │       │  [0] → &Animal::Speak│
+│  │ __vptr (8B)   │──┼──────→│  [1] → &Animal::~A   │
+│  │ age           │  │       └──────────────────────┘
+│  └───────────────┘  │
+└─────────────────────┘
+
+┌─────────────────────┐       ┌──────────────────────┐
+│  Dog 对象           │       │  Dog vtable          │
+│  ┌───────────────┐  │       │  [0] → &Dog::Speak   │  ← 覆盖了基类
+│  │ __vptr (8B)   │──┼──────→│  [1] → &Dog::~Dog    │
+│  │ age           │  │       └──────────────────────┘
+│  │ breed         │  │
+│  └───────────────┘  │
+└─────────────────────┘</code></pre>
+                    <ol>
+                        <li>每个<strong>有多态行为的类</strong>有一个<strong>虚函数表</strong>（vtable）——存储所有虚函数的地址</li>
+                        <li>每个<strong>对象</strong>包含一个隐藏的 <code>__vptr</code> 指针，指向它所属类的 vtable</li>
+                        <li><code>ptr->Speak()</code> 实际变成：<code>ptr->__vptr[0](ptr)</code> —— 一次间接寻址</li>
+                        <li>构造函数会将 <code>__vptr</code> 设置为<strong>正在构造的那个类的 vtable</strong></li>
+                    </ol>
+
+                    <h3>纯虚函数与抽象类</h3>
+                    <pre><code>class IShape {  // "I" 前缀是 UE5/业界惯用的接口命名
+public:
+    virtual float GetArea() const = 0;  // 纯虚函数——没有实现
+    virtual ~IShape() = default;        // 虚析构
+};
+// IShape shape;  // ❌ 不能实例化抽象类
+
+class Circle : public IShape {
+    float radius;
+public:
+    Circle(float r) : radius(r) {}
+    float GetArea() const override { return 3.14159f * radius * radius; }
+};</code></pre>
+
+                    <h3>运算符重载</h3>
+                    <pre><code>struct Vector2 {
+    float x, y;
+    Vector2 operator+(const Vector2&amp; other) const {
+        return {x + other.x, y + other.y};
+    }
+    bool operator==(const Vector2&amp; other) const {
+        return x == other.x &amp;&amp; y == other.y;
+    }
+};
+Vector2 v3 = Vector2{1,2} + Vector2{3,4};  // {4, 6}</code></pre>
+                    <p>大多数运算符都可以重载。不能重载的：<code>::</code> <code>.</code> <code>.*</code> <code>?:</code> <code>sizeof</code> <code>typeid</code>。</p>
+                <div class="interview-block" id="interview-cpp-oop">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">什么是多态？C++如何实现？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐⭐</div>
+                            <div class="q-title">什么是多态？C++的多态是如何实现的？</div>
+                            <div class="q-answer">
+                                <p><strong>所谓多态，就是同一个函数名具有多种状态，或者说一个接口具有不同的行为</strong>；C++的多态分为<strong>编译时多态</strong>和<strong>运行时多态</strong>，编译时多态也称为静态联编，通过<strong>重载和模板</strong>来实现，运行时多态称为动态联编，通过<strong>继承和虚函数</strong>来实现。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">虚函数的实现机制？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐⭐</div>
+                            <div class="q-title">虚函数的实现机制是什么？如何确定调用哪个函数？</div>
+                            <div class="q-answer">
+                                <p>虚函数是通过<strong>虚函数表</strong>来实现的，虚函数表包含了一个类(所有)的虚函数的地址，在有虚函数的类对象中，它内存空间的头部会有一个<strong>虚函数表指针(虚表指针)</strong>，用来管理虚函数表。当子类对象对父类虚函数进行重写的时候，虚函数表的相应虚函数地址会发生改变，改写成这个虚函数的地址，当我们用一个父类的指针来操作子类对象的时候，它可以指明实际所调用的函数。</p>
+                                <p><strong>虚函数调用是运行时确定</strong>，通过查找虚函数表中的函数地址确定。（补充：只有通过指针或者引用的方式调用虚函数是运行时确定，通过值调用的虚函数是编译期就可以确定的。）</p>
+                                <p><strong>虚函数存在类中</strong>，不同的类对象共享一张虚函数表（为了节省内存空间）。</p>
+                                <p>在基类的<strong>构造函数和析构函数中调用虚函数</strong>：从语法上讲调用没有问题，但从效果上看，往往不能达到需要的目的（不能实现多态）；因为调用构造函数的时候，是先进行父类成分的构造，再进行子类的构造。在父类构造期间，子类的特有成分还没有被初始化，此时下降到调用子类的虚函数，使用这些尚未初始化的数据一定会出错；同理，调用析构函数的时候，先对子类的成分进行析构，当进入父类的析构函数的时候，子类的特有成分已经销毁，此时是无法再调用虚函数实现多态的。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">菱形继承的问题与解决？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">钻石(菱形)继承存在什么问题？如何解决？</div>
+                            <div class="q-answer">
+                                <p>会存在<strong>二义性</strong>的问题，因为两个父类会对公共基类的数据和方法产生一份拷贝，因此对于子类来说读写一个公共基类的数据或调用一个方法时，不知道是哪一个父类的数据和方法，也会导致编译错误。可以采用<strong>虚继承</strong>的方法解决这个问题（父类继承公共基类时用virtual修饰），这样就只会创造一份公共基类的实例，不会造成二义性。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">C++类型转换关键字有哪些？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">C++有哪些类型转换的方法？各自作用？</div>
+                            <div class="q-answer">
+                                <p>（1）<strong>const_cast</strong>：把const属性去掉，即将const转换为非const（也可以反过来），const_cast只能用于指针或引用，并且只能改变对象的底层const（顶层const即本身是const，底层const即指向对象const）；</p>
+                                <p>（2）<strong>static_cast</strong>：隐式类型转换，可以实现C++中内置基本数据类型之间的相互转换，enum、struct、int、char、float等，能进行类层次间的向上类型转换和向下类型转换（向下不安全，因为没有进行动态类型检查）。它不能进行无关类型(如非基类和子类)指针之间的转换，也不能作用包含底层const的对象；</p>
+                                <p>（3）<strong>dynamic_cast</strong>：动态类型转换，用于将基类的指针或引用安全地转换成派生类的指针或引用（也可以向上转换），若指针转换失败返回NULL，若引用返回失败抛出bad_cast异常。dynamic_cast是在运行时进行安全性检查；使用dynamic_cast父类一定要有虚函数，否则编译不通过；</p>
+                                <p>（4）<strong>reinterpret_cast</strong>：reinterpret是重新解释的意思，此标识符的意思即为将数据的二进制形式重新解释，但是不改变其值，有着和C风格的强制转换同样的能力。它可以转化任何内置的数据类型为其他任何的数据类型，也可以转化任何指针类型为其他的类型。它甚至可以转化内置的数据类型为指针，无须考虑类型安全或者常量的情形。不到万不得已绝对不用（比较不安全）。</p>
+                                <p><strong>static_cast和dynamic_cast的异同</strong>：二者都会做类型安全检查，只是static_cast在编译期进行类型检查，dynamic_cast在运行期进行类型检查。后者需要父类具备虚函数，而前者不需要。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">类对象的内存模型？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">C++类对象的内存模型(布局)是怎么样的？</div>
+                            <div class="q-answer">
+                                <p>1) 有虚函数→虚表指针始终在内存头部</p>
+                                <p>2) 按继承顺序(父→子)和字段声明顺序布局</p>
+                                <p>3) 多继承：每个含虚函数的父类各有自己的虚表，子类新虚函数加到第一个虚表后</p>
+                                <p>4) 虚继承：各父类(含虚表)→子类→公共基类(含虚表)，父类不再拷贝公共基类数据</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">Delete和Delete[]的区别？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">Delete和Delete[]的区别？delete[]如何知道要delete多少次？</div>
+                            <div class="q-answer">
+                                <p>基本类型效果一样。自定义类：delete只释放第一个元素+调一次析构，delete[]调所有元素析构+释放全部内存。</p>
+                                <p>new[]对象数组时多分配4字节存储数组大小，delete[]时取出来确定析构次数。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">C语言能实现虚函数机制吗？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">C语言可以实现虚函数机制吗？如何实现？</div>
+                            <div class="q-answer">
+                                <p>可以，需要手工完成：1) 手动构造父子关系（结构体嵌套）2) 创建虚函数表（函数指针数组）3) 设置虚表指针指向虚函数表 4) 填充各虚函数地址 5) 虚函数重写时手动替换函数指针。本质上就是用C语言把C++编译器自动做的事情手工做一遍。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+                <!-- ========== 8. 模板与泛型 ========== -->
+                <section id="cpp-template">
+                    <h2>📦 模板与泛型编程 <a href="#ue-template" class="ue-link-tag">UE5 模板应用</a></h2>
+                    <p>模板是 C++ 的"编译期代码生成器"——你写一套逻辑，编译器为每种使用的类型自动生成一份代码。</p>
+
+                    <h3>函数模板</h3>
+                    <pre><code>template&lt;typename T&gt;
+T Max(T a, T b) {
+    return (a &gt; b) ? a : b;
+}
+
+int    i = Max(3, 5);        // 编译器生成 Max&lt;int&gt;
+float  f = Max(3.14f, 2.7f); // 编译器生成 Max&lt;float&gt;
+// 每个不同的 T 都会生成一份独立的函数代码</code></pre>
+
+                    <h3>类模板</h3>
+                    <pre><code>template&lt;typename T, int Capacity = 64&gt;
+class Stack {
+    T data[Capacity];
+    int count = 0;
+public:
+    void Push(const T&amp; item) { data[count++] = item; }
+    T Pop() { return data[--count]; }
+};
+
+Stack&lt;int, 128&gt; intStack;    // int 类型，容量 128
+Stack&lt;std::string&gt; strStack;  // string 类型，容量默认 64</code></pre>
+
+                    <h3>模板特化</h3>
+                    <pre><code>// 通用模板
+template&lt;typename T&gt; class DataHolder { /* 通用实现 */ };
+
+// 全特化：为 bool 写一套完全不同的实现
+template&lt;&gt;
+class DataHolder&lt;bool&gt; { /* 针对 bool 的特殊实现（比如用位存储） */ };
+
+// 偏特化：为指针类型写特殊实现
+template&lt;typename T&gt;
+class DataHolder&lt;T*&gt; { /* 针对指针的特殊实现 */ };</code></pre>
+                <div class="interview-block" id="interview-cpp-template">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">auto 和 decltype 的作用和区别？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">auto和decltype的作用和区别？</div>
+                            <div class="q-answer">
+                                <p>两者都用于<strong>类型自动推导</strong>，让编译器自动推断变量类型。</p>
+                                <p><strong>区别</strong>：auto不能用于函数传参和推导数组类型；decltype可以解决这些问题，且decltype会保留引用和const属性。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+                <!-- ========== 9. STL 标准库 ========== -->
+                <section id="cpp-stl">
+                    <h2>🗂️ STL 标准模板库（侯捷 · 源码剖析视角） <a href="#ue-containers" class="ue-link-tag">UE5 容器对比</a></h2>
+                    <blockquote>
+                        <p>"使用一个东西，却不明白它的道理，不高明！" —— 侯捷《STL源码剖析》</p>
+                    </blockquote>
+                    <p>STL 不仅仅是"用好容器和算法"，更要理解<strong>六大部件如何协作</strong>、<strong>底层数据结构如何实现</strong>、<strong>泛型编程如何通过 traits 和 tag dispatch 做到零开销抽象</strong>。</p>
+
+                    <!-- ===== 9.1 六大部件 ===== -->
+                    <h3>🏗️ 一、STL 六大部件（Components）</h3>
+                    <p>侯捷老师将 STL 归纳为<strong>六大部件</strong>，它们的关系如下：</p>
+                    <pre><code>                         ┌──────────────────────┐
+                         │     Algorithms (算法)  │
+                         │  sort, find, count...  │
+                         └──────────┬───────────┘
+                                    │ 通过 Iterators 操作数据
+                                    ▼
+  ┌───────────┐          ┌──────────────────────┐          ┌───────────┐
+  │ Allocators│ ◄─────── │   Containers (容器)   │ ◄─────── │  Adapters │
+  │ (分配器)   │ 管理内存  │ vector, list, map... │  改造接口 │ (适配器)   │
+  └───────────┘          └──────────┬───────────┘          └───────────┘
+                                    │ 通过 Iterators 访问元素
+                                    ▼
+                         ┌──────────────────────┐
+                         │   Iterators (迭代器)   │
+                         │  泛化指针, traits技法  │
+                         └──────────┬───────────┘
+                                    │ 协助算法完成策略变化
+                                    ▼
+                         ┌──────────────────────┐
+                         │  Functors (仿函数)     │
+                         │  less&lt;T&gt;, greater&lt;T&gt;  │
+                         └──────────────────────┘</code></pre>
+                    <p>一句代码串联六大部件：</p>
+                    <pre><code>//   [容器]          [分配器]        [算法]   [迭代器]    [仿函数+适配器]
+std::vector&lt;int, std::allocator&lt;int&gt;&gt; vi {5,2,8,1,9};
+int cnt = std::count_if(vi.begin(), vi.end(),
+                        std::not1(std::bind2nd(std::less&lt;int&gt;(), 40)));
+//                       ↑ 适配器    ↑ 适配器    ↑ 仿函数</code></pre>
+
+                    <!-- ===== 9.2 空间配置器 ===== -->
+                    <h3>🧩 二、空间配置器（Allocator）</h3>
+                    <p>容器需要内存，但 <code>new/delete</code> 背后是 <code>malloc/free</code>，频繁申请小块内存有两个问题：</p>
+                    <ol>
+                        <li><strong>cookie 开销</strong>：<code>malloc</code> 每次分配都要在内存块首尾记录大小（各 4 字节），供 <code>free</code> 时知道要释放多少。频繁分配小块内存 → cookie 占比巨大。</li>
+                        <li><strong>系统调用开销</strong>：<code>malloc</code> 最终要进内核，开销远大于用户态操作。</li>
+                    </ol>
+
+                    <h4>SGI STL 的双层配置器</h4>
+                    <p>这是侯捷老师重点讲解的经典设计——GCC 2.9 SGI STL 使用名为 <code>alloc</code> 的分配器：</p>
+                    <pre><code>// 16 条自由链表（free_list），每条管理固定大小的内存块：
+// free_list[0]  → 管理 8 字节块
+// free_list[1]  → 管理 16 字节块
+// free_list[2]  → 管理 24 字节块
+// ...
+// free_list[15] → 管理 128 字节块（每次递增 8 字节）
+
+// 工作机制：
+// 1. 容器需要 n 字节 → 向上调整为 8 的倍数 → 查对应链表
+// 2. 链表有可用块 → 直接拿（纯指针操作，极快，无 cookie）
+// 3. 链表为空 → 用 malloc 一次性申请一大块，切成 n 个小块串进链表
+// 4. 容器释放内存 → 小块归还到链表头部（不是还给 OS）</code></pre>
+                    <p><strong>核心收益</strong>：小块内存<strong>没有 cookie 开销</strong>；减少 <code>malloc</code> 调用次数；降低内存碎片。</p>
+                    <blockquote>
+                        <p>GCC 4.9 默认分配器回到了 <code>new_allocator</code>（即直接调 <code>::operator new</code>）。原来的 <code>alloc</code> 变成了 <code>__gnu_cxx::__pool_alloc</code>，需要显式指定。理解它的设计思想比记住哪个版本在用更重要。</p>
+                    </blockquote>
+
+                    <!-- ===== 9.3 迭代器与 Traits ===== -->
+                    <h3>🔍 三、迭代器与 Traits 编程技法</h3>
+                    <p>这是 STL 泛型编程<strong>最精巧的设计</strong>——算法通过迭代器操作容器，需要知道迭代器的属性，但<strong>原生指针不是 class</strong>，无法 typedef。Traits 就是为此而生的"萃取机"。</p>
+
+                    <h4>迭代器必须提供的五种关联类型</h4>
+                    <table>
+                        <tr><th>类型</th><th>含义</th><th>用途</th></tr>
+                        <tr><td><code>value_type</code></td><td>迭代器所指对象的类型</td><td>算法需要知道"在操作什么类型"</td></tr>
+                        <tr><td><code>pointer</code></td><td>指针类型</td><td></td></tr>
+                        <tr><td><code>reference</code></td><td>引用类型</td><td></td></tr>
+                        <tr><td><code>difference_type</code></td><td>两个迭代器之间的距离类型</td><td><code>ptrdiff_t</code></td></tr>
+                        <tr><td><code>iterator_category</code></td><td>迭代器类别（最重要的是这个）</td><td>决定算法走哪条路径</td></tr>
+                    </table>
+
+                    <h4>Iterator Traits 的实现</h4>
+                    <pre><code>// ===== 泛化版本：接收 class iterator =====
+template &lt;class Iterator&gt;
+struct iterator_traits {
+    typedef typename Iterator::value_type        value_type;
+    typedef typename Iterator::pointer           pointer;
+    typedef typename Iterator::reference         reference;
+    typedef typename Iterator::difference_type   difference_type;
+    typedef typename Iterator::iterator_category  iterator_category;
+};
+
+// ===== 偏特化版本1：接收原生指针 T* =====
+template &lt;class T&gt;
+struct iterator_traits&lt;T*&gt; {
+    typedef random_access_iterator_tag iterator_category;
+    typedef T                          value_type;
+    typedef ptrdiff_t                  difference_type;
+    typedef T*                         pointer;
+    typedef T&amp;                         reference;
+};
+
+// ===== 偏特化版本2：接收 const T* =====
+template &lt;class T&gt;
+struct iterator_traits&lt;const T*&gt; {
+    typedef random_access_iterator_tag iterator_category;
+    typedef T                          value_type;  // ← 注意：是 T，不是 const T！
+    typedef ptrdiff_t                  difference_type;
+    typedef const T*                   pointer;
+    typedef const T&amp;                   reference;
+};</code></pre>
+                    <p><strong>关键思想</strong>：算法永远通过 <code>iterator_traits&lt;I&gt;::value_type</code> 来获取类型，而不是直接 <code>I::value_type</code>。当 <code>I</code> 是 <code>T*</code> 时，偏特化版本生效，返回正确的类型——<strong>原生指针也能被"萃取"</strong>。</p>
+
+                    <h4>迭代器分类与继承体系</h4>
+                    <pre><code>struct input_iterator_tag {};                    // 只读，单次遍历
+struct output_iterator_tag {};                   // 只写，单次遍历
+struct forward_iterator_tag       : public input_iterator_tag {};         // 可读写，可多次遍历
+struct bidirectional_iterator_tag : public forward_iterator_tag {};       // 可 ++ 和 --
+struct random_access_iterator_tag : public bidirectional_iterator_tag {}; // 可 +n, -n, []</code></pre>
+                    <table>
+                        <tr><th>迭代器类别</th><th>能力</th><th>对应容器</th></tr>
+                        <tr><td>Input</td><td>只读，++，== / !=</td><td><code>istream_iterator</code></td></tr>
+                        <tr><td>Forward</td><td>++，可多次遍历</td><td><code>forward_list</code>, 哈希容器</td></tr>
+                        <tr><td>Bidirectional</td><td>++ 和 --</td><td><code>list</code>, <code>set</code>, <code>map</code></td></tr>
+                        <tr><td>Random Access</td><td>+n, -n, [], &lt;, &gt;</td><td><code>vector</code>, <code>array</code>, <code>deque</code></td></tr>
+                    </table>
+
+                    <h4>Tag Dispatch：编译期多态</h4>
+                    <p>不同迭代器走不同算法路径——这一切在<strong>编译期</strong>决定，<strong>零运行时开销</strong>：</p>
+                    <pre><code>// advance 算法：将迭代器前进 n 步
+template &lt;class InputIterator, class Distance&gt;
+void advance(InputIterator&amp; i, Distance n) {
+    __advance(i, n, iterator_traits&lt;InputIterator&gt;::iterator_category());
+}
+// ↑ 第三个参数是一个临时对象，用于触发重载决议
+
+// 随机访问版本：O(1) —— i += n 直接跳
+template &lt;class RandomAccessIterator, class Distance&gt;
+void __advance(RandomAccessIterator&amp; i, Distance n,
+               random_access_iterator_tag) {
+    i += n;  // 指针算术，一条 CPU 指令
+}
+
+// 通用版本：O(n) —— 一步一步走
+template &lt;class InputIterator, class Distance&gt;
+void __advance(InputIterator&amp; i, Distance n,
+               input_iterator_tag) {
+    while (n--) ++i;  // 循环 n 次
+}</code></pre>
+                    <p>如果某类迭代器没有专门版本，会<strong>通过继承自动使用父类的实现</strong>——比如 <code>bidirectional_iterator_tag</code> 如果没有专门的 <code>__advance</code>，就自动用 <code>forward_iterator_tag</code> → <code>input_iterator_tag</code> 的版本。</p>
+
+                    <!-- ===== 9.4 序列式容器深度剖析 ===== -->
+                    <h3>📐 四、序列式容器深度剖析</h3>
+
+                    <h4>1. vector —— 动态数组</h4>
+                    <p><strong>数据结构</strong>：只有<strong>三个指针</strong>（12 字节 on 32-bit）：</p>
+                    <pre><code>template &lt;class T, class Alloc = alloc&gt;
+class vector {
+protected:
+    iterator start;           // 指向当前使用空间的起始
+    iterator finish;          // 指向当前使用空间的末尾（= size()）
+    iterator end_of_storage;  // 指向整块连续空间的末尾（= capacity()）
+};</code></pre>
+                    <p><strong>扩容机制</strong>——<code>push_back</code> 时空间不足：</p>
+                    <ol>
+                        <li>以<strong>原大小的 2 倍</strong>重新分配一块更大的连续内存</li>
+                        <li>将旧数据<strong>拷贝/移动</strong>到新空间</li>
+                        <li>释放旧空间</li>
+                        <li><strong>所有旧迭代器、指针、引用全部失效</strong></li>
+                    </ol>
+                    <p>如果初始大小为 0，则先分配 1 个元素的空间。很多实现使用 <strong>1.5 倍</strong>而非 2 倍（GCC 用 2 倍，MSVC 用 1.5 倍），是为了<strong>让之前释放的内存块有机会被复用</strong>。</p>
+                    <pre><code>// vector 内部 push_back 的核心逻辑
+void push_back(const T&amp; x) {
+    if (finish != end_of_storage) {
+        construct(finish, x);   // 还有空间，直接构造
+        ++finish;
+    } else {
+        insert_aux(end(), x);   // 空间不足 → 扩容 → 拷贝 → 插入
+    }
+}</code></pre>
+                    <blockquote>
+                        <p>vector 迭代器就是普通指针 <code>T*</code>，属于 <code>random_access_iterator_tag</code>。这意味对 vector 使用 <code>advance()</code> 是 O(1) 的。</p>
+                    </blockquote>
+
+                    <h4>2. list —— 双向环状链表</h4>
+                    <p><strong>节点结构</strong>：每个节点包含<strong>两个指针 + 数据</strong>：</p>
+                    <pre><code>template &lt;class T&gt;
+struct __list_node {
+    __list_node* prev;   // 前驱指针
+    __list_node* next;   // 后继指针
+    T data;              // 用户数据
+};</code></pre>
+                    <p><strong>list 的结构</strong>：有一个<strong>哨兵节点（空节点）</strong>，形成环状双向链表。这保证了以下性质：</p>
+                    <ul>
+                        <li><code>end()</code> 返回的就是哨兵节点——它不存数据，只用来标记边界</li>
+                        <li><strong>任意位置插入/删除都是 O(1)</strong>——只修改指针，不移动数据</li>
+                        <li>插入/删除<strong>不会使任何迭代器失效</strong></li>
+                    </ul>
+                    <pre><code>// list 迭代器的核心操作
+// operator++: node = (link_type)((*node).next);
+// operator--: node = (link_type)((*node).prev);
+
+// 插入操作：在 position 之前插入
+iterator insert(iterator position, const T&amp; x) {
+    link_type tmp = create_node(x);
+    tmp-&gt;next = position.node;          // 新节点 → 后继
+    tmp-&gt;prev = position.node-&gt;prev;   // 新节点 → 前驱
+    position.node-&gt;prev-&gt;next = tmp;   // 前驱的 next → 新节点
+    position.node-&gt;prev = tmp;         // 后继的 prev → 新节点
+    return iterator(tmp);
+}</code></pre>
+                    <blockquote>
+                        <p>list 的迭代器是 <code>bidirectional_iterator_tag</code>——支持 ++ 和 --，但<strong>不支持 +n 或 []</strong>。因此对它调用 <code>std::sort()</code> 会<strong>编译失败</strong>（sort 需要 Random Access）。list 有自己的 <code>sort()</code> 成员函数。</p>
+                    </blockquote>
+
+                    <h4>3. deque —— 分段连续双端队列</h4>
+                    <p>deque 是 STL 中<strong>设计最复杂的容器</strong>——"逻辑上连续，事实上分段"。它通过<strong>中控器（map）</strong>将多个独立缓冲区串成一个逻辑上的连续空间。</p>
+                    <pre><code>// 中控器：一个 T**，指向一个指针数组，数组中的每个指针指向一个缓冲区
+typedef T** map_pointer;
+map_pointer map;       // 指向指针数组
+size_type map_size;    // 指针数组的大小
+
+// 每个缓冲区（buffer）大小：元素 &lt; 512 字节时存 512/sizeof(T) 个，否则存 1 个</code></pre>
+                    <p><strong>迭代器</strong>——deque 的迭代器是 STL 中最复杂的：</p>
+                    <pre><code>struct __deque_iterator {
+    T*              cur;    // 指向当前元素
+    T*              first;  // 当前缓冲区的起始位置
+    T*              last;   // 当前缓冲区的末尾位置（哨兵）
+    map_pointer     node;   // 指向中控器中"当前缓冲区对应的那个指针"
+};  // 随机访问迭代器！</code></pre>
+                    <p><strong>operator++ 如何跨越缓冲区边界</strong>：</p>
+                    <pre><code>self&amp; operator++() {
+    ++cur;
+    if (cur == last) {          // 走到当前缓冲区的尽头了
+        set_node(node + 1);     // 跳到中控器的下一个槽（下一个缓冲区）
+        cur = first;            // cur 指向新缓冲区的第一个元素
+    }
+    return *this;
+}</code></pre>
+                    <p><strong>operator+=n 跨越多个缓冲区</strong>：</p>
+                    <pre><code>self&amp; operator+=(difference_type n) {
+    difference_type offset = n + (cur - first);  // 在整段逻辑空间中的偏移
+    if (offset &gt;= 0 &amp;&amp; offset &lt; buffer_size()) {
+        cur += n;               // 还在同一个 buffer 内
+    } else {
+        difference_type node_offset = offset / buffer_size();
+        set_node(node + node_offset);              // 跳到目标缓冲区
+        cur = first + (offset - node_offset * buffer_size());  // 缓冲区内定位
+    }
+    return *this;
+}</code></pre>
+                    <blockquote>
+                        <p>deque 的迭代器是 <code>random_access_iterator_tag</code>——支持 +n、-n、[]，但每次操作都要判断是否跨越缓冲区边界，所以<strong>比 vector 的随机访问慢</strong>。</p>
+                    </blockquote>
+
+                    <h4>4. 三大序列容器对比</h4>
+                    <table>
+                        <tr><th></th><th>vector</th><th>list</th><th>deque</th></tr>
+                        <tr><td>底层结构</td><td>连续数组</td><td>环状双向链表</td><td>分段连续（map + buffer）</td></tr>
+                        <tr><td>迭代器</td><td><code>T*</code></td><td><code>__list_iterator</code></td><td><code>__deque_iterator</code></td></tr>
+                        <tr><td>迭代器类别</td><td>Random Access</td><td>Bidirectional</td><td>Random Access</td></tr>
+                        <tr><td>头部插入/删除</td><td>O(n)</td><td>O(1)</td><td>O(1)</td></tr>
+                        <tr><td>尾部插入/删除</td><td>O(1) 均摊</td><td>O(1)</td><td>O(1)</td></tr>
+                        <tr><td>中间插入/删除</td><td>O(n)</td><td>O(1)</td><td>O(n)（选移动少的一边）</td></tr>
+                        <tr><td>随机访问 []</td><td>O(1)</td><td>❌ 不支持</td><td>O(1)（但比 vector 慢）</td></tr>
+                        <tr><td>扩容方式</td><td>整体搬迁（2x/1.5x）</td><td>逐个节点申请</td><td>新增缓冲区</td></tr>
+                        <tr><td>迭代器失效</td><td>扩容后全部失效</td><td>不失效（除非删该节点）</td><td>push 时可能 map 重分配</td></tr>
+                    </table>
+
+                    <!-- ===== 9.5 关联式容器 ===== -->
+                    <h3>🌳 五、关联式容器</h3>
+
+                    <h4>有序关联容器（底层：红黑树）</h4>
+                    <p><code>set</code> / <code>map</code> / <code>multiset</code> / <code>multimap</code> 底层都是<strong>红黑树（RB-tree）</strong>：</p>
+                    <ul>
+                        <li><strong>自平衡二叉搜索树</strong>，保证树的高度不超过 <code>2 × log₂(n+1)</code></li>
+                        <li>查找、插入、删除都是 <strong>O(log n)</strong></li>
+                        <li>中序遍历即得<strong>排序序列</strong></li>
+                        <li><code>set</code> 的 key 即 value；<code>map</code> 的 value 是 <code>pair&lt;const Key, T&gt;</code></li>
+                    </ul>
+                    <pre><code>// map 的 value_type
+typedef pair&lt;const Key, T&gt; value_type;
+// Key 是 const ——你不能通过迭代器修改 key！这会破坏红黑树的有序性</code></pre>
+
+                    <h4>无序关联容器（底层：哈希表）</h4>
+                    <p><code>unordered_set</code> / <code>unordered_map</code> 底层是<strong>哈希表（Separate Chaining）</strong>：</p>
+                    <ul>
+                        <li>数组（buckets）+ 链表（同一个 bucket 内的元素串成链表）</li>
+                        <li>查找/插入/删除：<strong>O(1) 平均</strong>，O(n) 最坏（哈希碰撞严重时）</li>
+                        <li>元素<strong>无序</strong>——遍历顺序取决于哈希值在 buckets 中的分布</li>
+                        <li>rehashing：元素数量超过 <code>max_load_factor() * bucket_count()</code> 时自动扩容</li>
+                    </ul>
+
+                    <!-- ===== 9.6 容器适配器 ===== -->
+                    <h3>🔌 六、容器适配器（Adapters）</h3>
+                    <p>适配器不是真正的容器——它们<strong>内含一个容器</strong>，通过限制接口来实现特定的数据结构行为：</p>
+                    <pre><code>// stack —— 后进先出 (LIFO)
+template &lt;class T, class Sequence = deque&lt;T&gt;&gt;
+class stack {
+protected:
+    Sequence c;  // 内含一个 deque
+public:
+    void push(const T&amp; x) { c.push_back(x); }
+    void pop()             { c.pop_back(); }
+    T&amp; top()              { return c.back(); }
+    bool empty() const     { return c.empty(); }
+    // 注意：没有 begin()/end() —— 栈不允许遍历！
+};
+
+// queue —— 先进先出 (FIFO)
+template &lt;class T, class Sequence = deque&lt;T&gt;&gt;
+class queue {
+protected:
+    Sequence c;
+public:
+    void push(const T&amp; x) { c.push_back(x); }
+    void pop()             { c.pop_front(); }   // queue 用 pop_front！
+    T&amp; front()            { return c.front(); }
+    T&amp; back()             { return c.back(); }
+};</code></pre>
+                    <table>
+                        <tr><th>适配器</th><th>默认底层</th><th>可用底层</th><th>概念</th></tr>
+                        <tr><td><code>stack</code></td><td>deque</td><td>deque / list / vector</td><td>LIFO 后进先出</td></tr>
+                        <tr><td><code>queue</code></td><td>deque</td><td>deque / list</td><td>FIFO 先进先出</td></tr>
+                        <tr><td><code>priority_queue</code></td><td>vector</td><td>vector / deque</td><td>最大元素优先出队（堆）</td></tr>
+                    </table>
+                    <blockquote>
+                        <p>queue 不能用 vector 做底层——因为 vector 没有 <code>pop_front()</code>。stack 可以用 vector。它们都<strong>不提供迭代器</strong>——这是刻意的设计，保护了栈和队列的<strong>行为语义</strong>不被破坏。</p>
+                    </blockquote>
+
+                    <!-- ===== 9.7 算法 ===== -->
+                    <h3>⚙️ 七、算法</h3>
+                    <p>STL 算法的设计哲学：<strong>算法通过迭代器操作数据，不知道容器的存在</strong>。所有算法使用<strong>前闭后开区间</strong> <code>[first, last)</code>。</p>
+                    <pre><code>#include &lt;algorithm&gt;
+#include &lt;numeric&gt;
+
+std::vector&lt;int&gt; v = {5, 2, 8, 1, 9};
+
+// ===== 排序 =====
+std::sort(v.begin(), v.end());                     // 升序：{1,2,5,8,9}
+std::sort(v.begin(), v.end(), std::greater&lt;&gt;());   // 降序
+std::stable_sort(v.begin(), v.end());              // 稳定排序
+std::partial_sort(v.begin(), v.begin()+3, v.end());// 只排前 3 小
+
+// ===== 查找 =====
+auto it = std::find(v.begin(), v.end(), 5);        // 线性查找 O(n)
+bool has = std::binary_search(v.begin(), v.end(), 5); // 二分查找 O(log n)，须已排序
+auto lb = std::lower_bound(v.begin(), v.end(), 5); // 第一个 ≥5 的位置
+
+// ===== 变换 =====
+std::transform(v.begin(), v.end(), v.begin(),
+               [](int x) { return x * 2; });       // 每个元素 *2
+
+// ===== 过滤/删除 =====  （注意：算法不改变容器大小，须配合 erase）
+auto newEnd = std::remove_if(v.begin(), v.end(),
+                             [](int x) { return x &lt; 3; });
+v.erase(newEnd, v.end());                          // 真正删除！这被称为 erase-remove idiom
+
+// ===== 统计 =====
+int sum  = std::accumulate(v.begin(), v.end(), 0);       // 累加
+int cnt  = std::count_if(v.begin(), v.end(),
+                         [](int x) { return x &gt; 5; });   // 计数
+
+// ===== 遍历 =====
+std::for_each(v.begin(), v.end(), [](int&amp; x) { x += 1; }); // 每个元素 +1
+
+// ===== 最大/最小 =====
+auto maxIt = std::max_element(v.begin(), v.end());
+auto minIt = std::min_element(v.begin(), v.end());</code></pre>
+                    <blockquote>
+                        <p>核心思想：算法和容器<strong>各自独立</strong>，通过迭代器胶合。算法不知道容器是谁，只知道迭代器能做什么。这保证了<strong>代码复用度最大化</strong>——一个 <code>find</code> 在所有容器上都能用。</p>
+                    </blockquote>
+                <div class="interview-block" id="interview-cpp-stl">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">STL各种容器的底层实现？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐⭐</div>
+                            <div class="q-title">STL各种容器的底层实现是什么？</div>
+                            <div class="q-answer">
+                                <p>（1）<strong>vector</strong>，底层是一块具有连续内存的数组，vector的核心在于其长度自动可变。vector的数据结构主要由三个迭代器(指针)来完成：指向首元素的start，指向尾元素的finish和指向内存末端的end_of_storage。vector的扩容机制是：当目前可用的空间不足时，分配目前空间的两倍或者目前空间加上所需的新空间大小（取较大值），容量的扩张必须经过"重新配置、元素移动、释放原空间"等过程。</p>
+                                <p>（2）<strong>list</strong>，底层是一个循环双向链表，链表结点和链表分开独立定义的，结点包含pre、next指针和data数据。</p>
+                                <p>（3）<strong>deque</strong>，双向队列，由分段连续空间构成，每段连续空间是一个缓冲区，由一个中控器来控制。它必须维护一个map指针（中控器指针），还要维护start和finish两个迭代器，指向第一个缓冲区和最后一个缓冲区。deque可以在前端或后端进行扩容，这些指针和迭代器用来控制分段缓冲区之间的跳转。</p>
+                                <p>（4）<strong>stack和queue</strong>，栈和队列。它们都是由deque作为底层容器实现的，它们是一种容器配接器，修改了deque的接口，具有自己独特的性质（此二者也可以用list作为底层实现）；stack是deque封住了头端的开口，先进后出，queue是deque封住了尾端的开口，先进先出。</p>
+                                <p>（5）<strong>priority_queue</strong>，优先队列。是由以vector作为底层容器，以heap作为处理规则，heap的本质是一个完全二叉树。</p>
+                                <p>（6）<strong>set和map</strong>。底层都是由红黑树实现的。红黑树是一种二叉搜索树，但是它多了一个颜色的属性。红黑树的性质如下：1）每个结点非红即黑；2）根节点是黑的；3）如果一个结点是红色的，那么它的子节点就是黑色的；4）任一结点到树尾端（NULL）的路径上含有的黑色结点个数必须相同。通过以上定义的限制，红黑树确保没有一条路径会比其他路径多出两倍以上；因此，红黑树是一种弱平衡二叉树，相对于严格要求平衡的平衡二叉树来说，它的旋转次数少，所以对于插入、删除操作较多的情况下，通常使用红黑树。</p>
+                                <p><strong>补充：平衡二叉树(AVL)和红黑树的区别</strong>：AVL树是高度平衡的，频繁的插入和删除会引起频繁的rebalance（旋转操作），导致效率下降；红黑树不是高度平衡的，算是一种折中，插入最多两次旋转，删除最多三次旋转。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">STL容器时间复杂度对比？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">STL各种容器查找、删除和插入的时间复杂度？</div>
+                            <div class="q-answer">
+                                <p>（1）<strong>vector</strong>，支持随机访问(通过下标），时间复杂度是O(1)；如果是无序vector查找的时间复杂度是O(n)，如果是有序vector，采用二分查找则是O(log n)；对于插入操作，在尾部插入最快，中部次之，头部最慢，删除同理。vector占用的内存较大，由于二倍扩容机制可能会导致内存的浪费，内存不足时扩容的拷贝也会造成较大性能开销；</p>
+                                <p>（2）<strong>list</strong>由于底层是链表，不支持随机访问，只能通过扫描的方式查找，复杂度为O(n)，但是插入和删除的速度快，只需要调整指针的指向。（有一种说法是链表每次插入和删除都需要分配和释放内存，会造成较大的性能开销，所以如果频繁地插入和删除，list性能并不好，但很多地方都说list插入删除性能好）；list不会造成内存的浪费，占用内存较小；</p>
+                                <p>（3）<strong>deque</strong>支持随机访问，但性能比vector要低；支持双端扩容，因此在头部和尾部插入和删除元素很快，为O(1)，但是在中间插入和删除元素很慢；</p>
+                                <p>（4）<strong>set和map</strong>，底层基于红黑树实现，增删查改的时间复杂度近似O(log n)，红黑树又是基于链表实现，因此占用内存较小；</p>
+                                <p>（5）<strong>unordered_set和unordered_map</strong>，底层是基于哈希表实现的，是无序的。理论上增删查改的时间复杂度是O(1)（最差时间复杂度O(n)），实际上数据的分布是否均匀会极大影响容器的性能。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">SGI STL 次级分配器原理？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">Allocator次级分配器的原理？内存池的优势和劣势？</div>
+                            <div class="q-answer">
+                                <p>为了提升内存管理的效率，减少申请小内存造成的内存碎片问题，SGI STL采用了<strong>两级配置器</strong>，当分配的空间大小超过128B时，会使用第一级空间配置器，直接使用malloc()、realloc()、free()函数进行内存空间的分配和释放。当分配的空间大小小于128B时，将使用第二级空间配置器，采用了<strong>内存池技术</strong>，通过空闲链表来管理内存。</p>
+                                <p><strong>次级配置器的内存池管理技术</strong>：每次配置一大块内存，并维护对应的自由链表(free list)。若下次再有相同大小的内存配置，就直接从自由链表中拔出。如果客户端释还小额区块，就由配置器回收到自由链表中；配置器共要维护16个自由链表，存放在一个数组里，分别管理大小为8-128B不等的内存块。分配空间的时候，首先根据所需空间的大小（调整为8B的倍数）找到对应的自由链表中相应大小的链表，并从链表中拔出第一个可用的区块；回收的时候也是一样的步骤，先找到对应的自由链表，并插到第一个区块的位置。</p>
+                                <p><strong>优势</strong>：避免内存碎片(这里应该指的是外部碎片)，不需要频繁从用户态切换到内核态，性能高效；<strong>劣势</strong>：仍然会造成一定的内存浪费，比如申请120B就必须分配128B（内部碎片）。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">push_back vs emplace_back？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">STL容器push_back和emplace_back的区别？</div>
+                            <div class="q-answer">
+                                <p>emplace/emplace_back函数使用传递来的参数直接在容器管理的内存空间中<strong>构造元素</strong>（只调用了构造函数）；push_back会创建一个<strong>局部临时对象</strong>，并将其压入容器中（可能调用拷贝构造函数或移动构造函数）。因此emplace_back更高效，少了一次临时对象的构造和移动/拷贝。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">STL sort 用到了哪种算法？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">STL的排序用到了哪种算法？具体如何执行？</div>
+                            <div class="q-answer">
+                                <p>使用<strong>快速排序、插入排序和堆排序</strong>三种算法的混合。当数据量很大的时候用快排，划分区段比较小的时候用插入排序，当划分有导致最坏情况的倾向的时候使用堆排序。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">哈希表长度为什么是质数？如何处理冲突？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">哈希表的长度为什么要用质数？如何处理冲突？如何删除？</div>
+                            <div class="q-answer">
+                                <p><strong>为什么用质数</strong>：降低冲突概率，使哈希后的数据分布更均匀；合数可能导致数据集中分布到某一点。</p>
+                                <p><strong>处理冲突</strong>：开放定址法（线性探测、平方探测）和拉链法。</p>
+                                <p><strong>删除</strong>：线性探测不会真正删元素，只做标记，否则后续查找会因为"空洞"而误判不存在。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">各种排序算法的原理和时间复杂度？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">各种排序算法的原理和时间复杂度？</div>
+                            <div class="q-answer">
+                                <p>（1）<strong>快排</strong>：一轮划分，选择一个基准值，小于该基准值的元素放到左边，大于的放在右边，此时该基准值在整个序列中的位置就确定了，接着递归地对左边子序列和右边子序列进行划分。时间复杂度O(nlogn)，最坏的时间复杂度是O(n²)；</p>
+                                <p>（2）<strong>堆排序</strong>：利用完全二叉树性质构造的一个一维数组，用数组下标代表结点，则一个结点的左孩子下标为2i+1，右孩子为2i+2，一个结点的父节点为(i-1)/2。堆排序的思想就是，构造一个最大堆或者最小堆，以最大堆为例，那么最大的值就是根节点，把这个最大值和最后一个结点交换，然后在从前n-1个结点中构造一个最大堆，再重复上述的操作，即每次将现有序列的最大值放在现有数组的最后一位，最后就会形成一个有序数组；求升序用最大堆，降序用最小堆。时间复杂度O(nlogn)；</p>
+                                <p>（3）<strong>冒泡排序</strong>：从前往后两两比较，逆序则交换，不断重复直到有序；时间复杂度O(n²），最好情况O(n)；</p>
+                                <p>（4）<strong>插入排序</strong>，类似打牌，从第二个元素开始，把每个元素插入前面有序的序列中；时间复杂度O(n²），最好情况O(n)；</p>
+                                <p>（5）<strong>选择排序</strong>，每次选择待排序列中的最小值和未排序列中的首元素交换；时间复杂度O(n²）；</p>
+                                <p>（6）<strong>归并排序</strong>，将整个序列划分成最小的>=2的等长序列，排序后再合并，再排序再合并，最后合成一个完整序列。时间复杂度O(nlogn)；</p>
+                                <p>（7）<strong>希尔排序</strong>，是插入排序的改进版，取一个步长划分为多个子序列进行排序，再合并(如135一个序列，246一个序列），时间复杂度O(n^1.3)，最好O(n)，最坏O(n²)；</p>
+                                <p>（8）<strong>桶排序</strong>，将数组分到有限数量的桶里。每个桶再个别排序，最后依次把各个桶中的记录列出来即得到有序序列。桶排序的平均时间复杂度为线性的O(N+C)，其中C=N*(logN-logM)，M为桶的数量。最好的情况下为O(N)。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">求序列前K个最大/最小的数？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">如何在一个序列中求前k个最大或者最小的数？</div>
+                            <div class="q-answer">
+                                <p><strong>方法1-快排</strong>：每轮划分后基准值位置=P，若P=K则0~P即前K小。P>K去左边找，P<K去右边找。递归直到P=K。O(n)。</p>
+                                <p><strong>方法2-堆</strong>：求前K小用最大顶堆（大小为K），求前K大用最小顶堆。先将K个数入堆，之后每个数与堆顶比较：若比堆顶小(K小)则替换堆顶并调整。遍历完后堆中即结果。O(nlogK)。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">Remove_If 算法的原理？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">如何快速移除序列中指定条件的元素？（Remove_If原理）</div>
+                            <div class="q-answer">
+                                <p>使用双指针：先找到第一个符合条件的元素位置，然后从此位置开始，往后扫描<strong>不符合</strong>条件的元素，逐个覆盖到该位置及之后。用指针指向要安插的位置，步进。时间复杂度O(n)，保持相对顺序。</p>
+                                <p>注意：remove_if不改变容器大小，需配合erase使用（erase-remove idiom）。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">如何用栈实现队列？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">如何用栈实现一个队列？</div>
+                            <div class="q-answer">
+                                <p>使用两个栈A和B。入队时压入A；出队时若B为空，将A中所有元素弹出并压入B（反转顺序），然后从B弹出栈顶；若B非空直接弹出。这样先进A的元素先进入B的栈顶→先出。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">如何判断链表是否有环？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">如何判断链表是否有环？</div>
+                            <div class="q-answer">
+                                <p><strong>快慢指针法</strong>：两个指针，快指针每次走两步，慢指针每次走一步。如果链表有环，快慢指针最终会在环内相遇；如果快指针走到nullptr则无环。时间O(n)，空间O(1)。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+                <!-- ========== 10. 现代 C++ 特性 ========== -->
+                <section id="cpp-modern">
+                    <h2>🚀 现代 C++ 特性 <a href="#ue-modern" class="ue-link-tag">UE5 现代 C++</a></h2>
+                    <p>以下特性从 C++11 开始引入，极大地改变了 C++ 的编程范式。</p>
+
+                    <h3>移动语义（Move Semantics）</h3>
+                    <p>移动语义是 C++11 <strong>最重要的新增特性</strong>。它解决了"拷贝大对象很昂贵，但拷贝完了原对象就不要了"的问题：</p>
+                    <pre><code>std::string s1 = "hello world this is a very long string";
+std::string s2 = std::move(s1);  // 移动：s1 的内容被"转移"到 s2
+// s1 现在为空，s2 拥有原来的字符串——没有发生任何内存分配或拷贝！
+
+// 原理：通过右值引用 T&& 和移动构造函数
+class Buffer {
+    char* data;
+    size_t size;
+public:
+    // 移动构造：偷走别人的资源
+    Buffer(Buffer&amp;&amp; other) noexcept
+        : data(other.data), size(other.size) {
+        other.data = nullptr;   // 把原对象置为空
+        other.size = 0;
+    }
+};</code></pre>
+                    <p><strong>核心理解</strong>：左值（有名字、能取地址的）→ 拷贝；右值（临时的、即将销毁的）→ 移动。</p>
+
+                    <h3>auto 类型推导</h3>
+                    <pre><code>auto i = 42;                     // int
+auto f = 3.14f;                  // float
+auto it = myMap.begin();         // std::map&lt;K,V&gt;::iterator —— 不用写又臭又长的类型名
+auto result = ComputeSomething(); // 类型变了自动适应
+
+// 配合范围 for
+for (auto&amp; item : vec) { /* 修改元素 */ }
+for (const auto&amp; item : vec) { /* 只读遍历 */ }</code></pre>
+
+                    <h3>范围 for 循环</h3>
+                    <pre><code>std::vector&lt;int&gt; v = {1, 2, 3, 4, 5};
+for (int x : v)        // 值拷贝遍历
+for (int&amp; x : v)       // 引用遍历（可以修改）
+for (const int&amp; x : v) // 只读引用遍历（推荐默认）</code></pre>
+
+                    <h3>其他重要特性速览</h3>
+                    <table>
+                        <tr><th>特性</th><th>版本</th><th>说明</th></tr>
+                        <tr><td><code>nullptr</code></td><td>C++11</td><td>空指针，替代 <code>NULL</code> 和 <code>0</code>（有类型安全）</td></tr>
+                        <tr><td><code>override</code></td><td>C++11</td><td>显式标记覆写，编译器检查是否正确覆写了基类虚函数</td></tr>
+                        <tr><td><code>final</code></td><td>C++11</td><td>禁止类被继承 / 禁止虚函数被进一步覆写</td></tr>
+                        <tr><td><code>= default</code></td><td>C++11</td><td>显式要求编译器生成默认实现</td></tr>
+                        <tr><td><code>= delete</code></td><td>C++11</td><td>显式禁止（如禁止拷贝构造）</td></tr>
+                        <tr><td><code>enum class</code></td><td>C++11</td><td>强类型枚举，不隐式转 int，不污染外部作用域</td></tr>
+                        <tr><td><code>std::optional&lt;T&gt;</code></td><td>C++17</td><td>可能包含值也可能不包含的类型</td></tr>
+                        <tr><td><code>std::variant&lt;T...&gt;</code></td><td>C++17</td><td>类型安全的 union</td></tr>
+                        <tr><td>结构化绑定</td><td>C++17</td><td><code>auto [x, y] = GetPoint();</code></td></tr>
+                        <tr><td>Concepts</td><td>C++20</td><td>约束模板参数，编译期检查，更好的错误信息</td></tr>
+                    </table>
+                <div class="interview-block" id="interview-cpp-modern">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">C++11 有哪些新特性？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">C++11的新特性有哪些？（关键5项）</div>
+                            <div class="q-answer">
+                                <p>（1）<strong>auto关键字</strong>，可以自动推断出变量的类型；</p>
+                                <p>（2）<strong>nullptr</strong>来代替NULL，可以避免重载时出现的问题（一个是int，一个是void*）；</p>
+                                <p>（3）<strong>智能指针</strong>，shared_ptr、unique_ptr和weak_ptr，对内存进行管理；</p>
+                                <p>（4）<strong>右值引用</strong>，基于右值引用可以实现移动语义和完美转发，消除两个对象交互时不必要的对象拷贝，节省运算存储资源，提高效率；</p>
+                                <p>（5）<strong>lambda表达式</strong>，可以理解为一个匿名的内联函数。</p>
+                                <p><strong>不足之处</strong>：没有GC（垃圾回收机制）、没有反射机制等。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">右值引用和移动语义的关系？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">为什么要引入右值引用？std::move的作用？</div>
+                            <div class="q-answer">
+                                <p>右值引用(&&)是为了<strong>支持移动操作</strong>而引入的。它只能绑定到即将销毁的对象，因此可以安全地"偷走"其资源。</p>
+                                <p>std::move()将一个左值<strong>强制转换为右值引用</strong>，使你能够对左值使用移动语义。本质上是一个cast，不实际移动任何数据。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">vector 如何手动释放内存？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">vector如何手动释放内存？</div>
+                            <div class="q-answer">
+                                <p>比如有一个<code>vector&lt;int&gt; nums</code>，比较hack的一种方式是<code>nums = {}</code>，这样既可以清空元素还会释放内存（从一个大佬身上学来的）；规范的做法是，<code>vector&lt;int&gt;().swap(nums)</code>或者<code>nums.swap(vector&lt;int&gt;())</code>。</p>
+                                <p>注意：<code>clear()</code>只清空元素但<strong>不释放</strong>已分配的内存容量。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+                <div class="interview-block">
+                    <h4>面试高频题 · 设计模式（原文 §3.6）</h4>
+                    <span class="iq-trigger">单例模式是什么？如何实现？ ⭐⭐
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">单例模式是什么？如何实现？</div>
+                            <div class="q-answer">
+                                <p>单例模式保证全局只有<strong>唯一一个自行创建的实例对象</strong>，并由单例类提供获取这个唯一实例的接口。主要有两种实现方法：</p>
+                                <p>1）<strong>懒汉式</strong>，用到的时候才会加载，线程不安全，需要加锁；</p>
+                                <p>2）<strong>饿汉式</strong>，在main函数开始的时候即创建对象，线程安全；</p>
+                                <p>C++11标准之后的最佳选择是<strong>Meyers' Singleton</strong>（属于懒汉式），它利用了局部静态变量在第一次使用时才初始化的特性，并且由于C++11标准解决了局部静态变量的线程安全问题，使得它成为当前最简洁也最高效的实现方式。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">工厂模式是什么？有哪几种？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">工厂模式是什么？分为哪几种？</div>
+                            <div class="q-answer">
+                                <p>该模式用来封装和管理类的创建，终极目的是为了<strong>解耦</strong>，实现创建者和调用者的分离。工厂模式分为三种：</p>
+                                <p>1）<strong>简单工厂</strong>，一个工厂生产多种产品，要指定产品的名字进行生产；</p>
+                                <p>2）<strong>普通工厂</strong>，将产品生产分配给多个工厂，但是每个工厂只生产一种产品；</p>
+                                <p>3）<strong>抽象工厂</strong>，将产品生产分配给多个工厂，每个工厂可以生产多种产品。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+            <!-- ========== 11. 操作系统 ========== -->
+            <section id="cs-os">
+                <h2>💻 操作系统</h2>
+
+                <h3>进程和线程的区别？</h3>
+                <p><strong>参考：《现代操作系统》、面经总结</strong></p>
+                <ol>
+                    <li><strong>进程</strong>是运行时的程序，是系统进行<strong>资源分配和调度</strong>的基本单位，实现了系统的并发</li>
+                    <li><strong>线程</strong>是进程的子单位（轻量级进程），是<strong>CPU分配和调度</strong>的基本单位，实现了进程内部的并发</li>
+                    <li>一个程序至少一个进程，一个进程至少一个线程，线程<strong>依赖于进程</strong>而存在</li>
+                    <li>进程拥有<strong>独立</strong>的内存空间，线程<strong>共享</strong>进程的内存空间，不占用额外资源</li>
+                    <li>线程的优势：信息共享和通讯方便，不需要资源切换等</li>
+                </ol>
+
+                <h3>死锁</h3>
+                <p><strong>什么是死锁？</strong>多个进程并发执行，各自占有一定资源的同时希望获得其他进程的资源，但大家都不释放自己的资源，导致<strong>相互阻塞、循环等待</strong>，进程无法推进。</p>
+                <p><strong>四个必要条件：</strong></p>
+                <ol>
+                    <li><strong>互斥条件</strong>——一个资源每次只能被一个进程使用</li>
+                    <li><strong>请求并保持</strong>——因请求资源而阻塞时，对已获得的资源保持不放</li>
+                    <li><strong>不剥夺条件</strong>——未使用完之前不能被剥夺，只能自己释放</li>
+                    <li><strong>循环等待</strong>——若干进程之间形成头尾相接的循环等待资源关系</li>
+                </ol>
+                <p><strong>防止方法：</strong></p>
+                <ul>
+                    <li><strong>死锁预防</strong>：打破四个条件之一</li>
+                    <li><strong>死锁避免</strong>：银行家算法——分配前计算是否会导致不安全状态，若会则不分配</li>
+                    <li><strong>死锁检测和解除</strong>：抢占资源或终止进程</li>
+                </ul>
+
+                <h3>虚拟内存</h3>
+                <p>通过<strong>分页管理机制</strong>实现。将程序逻辑地址划分为固定大小的<strong>页（Page）</strong>，物理内存划分为同样大小的<strong>帧（Frame）</strong>。程序加载时任意页可放入任意帧，帧不必连续。虚拟内存允许程序<strong>不必将所有页都放入内存</strong>——部分页在外存，引用到不在内存的页时产生<strong>缺页中断</strong>，从外存调入——逻辑上内存得到扩充。</p>
+
+                <h3>内存碎片</h3>
+                <p>采用分区式存储管理的系统，在储存分配过程中产生的、不能供用户作业使用的<strong>主存里的小分区</strong>称为"内存碎片"。</p>
+                <ul>
+                    <li><strong>内部碎片</strong>：分配给进程的内存块中未被使用的部分（如分配128B实际只用120B）</li>
+                    <li><strong>外部碎片</strong>：未分配但太小而无法分配给任何进程的零散空间</li>
+                </ul>
+                <p>内存碎片<strong>只存在于虚拟内存</strong>上。</p>
+
+                <div class="interview-block">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">进程和线程的区别？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">进程和线程的区别？（5点）</div>
+                            <div class="q-answer">
+                                <p>1) 进程是资源分配和调度的基本单位；线程是CPU分配和调度的基本单位</p>
+                                <p>2) 一个程序至少一个进程，一个进程至少一个线程，线程依赖进程存在</p>
+                                <p>3) 进程拥有独立内存空间，线程共享进程内存空间</p>
+                                <p>4) 线程间信息共享和通讯更方便，不需要资源切换</p>
+                                <p>5) 进程是重量级，线程是轻量级</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">死锁的条件和防止方法？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">什么是死锁？四个条件？如何防止？什么是银行家算法？</div>
+                            <div class="q-answer">
+                                <p><strong>死锁</strong>：多进程各自占资源并等待对方资源，形成循环等待。</p>
+                                <p><strong>四个条件</strong>：互斥、请求并保持、不剥夺、循环等待。</p>
+                                <p><strong>防止</strong>：预防（打破条件）、避免（银行家算法：分配前计算安全性，不安全则不分配）、检测和解除（抢占或终止）。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">虚拟内存是什么？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">操作系统如何管理内存？什么是虚拟内存？</div>
+                            <div class="q-answer">
+                                <p>分页管理：逻辑地址→页，物理内存→帧，页可放入任意帧（不连续）。</p>
+                                <p>虚拟内存：不必全部页放入内存，部分在外存。访问不在内存的页→缺页中断→从外存调入→逻辑上内存被扩充。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">什么是内存碎片？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">什么是内存碎片？在虚拟内存还是物理内存？</div>
+                            <div class="q-answer">
+                                <p><strong>内部碎片</strong>：已分配但未使用的部分（如申请120B给128B）</p>
+                                <p><strong>外部碎片</strong>：未分配但太小无法分配给任何进程的零散空间</p>
+                                <p>内存碎片<strong>只存在于虚拟内存</strong>上。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+            <!-- ========== 12. 计算机组成 ========== -->
+            <section id="cs-arch">
+                <h2>🔧 计算机组成</h2>
+
+                <h3>缓存（Cache）</h3>
+                <p><strong>什么是Cache？</strong>CPU的高速缓冲存储器，是一种用于<strong>减少处理器访问内存所需平均时间</strong>的部件。由于CPU计算速度远大于从内存取数据的速度，Cache作为中间缓冲，CPU通过读写缓存来获取操作数，结果也通过缓存写入内存。</p>
+
+                <h3>如何提高缓存命中率？</h3>
+                <ul>
+                    <li>注意程序的<strong>局部性原理</strong>：遍历数组时按照内存顺序访问</li>
+                    <li>充分利用CPU<strong>分支预测</strong>功能，将预测的指令放到缓存中执行</li>
+                    <li>缓存的<strong>容量和块长</strong>是影响效率的重要因素</li>
+                </ul>
+                <p><strong>缓存不是最快的</strong>——<strong>寄存器</strong>比缓存更快。</p>
+
+                <h3>缓存一致性</h3>
+                <p>在多核CPU中，每个核有自己的缓存，当两个核<strong>独自修改</strong>缓存中的数据时，可能造成<strong>数据不一致</strong>的问题。解决方法：1) 总线加锁；2) <strong>缓存一致性协议</strong>（如MESI协议）。</p>
+
+                <h3>缓存块</h3>
+                <p>如果缓存<strong>没有命中</strong>（即读取一个数据不在缓存中），不仅需要把该字从主存中取出，还需要从主存中将该字所在的<strong>整个字块一次调入缓存</strong>中。<strong>缓存线（块）的长度是 64B</strong>。</p>
+
+                <div class="interview-block">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">什么是Cache？为什么需要？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">什么是缓存？为什么需要缓存？如何提高命中率？缓存是最快的吗？</div>
+                            <div class="q-answer">
+                                <p>CPU高速缓冲存储器，减少CPU访问内存的平均时间。CPU太快，内存太慢，Cache弥补速度差。</p>
+                                <p><strong>提高命中率</strong>：利用局部性原理按序访问、利用分支预测、增大缓存容量和块长。</p>
+                                <p><strong>不是最快</strong>：寄存器比缓存更快。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">什么是缓存一致性？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">什么是缓存一致性？如何保证？</div>
+                            <div class="q-answer">
+                                <p>多核CPU各自有缓存，独立修改同一数据时产生不一致。解决：总线加锁或缓存一致性协议（如MESI）。</p>
+                            </div>
+                        </span>
+                    </span>
+                    &nbsp;
+                    <span class="iq-trigger">缓存块大小？读内存是读多少取多少吗？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐</div>
+                            <div class="q-title">一个缓存块的大小是多少？读取内存是读多少取多少吗？</div>
+                            <div class="q-answer">
+                                <p><strong>缓存线(块)长度是64B</strong>。缓存未命中时，不仅取所需数据，而是将该数据所在的<strong>整个字块一次调入</strong>缓存中（利用了空间局部性）。</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+
+            <!-- ========== 13. 计算机网络 ========== -->
+            <section id="cs-net">
+                <h2>🌐 计算机网络</h2>
+
+                <h3>TCP 和 UDP 的区别</h3>
+                <table>
+                    <tr><th></th><th>TCP</th><th>UDP</th></tr>
+                    <tr><td>全称</td><td>传输控制协议</td><td>用户数据报协议</td></tr>
+                    <tr><td>连接</td><td><strong>面向连接</strong>（三次握手建立）</td><td><strong>无连接</strong></td></tr>
+                    <tr><td>可靠性</td><td><strong>可靠</strong>，保证数据正确到达</td><td><strong>不可靠</strong>，尽力而为，不保证送达</td></tr>
+                    <tr><td>数据单位</td><td>面向<strong>字节流</strong></td><td>面向<strong>数据报</strong></td></tr>
+                    <tr><td>通信模式</td><td>只支持<strong>点对点</strong></td><td>支持一对一、一对多、多对多</td></tr>
+                    <tr><td>拥塞控制</td><td>有</td><td>无</td></tr>
+                    <tr><td>适用场景</td><td>文件传输、网页、邮件</td><td>游戏实时通信、视频直播、DNS</td></tr>
+                </table>
+                <p>在游戏开发中：位置同步、实时战斗用<strong>UDP</strong>（低延迟，容忍丢包）；登录、交易用<strong>TCP</strong>（必须可靠）。</p>
+
+                <div class="interview-block">
+                    <h4>面试高频题</h4>
+                    <span class="iq-trigger">TCP和UDP的区别？
+                        <span class="iq-popup">
+                            <div class="q-label">面试题 · ⭐⭐</div>
+                            <div class="q-title">TCP和UDP的区别？（6点）</div>
+                            <div class="q-answer">
+                                <p>1) TCP面向连接（三次握手），UDP无连接</p>
+                                <p>2) TCP可靠（保证正确到达），UDP不可靠（尽力而为）</p>
+                                <p>3) TCP面向字节流，UDP面向数据报</p>
+                                <p>4) TCP只支持点对点，UDP支持一对一/一对多/多对多</p>
+                                <p>5) TCP有拥塞控制，UDP没有</p>
+                                <p>6) 游戏位置同步用UDP（低延迟容忍丢包），登录交易用TCP（必须可靠）</p>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+            </section>
+
+            </article>
+
+            <!-- ================================================================ -->
+            <!--                    右栏：UE C++ 中的应用 (30%)                    -->
+            <!-- ================================================================ -->
+            <aside class="ue-panel">
+
+                <!-- ====== Module 1: 编译与链接 → UE5 构建体系 ====== -->
+                <section id="ue-build">
+                    <h2 class="section-title">🔨 UE5 构建体系与 UBT</h2>
+                    <span class="ref-tag">编译与链接</span>
+                    <p>C++ 的四阶段编译流水线在 UE5 中被<strong>大规模工程化</strong>——UBT（Unreal Build Tool）负责编排整个构建流程，在标准编译器之上加了多层抽象。</p>
+
+                    <h4>UBT 工作流</h4>
+                    <pre><code>┌─────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────┐
+│ Build.cs    │ → │ UHT 反射生成  │ → │ 标准 C++ 编译 │ → │ 链接     │
+│ (模块声明)   │    │ .gen.cpp     │    │ MSVC/Clang    │    │ Linker   │
+└─────────────┘    └──────────────┘    └──────────────┘    └──────────┘
+  UBT 读取模块      基于宏标记生成      每个 .cpp 独立编译       最终生成
+  依赖和编译选项     反射注册代码        为 .obj                .dll/.exe</code></pre>
+                    <p>UBT 的工作远不止"调用编译器"：它负责<strong>模块依赖分析</strong>、<strong>编译选项注入</strong>、<strong>跨平台适配</strong>、<strong>第三方库链接</strong>。每一个 <code>.Build.cs</code> 文件声明一个模块，UBT 读取所有模块后构建<strong>依赖图</strong>，决定编译顺序。</p>
+
+                    <h4>Module 系统与 Build.cs</h4>
+                    <p>UE5 的项目由<strong>模块（Module）</strong>组成——每个模块是一个独立的编译单元，对应一个 <code>.Build.cs</code>：</p>
+                    <pre><code>// MyProject.Build.cs
+public class MyProject : ModuleRules
+{
+    public MyProject(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        // 公共依赖 —— 头文件会暴露给依赖本模块的其他模块
+        PublicDependencyModuleNames.AddRange(new string[] {
+            "Core", "CoreUObject", "Engine"
+        });
+
+        // 私有依赖 —— 只在 .cpp 内部使用，不暴露
+        PrivateDependencyModuleNames.AddRange(new string[] {
+            "Slate", "SlateCore", "EnhancedInput"
+        });
+    }
+}</code></pre>
+                    <div class="tip-card"><strong>理解：</strong><code>PublicDependencyModuleNames</code> 的依赖会<strong>传递</strong>——A 公开依赖(public引用) B，B 公开依赖 C → A 可以直接用 C。<code>PrivateDependencyModuleNames</code> 不传递。合理使用能显著缩短编译时间。</div>
+
+                    <h4>增量编译与 Live Coding</h4>
+                    <pre><code>// Live Coding 工作流（开发期）：
+// 1. 修改 .cpp → Ctrl+Alt+F11 → 编译差异 → Patch 到运行中的进程
+// 2. 无需关闭编辑器、无需重新加载关卡 —— 比完整编译快 5~10 倍
+//
+// 原理：编译器只重新编译改动的翻译单元 → 生成 .patch 文件
+// → 操作系统级 DLL 热替换（利用 LoadLibrary/FreeLibrary）</code></pre>
+                    <p>Live Coding 直接利用了<strong>C++ 独立编译</strong>的特性——只改一个 .cpp 就只重编那一个翻译单元，然后动态替换。但如果改了头文件（尤其被大量 .cpp include 的头），Live Coding 会退化为全量编译。</p>
+                    <div class="tip-card"><strong>🔗 对应 C++ 核心概念：</strong>理解 UBT 的关键在于理解<strong>翻译单元</strong>的独立性——UBT 的所有优化（PCH、Unity Build、增量编译）都建立在这个概念之上。改头文件为什么慢？因为预处理器把改动"广播"到了每一个 include 它的翻译单元。</div>
+                </section>
+
+                <!-- ====== Module 2: 头文件与预处理器 → UHT 宏系统 ====== -->
+                <section id="ue-uht-guard">
+                    <h2 class="section-title">📋 UHT 与宏系统</h2>
+                    <span class="ref-tag">头文件 / 预处理器 / 防卫式声明</span>
+                    <p>UE5 的 <strong>UHT（Unreal Header Tool）</strong>在编译前会解析所有头文件生成反射代码，这个过程直接依赖防卫式声明的正确性。</p>
+                    <div class="tip-card"><strong>⚠️ 关键点：</strong>没有防卫式声明 → UHT 对同一个类生成<strong>两份反射注册代码</strong> → 链接错误。</div>
+                    <pre><code>// MyActor.h（UE5 模板）
+#pragma once
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "MyActor.generated.h"   // ← 必须最后一个 include！
+
+UCLASS()
+class MYPROJECT_API AMyActor : public AActor {
+    GENERATED_BODY()
+};</code></pre>
+                    <p><code>.generated.h</code> 必须在 include 列表末尾——UHT 在解析头文件时需要<strong>所有依赖类型已经声明完毕</strong>，否则反射代码会引用到不完整的类型。</p>
+
+                    <h4>UCLASS / USTRUCT / UENUM 宏的本质</h4>
+                    <p>这些宏在 <strong>UHT 解析阶段</strong> 被识别，在 <strong>C++ 编译阶段</strong> 展开为空或装饰器。它们是"给 UHT 看的标记"，不是"给编译器看的指令"：</p>
+                    <table>
+                        <tr><th>宏</th><th>UHT 看到它做什么</th><th>C++ 编译时展开成什么</th></tr>
+                        <tr><td><code>UCLASS()</code></td><td>标记此类需要生成反射数据</td><td>编译器特定的 <code>__declspec</code> / <code>__attribute__</code> 装饰器</td></tr>
+                        <tr><td><code>USTRUCT()</code></td><td>标记此结构体需要反射</td><td>同上（结构体版本）</td></tr>
+                        <tr><td><code>UENUM()</code></td><td>标记此枚举需要反射</td><td>展开为包含元数据的枚举包装</td></tr>
+                        <tr><td><code>UFUNCTION()</code></td><td>记录函数签名，生成调用包装器</td><td>展开为函数装饰器 + 元数据结构</td></tr>
+                        <tr><td><code>UPROPERTY()</code></td><td>记录属性类型、偏移量、元数据</td><td>展开为静态变量声明 + 初始化代码</td></tr>
+                    </table>
+                    <div class="tip-card"><strong>🔍 这对应 C++ 的哪个概念？</strong>UHT 宏就是<strong>领域特定语言（DSL）</strong>——通过 <code>#define</code> 实现。UHT 在预处理之前解析它们，本质上是一个<strong>独立的预处理器</strong>，工作在 C++ 预处理器<strong>之前</strong>。这解释了为什么 <code>.generated.h</code> 必须在最后——它依赖前面所有 <code>#include</code> 展开后的类型信息。</div>
+
+                    <h4>GENERATED_BODY() 源码级展开</h4>
+                    <p>这是连接 UHT 生成代码和你手写代码的<strong>桥梁宏</strong>。典型的展开包含：</p>
+                    <pre><code>// GENERATED_BODY() 展开后大约包含：
+public:
+    // 1. 静态类型信息（用于 Cast、IsA 等运行时类型识别）
+    static FStaticClassRegisterCompiledInInfo StaticClassInfo;
+    // 2. 返回 UClass* 的函数声明
+    static UClass* GetPrivateStaticClass();
+    // 3. 虚函数覆盖：返回运行时 UClass
+    virtual UClass* GetClass() const override;
+    // 4. 静态初始化注册器（程序启动时自动注册到反射系统）
+    static const FCompiledInDefer&lt;TClass&gt; AutoInitialize##ClassName;
+    // 5. 友元声明：允许 UHT 生成的代码访问私有成员
+    friend class UClassCompiledInDefer&lt;TClass&gt;;</code></pre>
+                    <blockquote>
+                        <p><strong>核心理解：</strong>GENERATED_BODY() 本质上就是<strong>利用 C++ 静态成员变量在 main() 之前初始化的特性</strong>，在程序启动时向全局注册表写入类型信息。这跟 C++ 中 <code>static</code> 局部变量只在第一次调用时初始化的机制如出一辙。</p>
+                    </blockquote>
+                </section>
+
+                <!-- ====== Module 3: 变量与数据类型 → UE5 类型体系 ====== -->
+                <section id="ue-types">
+                    <h2 class="section-title">📐 UE5 类型体系</h2>
+                    <span class="ref-tag">变量与数据类型</span>
+                    <p>UE5 在标准 C++ 类型基础上建立了<strong>跨平台定长类型系统</strong>，确保同一份代码在不同平台上有一致的内存布局。</p>
+                    <div class="tip-card"><strong>💡 核心动机：</strong>标准 C++ 的 <code>int</code> 在不同平台上可能是 2 或 4 字节——这对网络同步、序列化、Shader 交互是致命的。UE5 用 <code>int32</code> 彻底消除歧义。此外，UE5 需要类型系统<strong>原生支持反射、序列化、网络复制、GC 追踪</strong>，这是 C++ 标准类型无法提供的。</div>
+
+                    <h4>定长基础类型</h4>
+                    <table>
+                        <tr><th>UE5 类型</th><th>C++ 底层</th><th>大小</th><th>UE5 无符号版</th></tr>
+                        <tr><td><code>int8</code></td><td><code>char</code></td><td>1</td><td><code>uint8</code></td></tr>
+                        <tr><td><code>int16</code></td><td><code>short</code></td><td>2</td><td><code>uint16</code></td></tr>
+                        <tr><td><code>int32</code></td><td><code>int</code></td><td>4</td><td><code>uint32</code></td></tr>
+                        <tr><td><code>int64</code></td><td><code>long long</code></td><td>8</td><td><code>uint64</code></td></tr>
+                        <tr><td><code>float</code></td><td><code>float</code></td><td>4</td><td>—（UE5 浮点即标准 float）</td></tr>
+                        <tr><td><code>double</code></td><td><code>double</code></td><td>8</td><td>—（Large World Coordinates 用）</td></tr>
+                    </table>
+
+                    <h4>三大字符串类型：FString / FName / FText</h4>
+                    <p>这组设计直接映射了 C++ 中 <strong>字符串的不同使用场景</strong>：</p>
+                    <table>
+                        <tr><th>类型</th><th>底层结构</th><th>可变性</th><th>比较速度</th><th>适用场景</th></tr>
+                        <tr><td><code>FString</code></td><td><code>TArray&lt;TCHAR&gt;</code> 动态数组</td><td>可变</td><td>O(n) 逐字符</td><td>文件路径、日志、UI 动态文本</td></tr>
+                        <tr><td><code>FName</code></td><td>全局哈希表索引（32位）</td><td><strong>不可变</strong></td><td><strong>O(1) 指针/索引比较</strong></td><td>资源名、骨骼名、Socket 名、高频标识符</td></tr>
+                        <tr><td><code>FText</code></td><td>三部分组成——源字符串 + 翻译 + 本地化格式</td><td>不可变</td><td>O(n)</td><td>玩家可见文本（需翻译成多语言）</td></tr>
+                    </table>
+                    <pre><code>// FName 的核心原理 —— 跟 C++ const 常量池的思想一脉相承
+FName Name1("MyBone");   // 第一次：把 "MyBone" 哈希后存入全局 Name 表
+FName Name2("MyBone");   // 第二次：哈希相同 → 直接返回同一个索引
+// Name1 == Name2  →  只比较 4 字节的索引，不是比较字符串！
+// 全局 Name 表在引擎生命周期内只增不减 —— 本质是一个巨大的 constexpr 池</code></pre>
+                    <div class="tip-card"><strong>🔗 对应 C++ constexpr：</strong>FName 的设计哲学和 C++ 的 <code>constexpr</code> 字符串池、编译期常量折叠是同一个思路——把可变的东西尽量推到编译期/初始化期处理，运行期只做 O(1) 的简单比较。只初始化一次，永不修改。</div>
+
+                    <h4>数学类型：FVector / FRotator / FTransform</h4>
+                    <p>这些类型底层就是 C++ 的基础类型组合，通过<strong>运算符重载</strong>实现数学运算的语法糖：</p>
+                    <pre><code>// FVector —— 本质就是三个 float
+struct FVector {
+    float X, Y, Z;
+    FVector operator+(const FVector&amp; V) const;  // 对应 C++ 运算符重载
+    float Dot(const FVector&amp; V) const;           // 点积
+    FVector Cross(const FVector&amp; V) const;       // 叉积
+    float Size() const;                           // 长度
+    FVector GetSafeNormal() const;                // 单位向量
+};
+
+// FRotator —— Pitch(Y), Yaw(Z), Roll(X)
+// FTransform —— 包含 Translation(FVector) + Rotation(FQuat) + Scale3D(FVector)</code></pre>
+                    <p><code>FColor</code>（RGBA 各 1 字节，共 4 字节）vs <code>FLinearColor</code>（RGBA 各 float，共 16 字节）——这就像 C++ 中选 <code>char</code> 还是 <code>int</code>，是<strong>精度与内存的权衡</strong>。</p>
+                </section>
+
+                <!-- ====== Module 4: 指针与引用 → UE5 智能指针 ====== -->
+                <section id="ue-pointer">
+                    <h2 class="section-title">👉 指针与智能指针</h2>
+                    <span class="ref-tag">指针与引用</span>
+                    <p>UE5 中有<strong>两套并行的指针体系</strong>：一套是 UObject 世界中的指针（被 GC 管理），另一套是非 UObject 的通用指针体系（对应 C++ 智能指针）。理解它们的区别至关重要。</p>
+
+                    <h4>第一套：UObject 指针——裸指针 + GC 追踪</h4>
+                    <p>所有 <code>UObject*</code> 都是<strong>裸指针</strong>，但它们被 GC 系统追踪——这是 UE5 最特殊的设计：</p>
+                    <pre><code>// UObject* 就是普通指针，但加了 GC 保护规则
+UPROPERTY()
+AActor* MyActor;  // ← UPROPERTY 标记 → GC 知道此指针引用了该对象 → 不被回收
+
+AActor* TempActor = GetActor();  // ← 没 UPROPERTY → GC 认为没人引用 → 可能被回收！
+// TempActor 在最坏情况下：你这行代码执行完后，下一秒 GC 就把它删了</code></pre>
+                    <div class="tip-card"><strong>⚠️ 核心规则：</strong>UObject* 是否受 GC 保护，<strong>不取决于它是不是指针，而取决于它有没有 <code>UPROPERTY()</code> 标记</strong>。没有 UPROPERTY 的 UObject* 只是"观察者"——GC 随时可能回收它指向的对象。UE5.1+ 引入 <code>TObjectPtr&lt;T&gt;</code> 替代裸 UObject*，本质上是加了编译期类型检查的包装，运行时仍是裸指针。</div>
+
+                    <h4>IsValid() vs nullptr</h4>
+                    <pre><code>AActor* Ptr = GetSomeActor();
+Ptr-&gt;Destroy();                          // 标记为待删除，但内存可能还没释放
+
+if (Ptr != nullptr) { ... }              // ❌ 对象已被 Destroy，但指针仍非空！
+if (IsValid(Ptr)) { ... }                // ✅ 检查对象是否真正可用（未被标记删除）</code></pre>
+                    <p><code>IsValid()</code> 会检查 UObject 的<strong>内部状态标记</strong>（PendingKill、内部标志位），而不仅仅是地址是否为空。这就像 C++ 中 RAII 对象析构后资源已释放，但原始指针还在——只是 UE5 多了一层引擎级的"半死"状态。</p>
+
+                    <h4>第二套：非 UObject 智能指针</h4>
+                    <p>对于<strong>非 UObject 的 C++ 类</strong>（纯 C++ 逻辑、Slate UI、第三方库），UE5 提供了对标标准库的智能指针：</p>
+                    <table>
+                        <tr><th>UE5</th><th>C++ 标准</th><th>所有权</th><th>使用场景</th></tr>
+                        <tr><td><code>TUniquePtr&lt;T&gt;</code></td><td><code>std::unique_ptr&lt;T&gt;</code></td><td>独占</td><td>工厂函数返回值、PIMPL、Slate Widget 内部成员</td></tr>
+                        <tr><td><code>TSharedPtr&lt;T&gt;</code></td><td><code>std::shared_ptr&lt;T&gt;</code></td><td>共享（引用计数）</td><td>Slate 系统大量使用、多线程共享数据</td></tr>
+                        <tr><td><code>TWeakPtr&lt;T&gt;</code></td><td><code>std::weak_ptr&lt;T&gt;</code></td><td>观察</td><td>打破循环引用、缓存引用</td></tr>
+                        <tr><td><code>TSharedRef&lt;T&gt;</code></td><td>—（UE5 特有）</td><td>共享（保证非空）</td><td>确定永远不为空的共享引用</td></tr>
+                        <tr><td><code>TWeakObjectPtr&lt;T&gt;</code></td><td>—（UE5 特有）</td><td>弱引用 UObject</td><td>跨 GC 周期安全引用 UObject</td></tr>
+                    </table>
+                    <pre><code>// TUniquePtr —— 独占，不可拷贝，对应 unique_ptr
+TUniquePtr&lt;FMyData&gt; Data = MakeUnique&lt;FMyData&gt;();
+// Data2 = Data;  ← 编译错误！不能拷贝
+TUniquePtr&lt;FMyData&gt; Data2 = MoveTemp(Data);  // Data 变为空，Data2 接管
+
+// TSharedPtr —— 引用计数，对应 shared_ptr
+TSharedPtr&lt;FMyData&gt; S1 = MakeShared&lt;FMyData&gt;();
+TSharedPtr&lt;FMyData&gt; S2 = S1;  // 引用计数 = 2</code></pre>
+                    <blockquote>
+                        <p><strong>经验法则：</strong>UObject 派生类 → 裸指针 + <code>UPROPERTY()</code> 保护（UE5.1+ 用 <code>TObjectPtr</code>）。非 UObject 类 → <code>TUniquePtr</code> 优先，真正需要共享时用 <code>TSharedPtr</code>。这和 C++ 中 <code>unique_ptr</code> 优先的原则完全一致。</p>
+                    </blockquote>
+                </section>
+
+                <!-- ====== Module 5: 函数进阶 → UE5 委托系统 ====== -->
+                <section id="ue-delegate">
+                    <h2 class="section-title">⚡ 委托系统与函数</h2>
+                    <span class="ref-tag">函数进阶 / InLine / Lambda</span>
+
+                    <h4>FORCEINLINE —— 强制内联</h4>
+                    <p>UE5 不用 <code>inline</code>，而用 <code>FORCEINLINE</code>——标准 inline 是<strong>建议</strong>，编译器可忽略；<code>FORCEINLINE</code> 是<strong>强制</strong>——Debug 模式也会展开：</p>
+                    <table>
+                        <tr><th>宏</th><th>MSVC 底层</th><th>GCC/Clang 底层</th></tr>
+                        <tr><td><code>FORCEINLINE</code></td><td><code>__forceinline</code></td><td><code>__attribute__((always_inline))</code></td></tr>
+                    </table>
+                    <pre><code>FORCEINLINE float GetHealth() const { return Health; }
+FORCEINLINE FVector GetLocation() const { return Location; }
+// 在性能关键路径（getter、数学运算、FVector 操作）大量使用</code></pre>
+
+                    <h4>委托——C++ 函数指针的工业化升级</h4>
+                    <p>UE5 委托系统直接建立在 C++ <strong>函数指针 + 成员函数指针</strong>之上，但解决了原生函数指针的三大痛点：<strong>类型安全</strong>、<strong>一对多广播</strong>、<strong>蓝图可绑定</strong>。</p>
+                    <table>
+                        <tr><th>委托类型</th><th>C++ 对应</th><th>绑定对象</th><th>蓝图</th><th>适用场景</th></tr>
+                        <tr><td><strong>单播委托</strong><br><code>DECLARE_DELEGATE</code></td><td>函数指针<br><code>void(*)(Args)</code></td><td>单个函数</td><td>❌</td><td>C++ 内部回调、策略模式</td></tr>
+                        <tr><td><strong>多播委托</strong><br><code>DECLARE_MULTICAST_DELEGATE</code></td><td>函数指针列表<br>（观察者模式）</td><td>多个函数</td><td>❌</td><td>事件分发、通知系统</td></tr>
+                        <tr><td><strong>动态单播</strong><br><code>DECLARE_DYNAMIC_DELEGATE</code></td><td>—（运行时反射）</td><td>单个函数</td><td>✅</td><td>蓝图可绑定的回调</td></tr>
+                        <tr><td><strong>动态多播</strong><br><code>DECLARE_DYNAMIC_MULTICAST_DELEGATE</code></td><td>—（事件分发器）</td><td>多个函数</td><td>✅</td><td>蓝图事件分发器（最常用）</td></tr>
+                    </table>
+                    <pre><code>// 声明一个带参数的委托
+DECLARE_DELEGATE_OneParam(FOnHealthChanged, float);    // NewHealth
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDied, AActor*, AActor*); // Victim, Killer
+
+// 绑定（对应 C++ 的"把函数地址赋给函数指针"）
+MyDelegate.BindUObject(this, &amp;AMyActor::OnHealthChanged);
+// Lambda 绑定 —— 对应 C++ 的 lambda + std::function
+MyDelegate.BindLambda([](float NewHealth) { UE_LOG(LogTemp, Log, TEXT("%f"), NewHealth); });
+
+// 执行（对应 C++ 的"通过函数指针调用函数"）
+MyDelegate.ExecuteIfBound(50.0f);   // 单播：只能有一个绑定者
+MyEvent.Broadcast(Killer, Victim);  // 多播：通知所有注册者</code></pre>
+                    <div class="tip-card"><strong>🔗 对应 C++：</strong><code>BindUObject</code> 底层用的是 <strong>C++ 成员函数指针</strong> <code>(T::*FuncPtr)(Args)</code>。非动态委托本质上是<strong>类型安全的函数指针包装器</strong>，动态委托则在上层增加了 UHT 反射支持来实现蓝图绑定和序列化。</div>
+
+                    <h4>UFUNCTION 说明符</h4>
+                    <p>这些标记决定了函数在蓝图、网络、GC 中的行为——本质上是用<strong>宏元数据</strong>标注 C++ 函数属性：</p>
+                    <table>
+                        <tr><th>说明符</th><th>含义</th></tr>
+                        <tr><td><code>BlueprintCallable</code></td><td>蓝图可调用此函数（最常见的标记）</td></tr>
+                        <tr><td><code>BlueprintNativeEvent</code></td><td>蓝图可覆写，C++ 提供默认实现（= 虚函数 + 蓝图可覆写）</td></tr>
+                        <tr><td><code>BlueprintImplementableEvent</code></td><td>纯蓝图实现，C++ 只声明不定义</td></tr>
+                        <tr><td><code>Server / Client / NetMulticast</code></td><td>网络 RPC：谁调用，在哪里执行</td></tr>
+                        <tr><td><code>BlueprintPure</code></td><td>蓝图纯函数（无副作用，类似 C++ const 方法）</td></tr>
+                    </table>
+                </section>
+
+                <!-- ====== Module 6: 内存管理 → UE5 GC 系统 ====== -->
+                <section id="ue-memory">
+                    <h2 class="section-title">🧠 UObject GC 与内存管理</h2>
+                    <span class="ref-tag">内存管理 / 智能指针 / RAII</span>
+                    <p>UE5 对<strong>UObject 派生类</strong>使用<strong>追踪式垃圾回收（Tracing GC）</strong>，对<strong>非 UObject 的纯 C++ 类</strong>使用<strong>智能指针 + RAII</strong>——两套体系并存，对应 C++ 内存管理的两种哲学。</p>
+
+                    <h4>UObject GC 机制 —— 标记-清扫（Mark-Sweep）</h4>
+                    <pre><code>// GC 流程（定期触发，间隔可配置）：
+//   Phase 1: Mark（标记）
+//     GC 从 Root Set（根集）出发，遍历所有 UPROPERTY 引用
+//     → 能到达的对象标记为"可达"
+//     Root Set 包括：
+//       - 所有 UObject（通过 AddToRoot() 手动加入）
+//       - 当前加载的 Level 中的 Actor
+//       - 引擎核心对象（GameInstance、World 等）
+//
+//   Phase 2: Sweep（清扫）
+//     → 未被标记的对象 = 垃圾 → 调用 ConditionalBeginDestroy() → 释放内存</code></pre>
+                    <div class="tip-card"><strong>🔗 对应 C++ RAII：</strong>GC 的 Mark-Sweep 跟 C++ 的手动 <code>new/delete</code> 是<strong>两种不同的内存管理哲学</strong>。但 UE5 在 UObject 析构时仍然遵循 RAII —— <code>BeginDestroy()</code> / <code>FinishDestroy()</code> 就是 UObject 的"析构函数"，在其中释放非 UObject 资源（如文件句柄、网络连接）。</div>
+
+                    <h4>UPROPERTY —— GC 的"可见性标记"</h4>
+                    <p>这直接对应 C++ 中智能指针的"所有权语义"：</p>
+                    <pre><code>UPROPERTY()
+	AActor* ImportantRef;     // "我拥有此引用"→ GC 不会回收 → 类似 shared_ptr
+
+	AActor* WeakRef;          // "我只观察"→ GC 可能随时回收 → 类似使用悬空指针</code></pre>
+                    <p>GC 只关心 <code>UPROPERTY()</code> 标记的成员——它是<strong>反射系统追踪引用关系的唯一入口</strong>，就像 C++ 的 shared_ptr 控制块是引用计数的唯一入口一样。</p>
+
+                    <h4>TWeakObjectPtr 与 TStrongObjectPtr</h4>
+                    <pre><code>// TWeakObjectPtr —— 安全的弱引用（相当于 C++ 的 weak_ptr）
+TWeakObjectPtr&lt;AActor&gt; WeakActor = SomeActor;
+if (WeakActor.IsValid()) {
+    WeakActor-&gt;DoSomething();  // 使用前检查——对象可能已被 GC 回收
+}
+
+// TStrongObjectPtr —— 强引用，阻止 GC
+TStrongObjectPtr&lt;UObject&gt; StrongObj = LoadObject&lt;UObject&gt;(...);
+// 只要 StrongObj 存在，对象就不会被 GC（相当于 AddToRoot 包装器）</code></pre>
+
+                    <h4>Actor 生命周期</h4>
+                    <table>
+                        <tr><th>阶段</th><th>对应 C++ 概念</th><th>关键函数</th></tr>
+                        <tr><td>诞生（创建）</td><td>构造函数</td><td><code>AActor::AActor()</code> / <code>PostInitializeComponents()</code></td></tr>
+                        <tr><td>活跃（运行中）</td><td>正常对象状态</td><td><code>BeginPlay()</code> → Tick循环 → ...</td></tr>
+                        <tr><td>标记待删除</td><td>—（UE5 特有）</td><td><code>Destroy()</code>——不通 C++ delete，只是打标记</td></tr>
+                        <tr><td>延迟销毁</td><td>析构前等待</td><td>等 GC 下一轮清扫——可能延迟数帧</td></tr>
+                        <tr><td>真正销毁</td><td>析构函数</td><td><code>BeginDestroy()</code> → <code>FinishDestroy()</code> → <code>~UObject()</code></td></tr>
+                    </table>
+                </section>
+
+                <!-- ====== Module 7: 面向对象 → UE5 对象模型 ====== -->
+                <section id="ue-oop">
+                    <h2 class="section-title">🏛️ 对象模型与反射</h2>
+                    <span class="ref-tag">面向对象 / 继承 / 多态 / 虚函数</span>
+
+                    <h4>UObject 继承体系</h4>
+                    <p>UE5 的<strong>所有需要反射、GC、序列化的类</strong>都继承自 UObject。这套继承体系直接建立在 C++ 虚函数和多态之上：</p>
+                    <pre><code>UObject                           // 根基类：提供 GC、反射、序列化、网络复制
+  ├── UActorComponent             // 组件基类（Tick、OnRegister）
+  │     ├── USceneComponent       // 有 Transform 的组件
+  │     └── UActorComponent ...   // 纯逻辑组件（如 UMovementComponent）
+  ├── AActor                      // 可放入关卡的实体（BeginPlay、Tick、Destroy）
+  │     ├── APawn                 // 可被控制的 Actor（含 Controller 引用）
+  │     │     └── ACharacter      // 含 CapsuleComponent + MovementComponent
+  │     └── AController           // Pawn 的控制器
+  ├── UUserWidget                 // UMG UI 基类
+  └── UDataAsset / UPrimaryDataAsset  // 数据资产</code></pre>
+                    <div class="tip-card"><strong>🔗 对应 C++ 继承：</strong>这套体系就是标准 C++ 继承（<code>class A : public B</code>）+ 虚函数（<code>virtual</code>）的直接应用。每个层级都通过 <code>virtual void BeginPlay()</code> 这样的虚函数让子类覆写行为。理解 C++ 的 vtable 就能理解 UE5 的虚函数分派。</div>
+
+                    <h4>Cast&lt;&gt; 与 IsA&lt;&gt; —— UE5 的 RTTI</h4>
+                    <p>UE5 不用 <code>dynamic_cast</code>（因为禁用了 C++ RTTI），而是用自己的反射系统实现更快的类型转换：</p>
+                    <pre><code>// Cast —— 等价于 dynamic_cast，但基于反射系统的类型比较
+AActor* GenericActor = ...;
+APawn* P = Cast&lt;APawn&gt;(GenericActor);
+if (P) { /* 确实是 Pawn */ }
+
+// IsA —— 等价于 typeid 检查
+bool isCharacter = SomeActor-&gt;IsA&lt;ACharacter&gt;();
+
+// Cast 的内部实现原理（简化）：
+// 1. 获取对象的 UClass*（通过 GetClass() 虚函数）
+// 2. 遍历继承链，看目标类型是否在链上（类似 C++ 的 type_info 继承遍历）
+// 3. 匹配成功 → 返回 static_cast 后的指针
+// 4. 匹配失败 → 返回 nullptr</code></pre>
+
+                    <h4>接口系统</h4>
+                    <pre><code>// 声明接口（对应 C++ 纯虚类）
+UINTERFACE(Blueprintable)         // UHT 生成的接口 UClass
+class UMyInterface : public UInterface { GENERATED_BODY() };
+
+class IMyInterface {              // 实际的 C++ 接口类
+    GENERATED_BODY()
+public:
+    virtual void DoSomething() = 0;  // 纯虚函数
+};
+
+// 实现接口（相当于 C++ 的多重继承）
+class AMyActor : public AActor, public IMyInterface {
+    virtual void DoSomething() override { /* ... */ }
+};
+
+// 接口指针获取（不用 Cast，用特定 API）
+IMyInterface* Iface = Cast&lt;IMyInterface&gt;(Actor);
+// 内部用 IsImplementedInterface() 检查 + static_cast</code></pre>
+
+                    <h4>CDO（Class Default Object）</h4>
+                    <p>每个 <code>UClass</code> 都有一个<strong>唯一的默认对象实例</strong>，在类注册时自动创建。它存储了<strong>类的默认属性值</strong>——这利用了 C++ 的静态存储期概念：</p>
+                    <pre><code>// CDO 创建流程：
+// 1. UHT 生成的 AutoInitialize 在 main() 前运行
+// 2. 调用 GetPrivateStaticClass() 注册 UClass
+// 3. 引擎用 NewObject&lt;T&gt;() 创建唯一 CDO 实例
+//    → 调用构造函数（无参）→ 用 config/ini 覆盖属性 → CDO 保存为 UClass 的成员
+//
+// 使用 CDO：
+const AMyActor* DefaultActor = GetDefault&lt;AMyActor&gt;();  // 获取 CDO
+float DefaultHealth = DefaultActor-&gt;Health;             // 读取默认值</code></pre>
+
+                    <h4>反射机制原理（总结）</h4>
+                    <p>UE5 的反射系统（UClass / UProperty / UFunction）构建在以下 C++ 基础之上：</p>
+                    <ul>
+                        <li><strong>静态成员变量</strong> → 存储类型元数据表，main() 前初始化注册</li>
+                        <li><strong>虚函数</strong> → <code>GetClass()</code> 返回运行时类型，对应 vtable 查询</li>
+                        <li><strong>函数指针</strong> → UFunction 内部用成员函数指针实现动态调用</li>
+                        <li><strong>模板 &amp; 宏展开</strong> → GENERATED_BODY() 自动生成样板反射代码</li>
+                        <li><strong>继承链</strong> → UObject 作为所有反射类型的根基类，提供 <code>__vptr</code> + <code>UClass*</code></li>
+                    </ul>
+                    <blockquote>
+                        <p>纯血 C++ 提供了"砖块"（类型、继承、模板、宏、编译模型），UE5 用这些砖块砌出了反射这座"建筑"。理解砖块才能理解建筑为什么这样设计。</p>
+                    </blockquote>
+                </section>
+
+                <!-- ====== Module 8: 模板与泛型 → UE5 模板应用 ====== -->
+                <section id="ue-template">
+                    <h2 class="section-title">📦 模板与泛型应用</h2>
+                    <span class="ref-tag">模板与泛型编程</span>
+                    <p>UE5 大量使用 C++ 模板，但风格更接近"早期 C++ 模板"——<strong>少用 SFINAE、多用 tag dispatch + 特化</strong>，优先考虑编译速度和调试体验。</p>
+
+                    <h4>TSubclassOf&lt;T&gt; —— 类型安全的类引用</h4>
+                    <p>这是模板在 UE5 中最经典的应用——封装 <code>UClass*</code> 指针，限制它只能指向特定类型的子类：</p>
+                    <pre><code>// TSubclassOf 利用了模板的类型约束能力
+UPROPERTY(EditAnywhere)
+TSubclassOf&lt;AActor&gt; ActorClass;       // 在编辑器中只能选 AActor 的子类
+
+UPROPERTY(EditAnywhere)
+TSubclassOf&lt;ACharacter&gt; CharacterClass; // 只能选 ACharacter 及其子类
+
+// 内部实现（简化）：
+template &lt;typename T&gt;
+class TSubclassOf {
+    UClass* Class;
+public:
+    // 检查传入的 UClass 是否为 T 的子类（通过 IsChildOf）
+    TSubclassOf(UClass* InClass) {
+        if (InClass &amp;&amp; InClass-&gt;IsChildOf(T::StaticClass())) {
+            Class = InClass;
+        }
+    }
+};</code></pre>
+
+                    <h4>TIsDerivedFrom —— 编译期类型判断（SFINAE）</h4>
+                    <pre><code>// 编译期判断 Derived 是否继承自 Base
+template&lt;typename Derived, typename Base&gt;
+struct TIsDerivedFrom {
+    // 利用 SFINAE：如果转换失败，选择返回 false 的重载
+    // 实质上利用了编译器的重载决议和 static_cast 的编译期检查
+    enum { Value = __is_base_of(Base, Derived) };  // 编译器内建
+};
+
+// 应用：模板函数只接受特定类型的参数
+template&lt;typename T&gt;
+typename TEnableIf&lt;TIsDerivedFrom&lt;T, AActor&gt;::Value&gt;::Type
+ProcessActor(T* Actor) { /* 只有 AActor 子类才能调这个函数 */ }</code></pre>
+
+                    <h4>模板在 UE5 中的常见应用场景</h4>
+                    <table>
+                        <tr><th>场景</th><th>模板用法</th><th>示例</th></tr>
+                        <tr><td>容器</td><td>类模板</td><td><code>TArray&lt;int32&gt;</code>, <code>TMap&lt;FName, int32&gt;</code></td></tr>
+                        <tr><td>类型约束</td><td>SFINAE + traits</td><td><code>TSubclassOf&lt;T&gt;</code>, <code>TIsDerivedFrom&lt;T,U&gt;</code></td></tr>
+                        <tr><td>算法</td><td>函数模板</td><td><code>Algo::Sort()</code>, <code>Algo::Find()</code></td></tr>
+                        <tr><td>委托</td><td>可变参数模板</td><td><code>TBaseDelegate&lt;RetType, ParamTypes...&gt;</code></td></tr>
+                        <tr><td>数学</td><td>数值模板参数</td><td><code>TVector&lt;T&gt;</code>, <code>TInterval&lt;T&gt;</code></td></tr>
+                    </table>
+                    <blockquote>
+                        <p>UE5 的模板风格偏保守——尽量避免复杂的模板元编程，原因很简单：<strong>编译时间</strong>。百万行级别的代码库中，每多一层模板递归就多几千个翻译单元的编译负担。引擎倾向于用<strong>代码生成（UHT）</strong>替代<strong>模板元编程</strong>——写宏让工具生成代码，而不是让编译器递归展开模板。</p>
+                    </blockquote>
+                </section>
+
+                <!-- ====== Module 9: STL 标准库 → UE5 容器 vs STL ====== -->
+                <section id="ue-containers">
+                    <h2 class="section-title">🗂️ UE5 容器 vs STL</h2>
+                    <span class="ref-tag">STL 标准库 / 容器 / 分配器</span>
+
+                    <h4>为什么 UE5 不用 STL 容器？</h4>
+                    <ol>
+                        <li><strong>历史原因</strong>——UE 诞生于 1998 年，当时 STL 在不同编译器上的实现<strong>天差地别</strong>（性能、行为、内存布局都不一致）。跨平台一致性是第一需求。</li>
+                        <li><strong>内存控制</strong>——STL 容器的 allocator 在 C++11 之前是<strong>类型的一部分</strong>（<code>std::vector&lt;int, MyAlloc&gt;</code> 和 <code>std::vector&lt;int&gt;</code> 是不同的类型！）。UE5 的分配器是<strong>模板参数</strong>，可自由切换。</li>
+                        <li><strong>调试体验</strong>——UE5 容器有边界检查、内存追踪、内部状态 dump。STL 在 Debug 模式下性能极差，Release 模式下出错时信息极少。</li>
+                        <li><strong>统一序列化/网络复制</strong>——UE5 容器原生支持 FArchive 序列化和属性复制，STL 容器需要额外包装。</li>
+                    </ol>
+
+                    <h4>核心容器对照表</h4>
+                    <table>
+                        <tr><th>UE5 容器</th><th>对应 STL</th><th>底层结构</th><th>关键差异</th></tr>
+                        <tr><td><code>TArray&lt;T&gt;</code></td><td><code>std::vector&lt;T&gt;</code></td><td>动态数组（连续）</td><td>UE5 支持自定义分配器为模板参数；扩容策略可配置</td></tr>
+                        <tr><td><code>TMap&lt;K,V&gt;</code></td><td><code>std::unordered_map&lt;K,V&gt;</code></td><td>哈希表（Separate Chaining）</td><td>UE5 的 TMap 元素有序！按插入顺序遍历；STL unordered_map 无序</td></tr>
+                        <tr><td><code>TSet&lt;T&gt;</code></td><td><code>std::unordered_set&lt;T&gt;</code></td><td>哈希表</td><td>同上——TSet 保持插入顺序</td></tr>
+                        <tr><td><code>TMultiMap&lt;K,V&gt;</code></td><td><code>std::unordered_multimap</code></td><td>哈希表（允许多值）</td><td>一个 Key 可对应多个 Value</td></tr>
+                        <tr><td><code>TSortedMap&lt;K,V&gt;</code></td><td><code>std::map&lt;K,V&gt;</code></td><td>红黑树（有序）</td><td>UE5 少用有序容器，优先哈希表</td></tr>
+                        <tr><td><code>TArrayView&lt;T&gt;</code></td><td><code>std::span&lt;T&gt;</code></td><td>指针+长度（不拥有）</td><td>轻量级视图，不拷贝数据，只持有指针和大小</td></tr>
+                        <tr><td><code>FString</code></td><td><code>std::string</code></td><td>TArray&lt;TCHAR&gt;</td><td>UE5 原生 UTF-16，std::string 是 char</td></tr>
+                    </table>
+
+                    <h4>TArray 的扩容与分配器</h4>
+                    <p>TArray 的扩容机制和 vector 类似，但它把<strong>分配器作为模板参数</strong>暴露出来，对应 SGI STL 的 allocator 思想：</p>
+                    <pre><code>// TArray 默认使用 FDefaultAllocator（封装了 GMalloc）
+TArray&lt;int32&gt; Arr;  // 内部用 FHeapAllocator → GMalloc → FMemory::Malloc
+
+// 可以切换分配器：
+TArray&lt;int32, TInlineAllocator&lt;4&gt;&gt; SmallArr;    // ≤4 个元素时用栈内存，超了才堆分配
+TArray&lt;int32, TInlineAllocator&lt;16&gt;&gt; MediumArr;  // ≤16 个元素用栈内存
+// TInlineAllocator 利用了 C++ 的局部变量（栈分配），小而快</code></pre>
+                    <p><strong>TInlineAllocator</strong> 是 UE5 对 SGI STL 双层配置器思想的现代实践——<strong>小内存用栈免 malloc，大内存才走堆</strong>。这和 SGI 的 free_list 池化思路一致，目标相同：消除频繁小内存分配的开销。</p>
+
+                    <h4>UE5 的 FMemory 与 GMalloc</h4>
+                    <pre><code>// UE5 有两层内存分配抽象：
+FMemory::Malloc(Size);   // 第一层：工具函数，加调试追踪
+  └── GMalloc-&gt;Malloc(); // 第二层：可替换的底层分配器（默认是 FMallocBinned）
+                         //   FMallocBinned2  —— UE5 默认，分桶分配器（类似 SGI alloc）
+                         //   FMallocAnsi      —— 直接调 malloc（类似 new_allocator）
+                         //   FMallocTBB       —— Intel TBB 分配器
+                         //   FMallocStomp     —— Debug 用，检测越界和悬空指针</code></pre>
+                    <blockquote>
+                        <p><strong>FMallocBinned2 跟 SGI STL alloc 的相似之处：</strong>按大小分桶（bins），小对象走池化分配，减少 cookie 开销和内核调用。区别在于 SGI 用 16 条自由链表手动管理，UE5 的 Binned 更复杂但原理相同——<strong>空间换时间，减少 malloc 调用次数</strong>。</p>
+                    </blockquote>
+
+                    <h4>TArray 深度用法</h4>
+                    <p>TArray 是 UE5 中使用频率最高的容器。对应 C++ 的 <code>std::vector</code>，但有更丰富的调试和内存控制能力：</p>
+                    <pre><code>// ===== 创建与初始化 =====
+TArray&lt;int32&gt; Arr;                          // 空数组
+TArray&lt;int32&gt; Arr2 = {1, 2, 3, 4, 5};      // 初始化列表（C++11）
+TArray&lt;int32&gt; Arr3; Arr3.Reserve(100);      // 预分配容量（类似 vector::reserve）
+TArray&lt;FVector&gt; Points; Points.SetNum(64);  // 直接设置元素数量（64 个默认构造的 FVector）
+
+// ===== 添加（对应 push_back / emplace_back）=====
+Arr.Add(42);                  // 尾加，容量不足时触发扩容
+Arr.Emplace(10);              // 原地构造（对应 emplace_back），避免临时对象拷贝
+Arr.EmplaceAt(0, 99);         // 在索引 0 处原地构造
+Arr.Insert(5, 2);             // 在索引 2 处插入值 5（O(n)）
+Arr.Append({10, 20, 30});     // 批量追加
+
+// ===== 删除 =====
+Arr.Remove(42);               // 删除所有值为 42 的元素（线性查找 + 搬移）
+Arr.RemoveAt(3);              // 按索引删除（O(n)，后面的元素前移）
+Arr.RemoveAtSwap(3);          // ⚡ 按索引删除但用最后一个元素填补空位（O(1)，不保序）
+Arr.Pop();                    // 移除尾部（stack 用法）
+Arr.Empty();                  // 清空但保留内存（= clear）
+Arr.Reset();                  // 清空并释放内存
+
+// ===== 查找与判断 =====
+bool bContains = Arr.Contains(42);             // 是否存在（线性查找 O(n)）
+int32 Idx = Arr.Find(42);                      // 返回索引，找不到返回 INDEX_NONE(-1)
+int32 Idx2 = Arr.FindLast(42);                 // 从尾部查找
+FVector* Found = Points.FindByPredicate(       // 按条件查找
+    [](const FVector&amp; V) { return V.X &gt; 100.0f; });
+int32 Count = Arr.FindLastByPredicate(         // 从尾部按条件查找
+    [](int32 V) { return V &gt; 50; });
+
+// ===== 排序与算法（对应 &lt;algorithm&gt;）=====
+Arr.Sort();                                    // 升序（默认 operator&lt;）
+Arr.Sort([](int32 A, int32 B) { return A &gt; B; }); // 降序
+Arr.StableSort([](int32 A, int32 B) { ... });  // 稳定排序
+Arr.HeapSort();                                // 堆排序
+Points.Sort([](const FVector&amp; A, const FVector&amp; B) {
+    return A.Size() &lt; B.Size();                // 按向量长度排序
+});
+
+// ===== 内存管理 =====
+int32 Num    = Arr.Num();        // 元素数量（= size()）
+int32 Max    = Arr.Max();        // 当前容量（= capacity()）
+int32 Slack  = Arr.GetSlack();   // 剩余容量 = Max - Num
+Arr.Shrink();                    // 释放多余容量（= shrink_to_fit）
+Arr.Reserve(256);                // 预分配，避免反复扩容</code></pre>
+                    <p><strong>RemoveAtSwap 的底层</strong>——体现了 UE5"游戏性能优先"的设计哲学：</p>
+                    <pre><code>// RemoveAtSwap 内部实现（简化）：
+void RemoveAtSwap(int32 Index) {
+    if (Index &lt; Num() - 1) {
+        // 用最后一个元素覆盖被删除的位置——O(1)！
+ Data[Index] = MoveTemp(Data[Num() - 1]);  // 移动赋值
+    }
+    --ArrayNum;  // 只减计数，不动内存
+}
+// 代价：元素顺序被破坏。适用场景：不关心顺序，只当"池"用</code></pre>
+
+                    <h4>TMap 深度用法</h4>
+                    <p>TMap 底层是<strong>哈希表（Separate Chaining）</strong>，但遍历时<strong>保持插入顺序</strong>——这是对 STL <code>unordered_map</code> 的最大改进：</p>
+                    <pre><code>// ===== 创建 =====
+TMap&lt;FName, int32&gt; Scores;
+TMap&lt;int32, FString&gt; IdToName;
+TMap&lt;FName, TArray&lt;FVector&gt;&gt; BonePositions;  // 嵌套容器
+
+// ===== 添加与更新 =====
+Scores.Add(TEXT("Player1"), 100);          // 添加（Key 已存在则断言失败）
+Scores.Emplace(TEXT("Player2"), 200);      // 原地构造
+Scores.FindOrAdd(TEXT("Player3"), 0);      // 存在则返回引用，不存在则添加后返回
+Scores[TEXT("Player1")] = 150;             // operator[] —— 存在就更新，不存在就插入默认值
+
+// ===== 查找（关键：TMap 的 Find 返回指针，不是迭代器）=====
+int32* Found = Scores.Find(TEXT("Player1"));   // 返回值的指针！
+if (Found) {
+    int32 Score = *Found;                      // 解引用获取值
+    *Found = 999;                              // 修改（直接通过指针修改 Map 中的值）
+}
+// 这和 STL 的 iterator 完全不同——更接近 C 风格的"查表返回指针"
+
+// ===== 遍历 =====
+// 方式1：范围 for（推荐，简洁）
+for (const TPair&lt;FName, int32&gt;&amp; Pair : Scores) {
+    UE_LOG(LogTemp, Log, TEXT("%s → %d"), *Pair.Key.ToString(), Pair.Value);
+}
+// 方式2：结构化绑定（C++17）
+for (const auto&amp; [Key, Value] : Scores) {
+    UE_LOG(LogTemp, Log, TEXT("%s → %d"), *Key.ToString(), Value);
+}
+// 方式3：迭代器查找并修改
+for (auto It = Scores.CreateIterator(); It; ++It) {
+    if (It-&gt;Value &lt; 60) {
+        It.RemoveCurrent();  // 遍历中安全删除
+    }
+}
+
+// ===== 删除 =====
+Scores.Remove(TEXT("Player1"));       // 按 Key 删除
+int32 Removed = Scores.RemoveAndCopyValue(TEXT("Player1")); // 删除并返回旧值
+Scores.Empty();                       // 清空
+Scores.Reset();                       // 清空 + 释放 buckets
+
+// ===== 其他常用 =====
+int32 Count = Scores.Num();
+bool bHas = Scores.Contains(TEXT("Player1"));
+Scores.Reserve(256);                  // 预分配 bucket
+TArray&lt;FName&gt; Keys;
+Scores.GetKeys(Keys);                 // 获取所有 Key
+TArray&lt;int32&gt; Values;
+Scores.GenerateValueArray(Values);    // 获取所有 Value</code></pre>
+                    <div class="tip-card"><strong>🔗 TMap Find 返回指针 vs STL 返回 iterator：</strong>这是 UE5 容器 API 风格的缩影——<strong>用指针代替迭代器</strong>。指针天然支持 <code>if (ptr)</code> 判空，比 <code>if (it != map.end())</code> 简洁；而且指针可以直接解引用修改值，不需要 <code>it->second</code>。这实际上是 C 风格和 C++ 风格的折中——保持了底层"指针就是地址"的直觉。</div>
+
+                    <h4>TSet 深度用法</h4>
+                    <p>TSet 可以理解为"没有 Value 的 TMap"——只存 Key，保证唯一性，底层同样是哈希表：</p>
+                    <pre><code>// ===== 创建与操作 =====
+TSet&lt;FName&gt; ActiveTags;
+ActiveTags.Add(TEXT("Poisoned"));
+ActiveTags.Add(TEXT("Burning"));
+ActiveTags.Emplace(TEXT("Stunned"));
+
+// 添加——已存在时返回索引，不重复添加
+int32 Idx = ActiveTags.Add(TEXT("Poisoned"));  // 返回已有元素的索引，不重复
+
+// ===== 查找 =====
+bool bHasPoison = ActiveTags.Contains(TEXT("Poisoned"));  // O(1) 平均
+FName* Found = ActiveTags.Find(TEXT("Burning"));           // 返回元素指针
+int32 Index = ActiveTags.FindId(TEXT("Stunned"));          // 返回内部索引（用于快速访问）
+
+// ===== 集合运算 =====
+TSet&lt;int32&gt; A = {1, 2, 3, 4};
+TSet&lt;int32&gt; B = {3, 4, 5, 6};
+
+TSet&lt;int32&gt; UnionSet = A.Union(B);            // 并集 {1,2,3,4,5,6}
+TSet&lt;int32&gt; InterSet = A.Intersect(B);        // 交集 {3,4}
+TSet&lt;int32&gt; DiffSet  = A.Difference(B);       // 差集 {1,2}（元素在 A 但不在 B）
+
+// ===== 删除 =====
+ActiveTags.Remove(TEXT("Stunned"));          // O(1) 平均
+for (auto It = ActiveTags.CreateIterator(); It; ++It) {
+    if (It-&gt;ToString().StartsWith(TEXT("B"))) {
+        It.RemoveCurrent();  // 遍历中安全删除
+    }
+}
+
+// ===== 遍历 =====
+for (const FName&amp; Tag : ActiveTags) { ... }
+for (auto It = ActiveTags.CreateConstIterator(); It; ++It) { ... }</code></pre>
+
+                    <h4>TTuple —— UE5 的元组</h4>
+                    <p>UE5 的 <code>TTuple</code> 就是 <code>std::tuple</code> 的引擎版本，用于在模板代码中打包多个不同类型的数据：</p>
+                    <pre><code>// ===== 创建 TTuple =====
+TTuple&lt;int32, FString, float&gt; Data(42, TEXT("Hello"), 3.14f);
+
+// UE5 特有：MakeTuple 工厂函数（类似 std::make_tuple）
+auto Data2 = MakeTuple(100, FString(TEXT("World")), 2.718f);
+
+// ===== 访问元素 =====
+int32 First  = Data.Get&lt;0&gt;();            // 按索引获取（编译期确定类型）
+FString Second = Data.Get&lt;1&gt;();
+float Third   = Data.Get&lt;2&gt;();
+
+// C++17 结构化绑定
+auto&amp; [A, B, C] = Data;
+// A=42, B="Hello", C=3.14
+
+// ===== 修改元素 =====
+Data.Get&lt;0&gt;() = 999;                     // Get 返回引用，可以直接修改
+Data.Set&lt;1&gt;(TEXT("Modified"));
+
+// ===== 解包（Unpack/Tie）=====
+int32 OutInt;
+FString OutStr;
+float OutFloat;
+// UE5 风格的 Tie（类似 std::tie + 结构化绑定混合）
+Tie(OutInt, OutStr, OutFloat) = Data;   // 一次解包到多个变量
+
+// ===== 实际应用：函数返回多个值 =====
+TTuple&lt;bool, FVector&gt; FindSpawnPoint(AActor* Requester) {
+    if (/* 找到合法点 */) {
+        return MakeTuple(true, FVector(100, 200, 300));
+    }
+    return MakeTuple(false, FVector::ZeroVector);
+}
+
+// 使用
+auto [bFound, Location] = FindSpawnPoint(MyActor);
+if (bFound) {
+    SpawnActorAt(Location);
+}
+
+// ===== 实际应用：TMap 中存多值（Value 是 Tuple）=====
+TMap&lt;FName, TTuple&lt;int32, float, bool&gt;&gt; ItemData;
+ItemData.Add(TEXT("Sword"), MakeTuple(10, 3.5f, true));
+
+auto&amp; [Damage, Weight, bEquipped] = ItemData[TEXT("Sword")];
+// Damage=10, Weight=3.5, bEquipped=true</code></pre>
+                    <blockquote>
+                        <p><strong>设计哲学：</strong>UE5 的 TTuple 设计原则和 STL tuple 一致——<strong>编译期确定类型，运行期通过索引访问</strong>。每个 <code>Get&lt;N&gt;()</code> 在编译期就确定了返回类型，零运行时开销。核心区别在于 UE5 的 TTuple 可以与反射/序列化系统集成——带 <code>UPROPERTY</code> 的结构体在 UE5 中通常比 TTuple 更优先，因为蓝图无法理解 TTuple。</p>
+                    </blockquote>
+                </section>
+
+                <!-- ====== Module 10: 现代 C++ → UE5 中的现代 C++ ====== -->
+                <section id="ue-modern">
+                    <h2 class="section-title">🚀 现代 C++ 在 UE5</h2>
+                    <span class="ref-tag">现代 C++ / C++11/17/20</span>
+
+                    <h4>UE5 的 C++ 标准要求</h4>
+                    <table>
+                        <tr><th>UE 版本</th><th>C++ 标准</th><th>关键特性</th></tr>
+                        <tr><td>UE 4.x</td><td>C++14 起步，部分 C++17</td><td>auto、lambda、智能指针、移动语义</td></tr>
+                        <tr><td>UE 5.0~5.3</td><td>C++17</td><td>结构化绑定、std::optional、if constexpr</td></tr>
+                        <tr><td>UE 5.4+</td><td>C++20（逐步）</td><td>Concepts、std::span（对应 TArrayView）、ranges</td></tr>
+                    </table>
+
+                    <h4>移动语义——MoveTemp</h4>
+                    <p><code>MoveTemp</code> 就是 <code>std::move</code> 的 UE5 包装。UE5 故意不用标准名，保持命名一致性（MoveTemp 而非 move）：</p>
+                    <pre><code>// MoveTemp = std::move —— 把左值转成右值引用，触发移动语义
+TArray&lt;int32&gt; Source = {1, 2, 3};
+TArray&lt;int32&gt; Dest = MoveTemp(Source);  // Source 变为空，没有拷贝！
+
+// Forward —— 完美转发（对应 std::forward）
+template&lt;typename T&gt;
+void Wrapper(T&amp;&amp; Arg) {
+    TargetFunc(Forward&lt;T&gt;(Arg));  // 保持 Arg 的左值/右值属性
+}</code></pre>
+
+                    <h4>UE5 对现代 C++ 的取舍</h4>
+                    <div class="tip-card"><strong>⚖️ UE5 的立场：</strong>Epic 对现代 C++ 持<strong>"谨慎采纳"</strong>态度——不是所有新特性都适合百万行级别的游戏引擎。编译时间、调试体验、跨平台一致性比语法糖更重要。</div>
+                    <table>
+                        <tr><th>特性</th><th>UE5 态度</th><th>原因</th></tr>
+                        <tr><td><code>auto</code></td><td>✅ 大量使用</td><td>减少冗长类型名（尤其 TMap::TConstIterator），提高可读性</td></tr>
+                        <tr><td>Range-for</td><td>✅ 推荐使用</td><td><code>for (AActor* Actor : Actors)</code> 简洁安全</td></tr>
+                        <tr><td><code>nullptr</code></td><td>✅ 替代 NULL</td><td>类型安全，不和 int 歧义</td></tr>
+                        <tr><td><code>override</code></td><td>✅ 强制要求</td><td>编译器验证是否正确覆写了基类虚函数</td></tr>
+                        <tr><td><code>enum class</code></td><td>⚠️ 代替 UENUM</td><td>UENUM 有反射，强类型枚举没有——需要反射时用 UENUM</td></tr>
+                        <tr><td>结构化绑定</td><td>⚠️ 有限使用</td><td><code>auto [Key, Value] = Map.Find(Key);</code></td></tr>
+                        <tr><td>Concepts (C++20)</td><td>⚠️ 实验性</td><td>UE5.4+ 开始引入，用于约束容器和算法的模板参数</td></tr>
+                        <tr><td>异常（Exceptions）</td><td>❌ 禁用</td><td>性能开销 + 不可预测的控制流。UE5 用返回值 + IsValid() 检查</td></tr>
+                        <tr><td>RTTI (dynamic_cast)</td><td>❌ 禁用</td><td>空间开销大。UE5 用反射系统的 Cast&lt;&gt; 替代</td></tr>
+                        <tr><td>STL 容器</td><td>❌ 不推荐</td><td>UE5 有自己的容器体系（见 Module 9）</td></tr>
+                    </table>
+
+                    <h4>UE5 风格的现代 C++ 示例</h4>
+                    <pre><code>// ===== UE5 风格的 auto + range-for =====
+for (const auto&amp; Pair : MyMap) {          // auto → TMap&lt;FName, int32&gt;::ElementType
+    UE_LOG(LogTemp, Log, TEXT("%s → %d"), *Pair.Key.ToString(), Pair.Value);
+}
+
+// ===== 结构化绑定（C++17） =====
+if (auto* Found = MyMap.Find(SearchKey)) {
+    auto&amp; [Key, Value] = *Found;          // Key=FName, Value=int32
+}
+
+// ===== 移动语义避免拷贝 =====
+TArray&lt;FVector&gt; GeneratePoints(int32 Count) {
+    TArray&lt;FVector&gt; Points;
+    Points.Reserve(Count);
+    for (int32 i = 0; i &lt; Count; ++i) {
+        Points.Add(FVector(i, i*2, i*3));
+    }
+    return MoveTemp(Points);  // 移动返回，避免拷贝整数组
+}
+
+// ===== Lambda + 委托（UE5 风格） =====
+AsyncTask(ENamedThreads::GameThread, [WeakThis = TWeakObjectPtr&lt;AActor&gt;(this)]() {
+    if (WeakThis.IsValid()) {
+        WeakThis-&gt;DoSomething();  // 回到 GameThread 安全操作
+    }
+});</code></pre>
+                    <blockquote>
+                        <p>理解 UE5 对现代 C++ 的态度，就是理解<strong>工程现实与语言美学的权衡</strong>。“好用”在百万行代码、多平台、百人协作面前，比"正确"更重要。但核心特性——移动语义、auto、lambda、智能指针——仍然是 UE5 性能基石，用好了才能写出高性能的游戏代码。</p>
+                    </blockquote>
+                </section>
+
+            </aside>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 Aisssky | 仅供学习交流</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aisssky | PRESS START</title>
+    <meta name="description" content="Aisssky 像素黑白风开屏页">
+    <style>
+        /* ==================== 像素字体(本地,含全量中文) ==================== */
+        @font-face {
+            font-family: "Fusion Pixel SC";
+            src: url("Assets/fonts/fusion-pixel-12px-proportional-sc.woff2") format("woff2");
+            font-weight: 400; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Fusion Pixel Mono SC";
+            src: url("Assets/fonts/fusion-pixel-12px-monospaced-sc.woff2") format("woff2");
+            font-weight: 400; font-style: normal; font-display: swap;
+        }
+
+        /* ==================== 基础:单屏,禁止滚动 ==================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            background: #000; color: #fff;
+            font-family: "Fusion Pixel SC", "Zpix", "Microsoft YaHei", monospace;
+            letter-spacing: 1px;
+        }
+        ::selection { background: #fff; color: #000; }
+
+        /* ==================== CRT 覆盖层:扫描线 + 暗角 ==================== */
+        .scanlines {
+            position: fixed; inset: 0; z-index: 50; pointer-events: none;
+            background:
+                radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.5) 100%),
+                repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);
+        }
+
+        /* ==================== CRT 开机动画(白线展开→消失) ==================== */
+        .crt-flash {
+            position: fixed; inset: 0; z-index: 99; background: #fff; pointer-events: none;
+            animation: crt-on .55s ease-out .05s forwards;
+        }
+        @keyframes crt-on {
+            0%   { transform: scale(1, 1);      opacity: 1; }
+            55%  { transform: scale(1, .012);   opacity: 1; }
+            90%  { transform: scale(.02, .012); opacity: 1; }
+            100% { transform: scale(0, 0);      opacity: 0; }
+        }
+        /* 点击 GO! 后的关机动画(反向:收成一条白线) */
+        body.off .crt-flash { animation: crt-off .32s ease-in forwards; }
+        @keyframes crt-off {
+            0%   { transform: scale(1, .012); opacity: 1; }
+            70%  { transform: scale(1, .012); opacity: 1; }
+            100% { transform: scale(.02, .012); opacity: 1; }
+        }
+        body.off .screen { animation: screen-die .3s steps(3) forwards; }
+        @keyframes screen-die { to { opacity: 0; transform: scale(1, .85); } }
+
+        /* ==================== 屏幕主体 ==================== */
+        .screen {
+            position: relative; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; overflow: hidden; padding: 24px;
+        }
+        .binary-bg {
+            position: absolute; inset: 0; z-index: 0;
+            font-size: 3rem; line-height: 1.1; opacity: .04;
+            word-break: break-all; user-select: none; overflow: hidden;
+        }
+
+        /* ==================== 引导终端文字 ==================== */
+        .boot {
+            position: absolute; top: 28px; left: 32px; z-index: 2;
+            font-family: "Fusion Pixel Mono SC", monospace;
+            font-size: 12px; line-height: 2; text-align: left;
+            opacity: .8; white-space: pre-wrap; user-select: none;
+        }
+        .boot::after { content: "█"; animation: blink .8s steps(1) infinite; }
+        .boot.done::after { content: ""; }
+
+        /* ==================== 主舞台(怪兽+标题+GO) ==================== */
+        .stage { position: relative; z-index: 1; display: none; flex-direction: column; align-items: center; }
+        .stage.on { display: flex; animation: appear .4s steps(4) both; }
+        @keyframes appear { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+        .invader {
+            font-size: 8px; width: 11em; height: 8em; margin-bottom: 52px;
+            color: #fff; position: relative;
+            animation: hover-float 1.2s steps(2, jump-none) infinite;
+        }
+        .invader::before {
+            content: ""; position: absolute; width: 1em; height: 1em; top: -1em; left: -1em;
+            box-shadow: 2em 0em 0 0 currentColor, 8em 0em 0 0 currentColor, 3em 1em 0 0 currentColor, 7em 1em 0 0 currentColor, 2em 2em 0 0 currentColor, 3em 2em 0 0 currentColor, 4em 2em 0 0 currentColor, 5em 2em 0 0 currentColor, 6em 2em 0 0 currentColor, 7em 2em 0 0 currentColor, 8em 2em 0 0 currentColor, 1em 3em 0 0 currentColor, 2em 3em 0 0 currentColor, 4em 3em 0 0 currentColor, 5em 3em 0 0 currentColor, 6em 3em 0 0 currentColor, 8em 3em 0 0 currentColor, 9em 3em 0 0 currentColor, 0em 4em 0 0 currentColor, 1em 4em 0 0 currentColor, 2em 4em 0 0 currentColor, 3em 4em 0 0 currentColor, 4em 4em 0 0 currentColor, 5em 4em 0 0 currentColor, 6em 4em 0 0 currentColor, 7em 4em 0 0 currentColor, 8em 4em 0 0 currentColor, 9em 4em 0 0 currentColor, 10em 4em 0 0 currentColor, 0em 5em 0 0 currentColor, 2em 5em 0 0 currentColor, 3em 5em 0 0 currentColor, 4em 5em 0 0 currentColor, 5em 5em 0 0 currentColor, 6em 5em 0 0 currentColor, 7em 5em 0 0 currentColor, 8em 5em 0 0 currentColor, 10em 5em 0 0 currentColor, 0em 6em 0 0 currentColor, 2em 6em 0 0 currentColor, 8em 6em 0 0 currentColor, 10em 6em 0 0 currentColor, 3em 7em 0 0 currentColor, 4em 7em 0 0 currentColor, 6em 7em 0 0 currentColor, 7em 7em 0 0 currentColor;
+        }
+        @keyframes hover-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+        h1 { font-size: 48px; font-weight: 400; letter-spacing: 3px; }
+        h1::before { content: "< "; opacity: .6; }
+        h1::after  { content: " />"; opacity: .6; }
+        .cursor { display: inline-block; margin-left: 8px; animation: blink 1s steps(1) infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .sub { margin-top: 22px; font-size: 16px; letter-spacing: 4px; opacity: .9; }
+        .tag { margin-top: 10px; font-size: 14px; opacity: .6; }
+
+        /* ==================== GO! 按钮 ==================== */
+        .go {
+            display: inline-block; margin-top: 52px;
+            border: 2px solid #fff; padding: 14px 34px 12px;
+            font-size: 24px; letter-spacing: 4px; color: #fff; background: #000;
+            text-decoration: none; cursor: pointer;
+            box-shadow: 4px 4px 0 0 #fff;
+            transition: background .1s, color .1s;
+            animation: pop .3s steps(3) .25s both;
+        }
+        @keyframes pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+        .go:hover { background: #fff; color: #000; }
+        .go:active { transform: translate(4px, 4px); box-shadow: 0 0 0 0 #fff; }
+        .hint { margin-top: 26px; font-size: 12px; letter-spacing: 3px; opacity: .55; animation: blink 1.6s steps(1) infinite; }
+
+        /* ==================== 底部版权 ==================== */
+        .foot { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; font-size: 12px; opacity: .45; z-index: 1; }
+
+        /* ==================== 响应式 / 减少动态 ==================== */
+        @media (max-width: 600px) {
+            h1 { font-size: 30px; }
+            .sub { font-size: 13px; letter-spacing: 2px; }
+            .invader { font-size: 6px; margin-bottom: 40px; }
+            .go { font-size: 20px; }
+            .boot { left: 16px; top: 18px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .crt-flash, .invader, .cursor, .hint, .boot::after { animation: none !important; }
+            .crt-flash { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="crt-flash" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <main class="screen">
+        <div class="binary-bg" aria-hidden="true">1000001100000000101001011011110000000101000011000100111110110100101101101101011000111110111010010000010010101100011001111110010110011010000011001110001100111010010010010011000001001100001111100010100101001010101000000011101000010000000000011101101001010100110111110100001100010100001100010100010110001110001011000001011110010100101011101100001010011100100010000001010000100011111011010110000001010010100000110011000010100001110111101010110010111100111100011001000011011001110000000000101110110001101111101110011011100010111011010001000100101101101100110111010011010110010000101010010000100100110101101110101011011001000111100111001011101000101101001001001011011000011111001001100101110100000111000100010010100001111101100001001110011011111001111101001110000000010000100101101101011011111000011100000010110111001110000110110100110100110011101100000101011101001010111001000000101000010111110101100110000110110001101000101100001110000110110011001010001011011000110100000101111101000011110110100010011110</div>
+
+        <pre class="boot" id="boot"></pre>
+
+        <div class="stage" id="stage">
+            <div class="invader" aria-hidden="true"></div>
+            <h1>Aisssky<span class="cursor">█</span></h1>
+            <div class="sub">UNREAL ENGINE DEVELOPER</div>
+            <div class="tag">// MY OWN ONE PIECE</div>
+            <a class="go" id="go" href="index.html">[ GO! ]</a>
+            <div class="hint">PRESS START</div>
+        </div>
+
+        <div class="foot">&copy; 2026 AISSSKY</div>
+    </main>
+
+    <script>
+        (function () {
+            var bootEl  = document.getElementById("boot");
+            var stageEl = document.getElementById("stage");
+            var goEl    = document.getElementById("go");
+
+            var lines = [
+                "AISSSKY BIOS v2.6.07",
+                "CHECKING PIXEL FONT ........ OK",
+                "LOADING PORTFOLIO.SYS ...... OK",
+                "BOOT SEQUENCE COMPLETE."
+            ];
+
+            var started = false, finished = false, timers = [];
+            var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+            function showStage() {
+                if (finished) return;
+                finished = true;
+                timers.forEach(clearTimeout);
+                bootEl.classList.add("done");
+                bootEl.textContent = lines.join("\n");
+                stageEl.classList.add("on");
+            }
+
+            function typeBoot() {
+                started = true;
+                var li = 0, ci = 0, out = "";
+                (function tick() {
+                    if (finished) return;
+                    if (li >= lines.length) { timers.push(setTimeout(showStage, 260)); return; }
+                    var line = lines[li];
+                    if (ci < line.length) {
+                        out += line[ci++];
+                        bootEl.textContent = out;
+                        timers.push(setTimeout(tick, 14));
+                    } else {
+                        out += "\n"; li++; ci = 0;
+                        timers.push(setTimeout(tick, 140));
+                    }
+                })();
+            }
+
+            // 开机白线动画结束后开始打字;点击/按键可跳过
+            if (reduced) { showStage(); }
+            else { timers.push(setTimeout(typeBoot, 650)); }
+
+            document.addEventListener("click", function (e) {
+                if (!finished && e.target !== goEl) showStage();
+            });
+            document.addEventListener("keydown", function (e) {
+                if (!finished) { showStage(); return; }
+                if (e.key === "Enter") goEl.click();
+            });
+
+            // 点击 GO!:先播放 CRT 关机动画,再跳转 index.html
+            goEl.addEventListener("click", function (e) {
+                e.preventDefault();
+                if (document.body.classList.contains("off")) return;
+                document.body.classList.add("off");
+                setTimeout(function () { window.location.href = "index.html"; }, reduced ? 0 : 380);
+            });
+        })();
+    </script>
+</body>
+</html>
