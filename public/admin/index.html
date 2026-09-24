@@ -8,7 +8,11 @@
   </head>
 
   <body>
-    <!-- Decap CMS：直接加载官方 CDN 版本，配置见同目录 config.yml -->
-    <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3/dist/decap-cms.js"></script>
+    <!-- Decap CMS：配置见同目录 config.yml
+         注意：turbo-github / turbo-gitlab 这两个 backend 目前只在 beta 版里，
+         稳定版（decap-cms@^3）加载会直接报 unrecognized-backend。
+         @beta 跟随最新；若某天 beta 有破坏性改动，可锁定为
+         https://cdn.jsdelivr.net/npm/decap-cms@3.17.0-beta.0/dist/decap-cms.js -->
+    <script src="https://cdn.jsdelivr.net/npm/decap-cms@beta/dist/decap-cms.js"></script>
   </body>
 </html>

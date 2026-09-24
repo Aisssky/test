@@ -1,25 +1,38 @@
 # ============================================================================
 # Decap CMS 配置
 #
-# 本地开发（推荐先跑通这条链路）：
-#   终端 A: npm run dev      →  http://localhost:4321/test/
-#   终端 B: npm run cms      →  本地代理，默认 http://localhost:8081
-#   浏览器打开 http://localhost:4321/test/admin/
-#   —— 此时 CMS 会直接读写你本地的 src/content/blog/*.md 与 public/images/uploads/
+# 两条链路并存：
 #
-# 线上使用：把下面的 backend 换成 github（已配好），
-# 但 GitHub backend 需要额外的 OAuth 代理，见 README「CMS 上线」一节。
+#   本地  → local_backend 直读本机文件（写 crypto.randomUUID() 之前先跑这条）
+#           终端 A: npm run dev   →  http://localhost:4321/test/
+#           终端 B: npm run cms   →  本地代理，默认 http://localhost:8081
+#           浏览器打开 http://localhost:4321/test/admin/
+#           CMS 直接读写本机 src/content/blog/*.md 与 public/images/uploads/
+#
+#   线上  → turbo-github → Decap Turbo → GitHub Aisssky/test
+#           线上 hostname 不是 localhost，local_backend 自动不生效，无需切换配置
 #
 # 字段必须与 src/content.config.ts 的 schema 保持一致，
 # 否则 Astro 构建时会因为 frontmatter 校验失败而报错。
 # ============================================================================
 
 backend:
-  name: github
+  # turbo-github 由 Decap Turbo 托管认证并代理 GitHub API，
+  # 不需要自己部署 OAuth proxy，也不需要 GitHub OAuth App。
+  name: turbo-github
+
+  # ★ 唯一需要手填的值：Decap Turbo 站点详情页 Overview 标签页里的 UUID。
+  #   拿到后替换下面这行，否则 /admin/ 会在登录页之前就报 config lookup 失败。
+  turbo_site_id: REPLACE_WITH_YOUR_TURBO_SITE_ID
+
+  # 仓库以 Turbo dashboard 里该站点的配置为准；这里保持与之一致即可，
+  # 若两边不一致会报 "requested repo does not match"。
   repo: Aisssky/test
+
+  # branch 若显式填写则以这里为准（默认落到 dashboard 的值）
   branch: main
 
-# 打开 /admin/ 时默认走本地代理，无需登录 GitHub
+# 本地开发免登录； hostname 不是 localhost 时自动跳过，不影响线上
 local_backend: true
 
 # 站点地址（用于「查看已发布页面」的预览链接）
