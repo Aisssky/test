@@ -1,0 +1,263 @@
+---
+/**
+ * 弹幕层：首屏的「脑内声音」。
+ *
+ * 每次加载从 thoughts 里随机挑 count 条横向飘过；
+ * 滚过半屏后整层淡出 —— 弹幕是空气，不是正文，不能变成 B 站首页。
+ *
+ * category → 图标，weight → 字号/样式，规则见 src/content/about/thoughts.md。
+ * weight: egg 的条目可点击，弹出 secrets 里对应的小窗。
+ */
+interface Thought {
+  text: string;
+  category: string;
+  weight: string;
+  speed: number;
+  year?: number;
+}
+
+interface Secret {
+  id: string;
+  title: string;
+  body: string;
+}
+
+interface Props {
+  thoughts: Thought[];
+  secrets?: Secret[];
+  /** 一次同时飘多少条 */
+  count?: number;
+}
+
+const { thoughts, secrets = [], count = 12 } = Astro.props;
+
+const icons: Record<string, string> = {
+  idea: '💭',
+  game: '🎮',
+  tech: '💻',
+  night: '🌙',
+  weird: '🌀',
+  egg: '✦',
+};
+---
+
+<div
+  class="danmaku"
+  id="danmaku-layer"
+  data-thoughts={JSON.stringify(thoughts)}
+  data-secrets={JSON.stringify(secrets)}
+  data-icons={JSON.stringify(icons)}
+  data-count={String(count)}
+  aria-hidden="true"
+></div>
+
+<dialog class="secret" id="secret-dialog">
+  <p class="secret-id"></p>
+  <h3 class="secret-title"></h3>
+  <p class="secret-body"></p>
+  <button class="secret-close" type="button">Close</button>
+</dialog>
+
+<script>
+  const layer = document.getElementById('danmaku-layer') as HTMLElement | null;
+  const dialog = document.getElementById('secret-dialog') as HTMLDialogElement | null;
+
+  if (layer) {
+    const thoughts = JSON.parse(layer.dataset.thoughts || '[]') as any[];
+    const secrets = JSON.parse(layer.dataset.secrets || '[]') as any[];
+    const icons = JSON.parse(layer.dataset.icons || '{}') as Record<string, string>;
+    const count = Number(layer.dataset.count || 12);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (thoughts.length && !reduce) {
+      const shuffle = (arr: any[]): any[] => {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = a[i];
+          a[i] = a[j];
+          a[j] = tmp;
+        }
+        return a;
+      };
+
+      const normal = shuffle(thoughts.filter((t) => t.weight !== 'egg'));
+      const eggs = thoughts.filter((t) => t.weight === 'egg');
+      const picked = normal.slice(0, Math.min(count, normal.length));
+
+      // 彩蛋低频出现：约 1/4 的概率随机顶替掉一条
+      if (eggs.length && picked.length && Math.random() < 0.25) {
+        picked[Math.floor(Math.random() * picked.length)] =
+          eggs[Math.floor(Math.random() * eggs.length)];
+      }
+
+      const lanes = 7;
+      picked.forEach((t: any, i: number) => {
+        const el = document.createElement('span');
+        el.className = `dm dm--${t.weight || 'normal'}`;
+        el.textContent = `${icons[t.category] ?? ''} ${t.text}`.trim();
+
+        // 分道，避免挤在同一条水平线上；再叠一点随机抖动
+        const lane = i % lanes;
+        el.style.top = `${(6 + lane * 12 + Math.random() * 3).toFixed(2)}%`;
+        el.style.animationDuration = `${t.speed || 20}s`;
+        el.style.animationDelay = `${(i * 1.1 + Math.random() * 1.4).toFixed(2)}s`;
+
+        if (t.weight === 'egg' && secrets.length) {
+          const secret = secrets[Math.floor(Math.random() * secrets.length)];
+          el.addEventListener('click', () => {
+            if (!dialog) return;
+            const id = dialog.querySelector('.secret-id');
+            const title = dialog.querySelector('.secret-title');
+            const body = dialog.querySelector('.secret-body');
+            if (id) id.textContent = secret.id ?? '';
+            if (title) title.textContent = secret.title ?? '';
+            if (body) body.textContent = secret.body ?? '';
+            dialog.showModal();
+          });
+        }
+
+        layer.appendChild(el);
+      });
+    }
+
+    // 滚出首屏就淡出，正文区不留弹幕
+    const onScroll = () => {
+      layer.classList.toggle('is-out', window.scrollY > window.innerHeight * 0.55);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  if (dialog) {
+    dialog.querySelector('.secret-close')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+  }
+</script>
+
+<style>
+  .danmaku {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.45s ease;
+  }
+
+  .danmaku.is-out {
+    opacity: 0;
+  }
+
+  .dm {
+    position: absolute;
+    left: 100%;
+    white-space: nowrap;
+    font-family: var(--ff-sans);
+    font-size: 14px;
+    line-height: 1;
+    color: var(--c-text-dim);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+    animation-name: dm-move;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    will-change: transform;
+  }
+
+  .dm--small {
+    font-size: 12px;
+    color: var(--c-text-faint);
+    opacity: 0.9;
+  }
+
+  .dm--highlight {
+    font-size: 16px;
+    color: var(--c-text);
+  }
+
+  .dm--egg {
+    font-family: var(--ff-mono);
+    font-size: 12px;
+    color: var(--c-accent);
+    pointer-events: auto;
+    cursor: pointer;
+    border-bottom: 1px dashed currentColor;
+    padding-bottom: 2px;
+  }
+
+  .danmaku.is-out .dm {
+    animation-play-state: paused;
+  }
+
+  @keyframes dm-move {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100vw - 100%));
+    }
+  }
+
+  /* ---- 彩蛋小窗 ---- */
+  .secret {
+    max-width: 420px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    background: var(--c-glass-strong);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    color: var(--c-text);
+    padding: 26px 28px;
+  }
+
+  .secret::backdrop {
+    background: rgba(23, 32, 51, 0.35);
+  }
+
+  .secret-id {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--c-accent);
+    margin: 0 0 10px;
+  }
+
+  .secret-title {
+    font-family: var(--ff-sans);
+    font-size: 17px;
+    font-weight: 500;
+    margin: 0 0 10px;
+  }
+
+  .secret-body {
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--c-text-dim);
+    margin: 0 0 20px;
+    white-space: pre-line;
+  }
+
+  .secret-close {
+    font-family: var(--ff-sans);
+    font-size: 12px;
+    color: var(--c-text-faint);
+    background: none;
+    border: 1px solid var(--c-border-soft);
+    border-radius: var(--radius-sm);
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+
+  .secret-close:hover {
+    color: var(--c-accent-hover);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .danmaku {
+      display: none;
+    }
+  }
+</style>

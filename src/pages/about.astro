@@ -1,80 +1,966 @@
 ---
 /**
- * 关于页。旧站没有独立 About，这里把首页侧栏的信息展开成一页。
+ * About —— 一个可以一直往下走的小空间（digital garden，不是 accordion）。
+ *
+ * 全平铺，不需要点击才能看到内容：
+ *   Hero(弹幕玄关) → PROFILE → NOW → GAMES → CURIOUS → THIS WEBSITE → BRAIN DUMP → Colophon
+ * 首屏只放 Hero + 弹幕，正文从 PROFILE 开始。
+ *
+ * 数据全部来自 src/content/about/*.md 的 frontmatter，改内容不用动代码。
+ * 这几个 md 没注册成 content collection（content.config.ts 里只有 blog），
+ * 直接用 import.meta.glob 读 frontmatter，省掉 5 套 zod schema，也不和 CMS 字段耦合。
  */
-import PageLayout from '../components/PageLayout.astro';
-import { SITE, postPath, withBase } from '../lib/site';
+import Layout from '../layouts/Layout.astro';
+import SiteBackground from '../components/SiteBackground.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Danmaku from '../components/Danmaku.astro';
+import { withBase, SITE } from '../lib/site';
 
-const skills = ['UE5', 'C++', 'BluePrints', 'TypeScript', 'Lua', '图形学', 'SVN / Git'];
+const files = import.meta.glob('../content/about/*.md', { eager: true }) as Record<
+  string,
+  { frontmatter: Record<string, any> }
+>;
 
-const projects = [
-  {
-    name: '《赛博朋克：飘渺城影》',
-    role: '对话系统 / 文本收集 / 教程系统',
-    stack: 'UE5 C++ · UMG · Dialogue Builder · SVN',
-    link: 'https://store.steampowered.com/app/3552700/_/',
-    note: '现已开放愿望单',
-    post: postPath('2026-04-21-cyberpunk-devlog'),
-  },
-];
+const pick = (name: string): Record<string, any> =>
+  files[`../content/about/${name}.md`]?.frontmatter ?? {};
 
-const notes = [
-  { label: '计算机图形学 GAMES101 笔记', href: postPath('2026-05-30-games101-notes') },
-  { label: 'UE5 踩坑记录', href: postPath('2026-02-17-ue5-qa') },
+const profile = pick('profile');
+const gamesDoc = pick('games');
+const nowDoc = pick('now');
+const siteDoc = pick('site');
+const thoughtsDoc = pick('thoughts');
+
+const games: any[] = gamesDoc.games ?? [];
+const nowList: any[] = nowDoc.now ?? [];
+const stack: any[] = siteDoc.stack ?? [];
+const timeline: any[] = siteDoc.timeline ?? [];
+const curious: string[] = thoughtsDoc.curious ?? [];
+const brainDump: string[] = thoughtsDoc.brain_dump ?? [];
+const thoughtsList: any[] = thoughtsDoc.thoughts ?? [];
+const secrets: any[] = thoughtsDoc.secrets ?? [];
+
+/** frontmatter 不走 Markdown 渲染，这里只补 **粗体** 一种语法 */
+const rich = (text = ''): string =>
+  String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+/** 按行切成段落（YAML 折叠标量的空行会变成换行） */
+const paras = (text = ''): string[] =>
+  String(text)
+    .split(/\n+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+/**
+ * YAML 里的 2026-09-24 有时是 Date、有时已被转成 ISO 字符串
+ * （"2026-09-24T00:00:00.000Z"），两种都要收敛成 YYYY-MM-DD。
+ */
+const asText = (v: any): string => {
+  if (!v) return '';
+  const s = v instanceof Date ? v.toISOString() : String(v);
+  return s.match(/^(\d{4}-\d{2}-\d{2})/)?.[1] ?? s;
+};
+
+const name = profile.name ?? 'Aisssky';
+const year = new Date().getFullYear();
+
+const chapters = [
+  { id: 'profile', label: 'Profile' },
+  { id: 'now', label: 'Now' },
+  { id: 'games', label: 'Games' },
+  { id: 'curious', label: 'Curious' },
+  { id: 'website', label: 'This website' },
+  { id: 'brain', label: 'Brain dump' },
 ];
 ---
 
-<PageLayout title="关于" description="关于 Aisssky —— Unreal Engine 开发者">
-  <div class="about-card">
-    <p>
-      独立游戏开发，主要方向是 <strong>Unreal Engine 5 / C++</strong>。
-      这个站点同时是作品集和技术笔记的存放处——笔记部分是普通 Markdown，
-      由 Astro 自动渲染，改动不必再手写 HTML。
-    </p>
+<Layout
+  title="About"
+  description="关于 Aisssky —— Unreal Engine 开发者，以及这个可以一路往下翻的小空间。"
+  bodyClass="about"
+>
+  <SiteBackground veil={0.22} />
+  <SiteHeader />
 
-    <h3>技能</h3>
-    <div class="chip-list" style="margin-bottom: 24px;">
-      {skills.map((skill) => <span class="chip chip-tag chip-lg">{skill}</span>)}
+  <main id="main">
+    <!-- 首屏：Hero + 弹幕，背景图自己说话 -->
+    <section class="hero">
+      <Danmaku thoughts={thoughtsList} secrets={secrets} count={12} />
+
+      <div class="hero-inner">
+        <h1 class="hero-name">{name}</h1>
+        {profile.tagline ? <p class="hero-tagline">{profile.tagline}</p> : null}
+        {profile.intro ? <p class="hero-intro">{profile.intro}</p> : null}
+      </div>
+
+      <div class="scroll-hint" aria-hidden="true">Scroll</div>
+    </section>
+
+    <!-- 章节导航 + 阅读进度：一条细线跟着往下走 -->
+    <nav class="chapter-nav" aria-label="章节导航">
+      <div class="chapter-links">
+        {chapters.map((c) => <a href={`#${c.id}`}>{c.label}</a>)}
+      </div>
+      <div class="chapter-track"><div class="chapter-bar" id="chapter-bar"></div></div>
+    </nav>
+
+    <div class="body">
+      <!-- ================= PROFILE ================= -->
+      <section class="panel reveal" id="profile">
+        <h2 class="eyebrow">Profile</h2>
+
+        {paras(profile.body).map((p) => <p class="prose" set:html={rich(p)} />)}
+
+        {
+          profile.likes?.length ? (
+            <ul class="likes">
+              {profile.likes.map((l: any) => (
+                <li>
+                  <span class="li-icon" aria-hidden="true">
+                    {l.icon}
+                  </span>
+                  {l.label}
+                </li>
+              ))}
+            </ul>
+          ) : null
+        }
+
+        {
+          profile.skills?.length ? (
+            <div class="chips">
+              {profile.skills.map((s: string) => (
+                <span class="chip">{s}</span>
+              ))}
+            </div>
+          ) : null
+        }
+
+        {
+          profile.projects?.length ? (
+            <div class="projects">
+              {profile.projects.map((p: any) => (
+                <div class="project">
+                  <p class="project-name">{p.name}</p>
+                  <p class="project-line">职责：{p.role}</p>
+                  <p class="project-line">技术栈：{p.stack}</p>
+                  <p class="project-links">
+                    {p.link ? (
+                      <a href={p.link} target="_blank" rel="noopener">
+                        Steam 商店页 ↗
+                      </a>
+                    ) : null}
+                    {p.note ? <span class="project-note">（{p.note}）</span> : null}
+                    {p.post ? <a href={withBase(`/blog/${p.post}/`)}>开发日志 →</a> : null}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null
+        }
+      </section>
+
+      <!-- ================= NOW ================= -->
+      <section class="panel reveal" id="now">
+        <div class="panel-head">
+          <h2 class="eyebrow">Now</h2>
+          {nowDoc.updated ? <span class="panel-note">更新于 {asText(nowDoc.updated)}</span> : null}
+        </div>
+
+        <dl class="now-list">
+          {
+            nowList.map((item: any) => (
+              <div class:list={['now-item', item.k === 'Thinking about' && 'is-focus']}>
+                <dt>{item.k}</dt>
+                <dd>{item.v}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      <!-- ================= GAMES ================= -->
+      <section class="panel reveal" id="games">
+        <h2 class="eyebrow">Games</h2>
+        {gamesDoc.lead ? <p class="panel-lead">{gamesDoc.lead}</p> : null}
+
+        <ul class="game-grid">
+          {
+            games.map((g: any) => (
+              <li class="game-card">
+                {g.cover ? (
+                  <div class="game-cover">
+                    <img
+                      src={withBase(g.cover)}
+                      alt={`${g.title} 封面`}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                ) : null}
+
+                <div class="game-main">
+                  <h3 class="game-title">{g.title}</h3>
+                  {g.meta ? <p class="game-meta">{g.meta}</p> : null}
+
+                  {g.card?.length ? (
+                    <dl class="game-stats">
+                      {g.card.map((row: any) => (
+                        <div>
+                          <dt>{row.k}</dt>
+                          <dd>{row.v}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : null}
+
+                  {g.why ? <p class="game-why" set:html={rich(g.why)} /> : null}
+
+                  {g.link ? (
+                    <a class="game-link" href={g.link} target="_blank" rel="noopener">
+                      官网 ↗
+                    </a>
+                  ) : null}
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <!-- ================= CURIOUS ================= -->
+      <section class="panel reveal" id="curious">
+        <h2 class="eyebrow">Curious</h2>
+        <ul class="quiet-list">
+          {curious.map((q: string) => <li>{q}</li>)}
+        </ul>
+      </section>
+
+      <!-- ================= THIS WEBSITE ================= -->
+      <section class="panel reveal" id="website">
+        <h2 class="eyebrow">This website</h2>
+
+        {paras(siteDoc.story).map((p) => <p class="prose" set:html={rich(p)} />)}
+
+        {
+          stack.length ? (
+            <dl class="stack">
+              {stack.map((s: any) => (
+                <div>
+                  <dt>{s.name}</dt>
+                  <dd>{s.note}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null
+        }
+
+        {
+          timeline.length ? (
+            <ol class="timeline">
+              {timeline.map((t: any) => (
+                <li>
+                  <span class="tl-year">{t.year}</span>
+                  <ul class="tl-events">
+                    {(t.events ?? []).map((e: string) => (
+                      <li>{e}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ol>
+          ) : null
+        }
+
+        <div class="progress">
+          <div class="progress-head">
+            <span>{siteDoc.progress_label ?? 'Status'}</span>
+            <span>{siteDoc.progress_percent ?? 0}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style={`width: ${siteDoc.progress_percent ?? 0}%`}></div>
+          </div>
+          {siteDoc.progress_note ? <p class="progress-note">{siteDoc.progress_note}</p> : null}
+        </div>
+      </section>
+
+      <!-- ================= BRAIN DUMP ================= -->
+      <section class="panel reveal" id="brain">
+        <h2 class="eyebrow">Brain dump</h2>
+        {thoughtsDoc.brain_dump_lead ? <p class="panel-lead">{thoughtsDoc.brain_dump_lead}</p> : null}
+
+        <ul class="quiet-list">
+          {brainDump.map((t: string) => <li>{t}</li>)}
+        </ul>
+
+        {
+          thoughtsDoc.guestbook_hint ? (
+            <p class="dump-hint">
+              <a href={`mailto:${SITE.email}`}>{thoughtsDoc.guestbook_hint}</a>
+            </p>
+          ) : null
+        }
+      </section>
+
+      <!-- ================= COLOPHON ================= -->
+      <footer class="colophon" id="colophon">
+        <div class="colophon-row">
+          <span>© {year} {name}</span>
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+          <a href={SITE.github} target="_blank" rel="noopener">GitHub ↗</a>
+          <a href={withBase('/rss.xml')}>RSS</a>
+          <a href="#main" class="to-top">回到顶部 ↑</a>
+        </div>
+      </footer>
     </div>
+  </main>
+</Layout>
 
-    <h3>参与项目</h3>
-    <ul>
-      {
-        projects.map((project) => (
-          <li style="margin-bottom: 14px;">
-            <strong>{project.name}</strong>
-            <br />
-            职责：{project.role}
-            <br />
-            技术栈：{project.stack}
-            <br />
-            <a href={project.link} target="_blank" rel="noopener noreferrer">
-              Steam 商店页
-            </a>
-            <span style="color:#999;">（{project.note}）</span>
-            <br />
-            <a href={project.post}>开发日志 →</a>
-          </li>
-        ))
-      }
-    </ul>
+<script>
+  const bar = document.getElementById('chapter-bar');
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.chapter-nav a'));
+  const targets = links
+    .map((a) => document.getElementById(a.hash.slice(1)))
+    .filter((el): el is HTMLElement => Boolean(el));
 
-    <h3>笔记</h3>
-    <ul>
-      {notes.map((note) => <li><a href={note.href}>{note.label}</a></li>)}
-    </ul>
-    <p>
-      完整列表见 <a href={withBase('/blog/')}>笔记列表</a>，
-      也可以订阅 <a href={withBase('/rss.xml')}>RSS</a>。
-    </p>
+  const onScroll = () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - doc.clientHeight;
+    if (bar) bar.style.width = `${max > 0 ? (doc.scrollTop / max) * 100 : 0}%`;
 
-    <h3>联系</h3>
-    <ul>
-      <li>📩 <a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
-      <li>
-        🐙
-        <a href={SITE.github} target="_blank" rel="noopener noreferrer">{SITE.github}</a>
-      </li>
-    </ul>
-  </div>
-</PageLayout>
+    let active = '';
+    for (const el of targets) {
+      if (el.getBoundingClientRect().top <= 160) active = el.id;
+    }
+    links.forEach((a) => a.classList.toggle('is-active', a.hash.slice(1) === active));
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>
+
+<style>
+  main {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 0 var(--page-pad) 80px;
+  }
+
+  /* ---- 首屏 ---- */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-top: var(--header-h);
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-name {
+    font-family: var(--ff-sans);
+    font-size: clamp(38px, 7vw, 74px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--c-text);
+    margin: 0 0 14px;
+  }
+
+  .hero-tagline {
+    font-family: var(--ff-mono);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+    margin: 0 0 22px;
+  }
+
+  .hero-intro {
+    font-family: var(--ff-serif);
+    font-size: clamp(17px, 2.2vw, 23px);
+    line-height: 1.6;
+    color: var(--c-text-dim);
+    max-width: 30ch;
+    margin: 0 auto;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 38px;
+    font-family: var(--ff-sans);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--c-text-faint);
+    z-index: 2;
+  }
+
+  /* ---- 章节导航（细线 + 进度） ---- */
+  .chapter-nav {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 40;
+    margin: 0 0 28px;
+    background: rgba(248, 250, 253, 0.78);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border-bottom: 1px solid var(--c-border-soft);
+  }
+
+  .chapter-links {
+    display: flex;
+    gap: 22px;
+    padding: 12px 0 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .chapter-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chapter-links a {
+    font-family: var(--ff-sans);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-text-faint);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.18s ease;
+  }
+
+  .chapter-links a:hover {
+    color: var(--c-accent-hover);
+  }
+
+  .chapter-links a.is-active {
+    color: var(--c-text);
+  }
+
+  .chapter-track {
+    height: 2px;
+    background: var(--c-border-soft);
+  }
+
+  .chapter-bar {
+    height: 100%;
+    width: 0;
+    background: var(--c-accent);
+  }
+
+  /* ---- 正文区块 ---- */
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .panel {
+    background: var(--c-glass);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 30px 32px;
+    scroll-margin-top: calc(var(--header-h) + 60px);
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .panel-note {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--c-text-faint);
+  }
+
+  .panel-lead {
+    font-family: var(--ff-serif);
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--c-text-dim);
+    margin: 6px 0 20px;
+  }
+
+  .prose {
+    font-family: var(--ff-sans);
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: var(--c-text);
+    margin: 0 0 12px;
+  }
+
+  .prose:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ---- PROFILE：likes / skills / projects ---- */
+  .likes {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+  }
+
+  .likes li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    color: var(--c-text-dim);
+  }
+
+  .li-icon {
+    font-size: 14px;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--c-border-soft);
+  }
+
+  .chip {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--c-text-dim);
+    border: 1px solid var(--c-border-soft);
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+
+  .projects {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--c-border-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .project-name {
+    font-family: var(--ff-sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--c-text);
+    margin: 0 0 4px;
+  }
+
+  .project-line {
+    font-family: var(--ff-sans);
+    font-size: 12.5px;
+    color: var(--c-text-dim);
+    margin: 0 0 2px;
+  }
+
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin: 6px 0 0;
+    font-family: var(--ff-sans);
+    font-size: 12.5px;
+  }
+
+  .project-links a {
+    color: var(--c-accent);
+    text-decoration: none;
+  }
+
+  .project-links a:hover {
+    color: var(--c-accent-hover);
+  }
+
+  .project-note {
+    color: var(--c-text-faint);
+    font-size: 11.5px;
+  }
+
+  /* ---- NOW ---- */
+  .now-list {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .now-item {
+    padding: 13px 0;
+    border-top: 1px solid var(--c-border-soft);
+  }
+
+  .now-item:first-child {
+    border-top: 0;
+    padding-top: 4px;
+  }
+
+  .now-item dt {
+    font-family: var(--ff-sans);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-text-faint);
+    margin-bottom: 4px;
+  }
+
+  .now-item dd {
+    margin: 0;
+    font-family: var(--ff-sans);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--c-text);
+  }
+
+  .now-item.is-focus dd {
+    font-family: var(--ff-serif);
+    font-size: 16px;
+    color: var(--c-accent-hover);
+  }
+
+  /* ---- GAMES ---- */
+  .game-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .game-card {
+    background: var(--c-glass-strong);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .game-cover {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: rgba(23, 32, 51, 0.05);
+  }
+
+  .game-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .game-main {
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 auto;
+  }
+
+  .game-title {
+    font-family: var(--ff-sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--c-text);
+    margin: 0;
+  }
+
+  .game-meta {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--c-text-faint);
+    margin: 0;
+  }
+
+  .game-stats {
+    margin: 4px 0 0;
+    padding: 10px 0 0;
+    border-top: 1px solid var(--c-border-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .game-stats div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .game-stats dt {
+    font-family: var(--ff-sans);
+    font-size: 11.5px;
+    color: var(--c-text-faint);
+  }
+
+  .game-stats dd {
+    margin: 0;
+    font-family: var(--ff-sans);
+    font-size: 12px;
+    color: var(--c-text-dim);
+    text-align: right;
+  }
+
+  .game-why {
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--c-text-dim);
+    margin: 6px 0 0;
+  }
+
+  .game-link {
+    margin-top: auto;
+    font-family: var(--ff-sans);
+    font-size: 12px;
+    color: var(--c-accent);
+    text-decoration: none;
+  }
+
+  .game-link:hover {
+    color: var(--c-accent-hover);
+  }
+
+  /* ---- 安静列表：CURIOUS / BRAIN DUMP ---- */
+  .quiet-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .quiet-list li {
+    font-family: var(--ff-sans);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--c-text);
+    padding: 12px 0 12px 20px;
+    border-top: 1px solid var(--c-border-soft);
+    position: relative;
+  }
+
+  .quiet-list li:first-child {
+    border-top: 0;
+    padding-top: 2px;
+  }
+
+  .quiet-list li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 21px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    opacity: 0.55;
+  }
+
+  .quiet-list li:first-child::before {
+    top: 11px;
+  }
+
+  .dump-hint {
+    margin: 18px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--c-border-soft);
+  }
+
+  .dump-hint a {
+    font-family: var(--ff-serif);
+    font-size: 15px;
+    color: var(--c-accent);
+    text-decoration: none;
+    border-bottom: 1px dashed currentColor;
+  }
+
+  .dump-hint a:hover {
+    color: var(--c-accent-hover);
+  }
+
+  /* ---- THIS WEBSITE ---- */
+  .stack {
+    margin: 20px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--c-border-soft);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px 24px;
+  }
+
+  .stack dt {
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--c-text);
+  }
+
+  .stack dd {
+    margin: 2px 0 0;
+    font-family: var(--ff-sans);
+    font-size: 12px;
+    color: var(--c-text-dim);
+  }
+
+  .timeline {
+    list-style: none;
+    margin: 22px 0 0;
+    padding: 18px 0 0;
+    border-top: 1px solid var(--c-border-soft);
+  }
+
+  .timeline > li {
+    display: flex;
+    gap: 18px;
+    padding: 9px 0;
+  }
+
+  .tl-year {
+    flex: 0 0 62px;
+    font-family: var(--ff-mono);
+    font-size: 12px;
+    color: var(--c-text-faint);
+    padding-top: 1px;
+  }
+
+  .tl-events {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tl-events li {
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--c-text-dim);
+  }
+
+  .progress {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--c-border-soft);
+  }
+
+  .progress-head {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-text-faint);
+    margin-bottom: 8px;
+  }
+
+  .progress-track {
+    height: 4px;
+    border-radius: 999px;
+    background: var(--c-border-soft);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--c-accent);
+  }
+
+  .progress-note {
+    font-family: var(--ff-serif);
+    font-size: 13.5px;
+    color: var(--c-text-faint);
+    margin: 10px 0 0;
+  }
+
+  /* ---- COLOPHON ---- */
+  .colophon {
+    margin-top: 8px;
+  }
+
+  .colophon-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    font-family: var(--ff-sans);
+    font-size: 12px;
+    color: var(--c-text-faint);
+  }
+
+  .colophon-row a {
+    color: var(--c-text-faint);
+    text-decoration: none;
+  }
+
+  .colophon-row a:hover {
+    color: var(--c-accent-hover);
+  }
+
+  .to-top {
+    margin-left: auto;
+  }
+
+  /* ---- 入场：只做 opacity + 轻微位移 ---- */
+  .reveal {
+    animation: rise 0.5s ease both;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hero {
+      min-height: 92svh;
+    }
+    .panel {
+      padding: 24px 20px;
+    }
+    .game-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .timeline > li {
+      flex-direction: column;
+      gap: 4px;
+    }
+    .tl-year {
+      flex: none;
+    }
+  }
+</style>
