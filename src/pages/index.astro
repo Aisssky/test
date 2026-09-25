@@ -9,6 +9,7 @@
 import Layout from '../layouts/Layout.astro';
 import SiteBackground from '../components/SiteBackground.astro';
 import SiteHeader from '../components/SiteHeader.astro';
+import { getCollection } from 'astro:content';
 import { getPublishedPosts } from '../lib/posts';
 import { formatDate, postPath, withBase, SITE } from '../lib/site';
 
@@ -16,11 +17,10 @@ const posts = (await getPublishedPosts())
   .slice()
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-const notes = [
-  { label: 'Lua 脚本优化', href: null },
-  { label: 'Games101/104', href: postPath('2026-05-30-games101-notes') },
-  { label: '问题汇总', href: postPath('2026-02-17-ue5-qa') },
-];
+/** 随记：游戏开发之外的记录，最新在前，首页只放最近几条 */
+const notes = (await getCollection('notes', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
 
 const currently = [
   { k: 'Building', v: '个人博客 · Astro + Decap CMS' },
@@ -85,28 +85,41 @@ const currently = [
           </ul>
         </section>
 
-        <!-- Notes：碎片化思考，和正式长文分开 -->
+        <!-- Notes：游戏开发之外的随记，排版和 Writing 一致，全部在 /notes/ -->
         <section class="panel reveal" id="notes">
           <div class="panel-head">
             <h2 class="eyebrow">Notes</h2>
+            <a class="view-all" href={withBase('/notes/')}>View all →</a>
           </div>
-          <ul class="entry-list entry-list--plain">
+
+          <ul class="entry-list">
             {
-              notes.map((note) => (
-                <li>
-                  {note.href ? (
-                    <a class="entry entry--plain" href={note.href}>
-                      <span class="entry-title">{note.label}</span>
+              notes.length ? (
+                notes.map((note) => (
+                  <li>
+                    <a class="entry" href={withBase('/notes/')}>
+                      <span class="entry-date">{formatDate(note.data.date)}</span>
+                      <span class="entry-body">
+                        <span class="entry-title">{note.data.title ?? '（无题）'}</span>
+                        {note.data.description && (
+                          <span class="entry-desc">{note.data.description}</span>
+                        )}
+                        {note.data.tags?.length ? (
+                          <span class="entry-tags">{note.data.tags.slice(0, 2).join(' · ')}</span>
+                        ) : null}
+                      </span>
                       <span class="entry-arrow" aria-hidden="true">→</span>
                     </a>
-                  ) : (
-                    <span class="entry entry--plain is-muted">
-                      <span class="entry-title">{note.label}</span>
-                      <span class="entry-note">待整理</span>
-                    </span>
-                  )}
+                  </li>
+                ))
+              ) : (
+                <li>
+                  <span class="entry entry--plain is-muted">
+                    <span class="entry-title">暂无记录</span>
+                    <span class="entry-note">往 src/content/notes/ 丢一个 .md 就会出现</span>
+                  </span>
                 </li>
-              ))
+              )
             }
           </ul>
         </section>
