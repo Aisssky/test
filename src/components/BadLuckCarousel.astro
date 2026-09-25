@@ -1,0 +1,272 @@
+---
+/**
+ * 倒霉熊日记 —— 横向轮播。
+ *
+ * 桌面 5 张 / 平板 3 张 / 手机 1 张且露出下一张的一角。
+ * 只有用户主动操作才会动：左右按钮、鼠标拖动、手机原生滑动。
+ * **没有自动播放**，也没有飞入飞出那种特效。
+ */
+import BadLuckCard from './BadLuckCard.astro';
+import type { BadLuckStory } from '../lib/badluck';
+
+interface Props {
+  items: BadLuckStory[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="bl-carousel" data-bl-carousel>
+  <button class="bl-arrow bl-arrow--prev" type="button" data-bl-prev aria-label="往前看几条" disabled>
+    ←
+  </button>
+
+  <div class="bl-viewport" data-bl-viewport tabindex="0" role="group" aria-label="倒霉熊日记卡片">
+    <ul class="bl-track">
+      {
+        items.map((story: BadLuckStory) => (
+          <li class="bl-slide" data-bl-slide>
+            <BadLuckCard date={story.ymd} cupLabel={story.cupLabel} text={story.text} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <button class="bl-arrow bl-arrow--next" type="button" data-bl-next aria-label="往后看几条">
+    →
+  </button>
+</div>
+
+<style>
+  .bl-carousel {
+    position: relative;
+    /* 祖先里有多层 flex/grid，不写死 0 会被内部百分比宽度撑爆 */
+    min-width: 0;
+    --bl-gap: 12px;
+    --bl-per: 5;
+    --bl-card-h: 330px;
+    --bl-arrow-w: 38px;
+    --bl-card-w: calc((100% - (var(--bl-per) - 1) * var(--bl-gap)) / var(--bl-per));
+    padding: 0;
+  }
+
+  /* 只有在真的能滑时才给左右按钮留出位置；
+     卡片没铺满一屏时（比如只有几条），按钮不出现，卡片顺势吃满宽度。 */
+  .bl-carousel.is-scrollable {
+    padding: 0 var(--bl-arrow-w);
+  }
+
+  .bl-viewport {
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    outline: none;
+  }
+
+  .bl-viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 拖动时临时关掉 snap，不然手指会因为吸附感在打架 */
+  .bl-viewport.is-dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  .bl-track {
+    display: flex;
+    gap: var(--bl-gap);
+    margin: 0;
+    padding: 2px 0;
+    list-style: none;
+  }
+
+  .bl-slide {
+    flex: 0 0 var(--bl-card-w);
+    scroll-snap-align: start;
+    opacity: 0.82;
+    transition: opacity 240ms ease;
+  }
+
+  /* 当前卡片只做非常轻微的一点点突出，不旋转、不飞 */
+  .bl-slide.is-current {
+    opacity: 1;
+  }
+
+  .bl-slide.is-current :global(.bl-card) {
+    transform: scale(1.02);
+    box-shadow: 0 12px 26px rgba(23, 32, 51, 0.09);
+  }
+
+  .bl-arrow {
+    position: absolute;
+    top: calc(var(--bl-card-h) / 2);
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    line-height: 1;
+    color: var(--c-text-dim);
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--c-border-soft);
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    transition:
+      color 180ms ease,
+      background 180ms ease,
+      opacity 180ms ease;
+  }
+
+  .bl-carousel.is-scrollable .bl-arrow {
+    display: flex;
+  }
+
+  .bl-arrow--prev {
+    left: 0;
+  }
+
+  .bl-arrow--next {
+    right: 0;
+  }
+
+  .bl-arrow:hover:not(:disabled) {
+    color: var(--c-accent-hover);
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .bl-arrow:disabled {
+    opacity: 0.28;
+    cursor: default;
+  }
+
+  /* 平板：一屏 3 张 */
+  @media (max-width: 1024px) {
+    .bl-carousel {
+      --bl-per: 3;
+    }
+  }
+
+  /* 手机：1 张 + 露出下一张的一角，提示可以横滑；按钮收掉，用手指 */
+  @media (max-width: 720px) {
+    .bl-carousel,
+    /* 手机上按钮是隐藏的，别再为它留出左右空间；
+       必须写成与 .is-scrollable 同等的特异性，否则会被上面那条 padding 规则压过去 */
+    .bl-carousel.is-scrollable {
+      --bl-per: 1;
+      --bl-card-h: 380px;
+      --bl-card-w: calc(100% - 48px);
+      padding: 0;
+    }
+
+    /* 手机靠手指横滑，不需要按钮 */
+    .bl-carousel.is-scrollable .bl-arrow {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bl-slide,
+    .bl-arrow {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector('[data-bl-carousel]') as HTMLElement | null;
+  const viewport = root?.querySelector('[data-bl-viewport]') as HTMLElement | null;
+  const prev = root?.querySelector('[data-bl-prev]') as HTMLButtonElement | null;
+  const next = root?.querySelector('[data-bl-next]') as HTMLButtonElement | null;
+  const slides = Array.from(root?.querySelectorAll('[data-bl-slide]') ?? []) as HTMLElement[];
+
+  if (root && viewport && slides.length) {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const behavior: ScrollBehavior = reduce ? 'auto' : 'smooth';
+
+    const step = (): number => {
+      const first = slides[0];
+      const second = slides[1];
+      if (first && second) return second.offsetLeft - first.offsetLeft;
+      return first ? first.offsetWidth + 14 : viewport.clientWidth * 0.8;
+    };
+
+    /** 靠近视口左边缘的那张算“当前”，只给一点点视觉权重 */
+    const sync = (): void => {
+      const left = viewport.scrollLeft;
+      let best = 0;
+      let bestDist = Infinity;
+      slides.forEach((slide, i) => {
+        const dist = Math.abs((slide as HTMLElement).offsetLeft - left);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      });
+      slides.forEach((slide, i) => slide.classList.toggle('is-current', i === best));
+
+      const max = viewport.scrollWidth - viewport.clientWidth;
+      if (prev) (prev as HTMLButtonElement).disabled = left <= 2;
+      if (next) (next as HTMLButtonElement).disabled = left >= max - 2;
+      root?.classList.toggle('is-scrollable', max > 2);
+    };
+
+    let ticking = false;
+    viewport.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          sync();
+        });
+      },
+      { passive: true },
+    );
+
+    prev?.addEventListener('click', () => viewport.scrollBy({ left: -step(), behavior }));
+    next?.addEventListener('click', () => viewport.scrollBy({ left: step(), behavior }));
+
+    /* 桌面鼠标拖动；手机交给原生 touch 滑动，不重复接管 */
+    let dragging = false;
+    let startX = 0;
+    let startScroll = 0;
+
+    viewport.addEventListener('pointerdown', (e) => {
+      if ((e as PointerEvent).pointerType !== 'mouse') return;
+      dragging = true;
+      startX = (e as PointerEvent).clientX;
+      startScroll = viewport.scrollLeft;
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const dx = (e as PointerEvent).clientX - startX;
+      if (Math.abs(dx) > 3) {
+        viewport.classList.add('is-dragging');
+        viewport.scrollLeft = startScroll - dx;
+      }
+    });
+
+    const endDrag = (): void => {
+      if (!dragging) return;
+      dragging = false;
+      viewport.classList.remove('is-dragging');
+    };
+
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+
+    sync();
+    window.addEventListener('resize', sync);
+  }
+</script>

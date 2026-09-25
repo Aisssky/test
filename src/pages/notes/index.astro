@@ -1,0 +1,112 @@
+---
+/**
+ * 随记列表页 /notes/
+ *
+ * 与 /blog/（Writing）同一套外壳和排版，但记录的是**游戏开发之外**的东西。
+ * 没有单篇详情页——随记就在这一页读完，正文直接渲染出来。
+ */
+import PageLayout from '../../components/PageLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { formatDate } from '../../lib/site';
+
+const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const rendered = await Promise.all(
+  notes.map(async (note) => ({ note, Content: (await render(note)).Content })),
+);
+---
+
+<PageLayout title="随记" description="游戏开发之外的随手记录">
+  <div class="page-glass">
+    {
+      rendered.length > 0 ? (
+        <ul class="note-list">
+          {rendered.map(({ note, Content }) => (
+            <li class="note-item">
+              <p class="note-date">{formatDate(note.data.date)}</p>
+              {note.data.title && <h2 class="note-title">{note.data.title}</h2>}
+              <div class="note-body">
+                <Content />
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div class="empty">
+          还没有随记。往 <code>src/content/notes/</code> 里放一个 <code>.md</code>
+          文件（frontmatter 写 <code>date</code>），或者打开 <code>/admin/</code> 新建。
+        </div>
+      )
+    }
+  </div>
+</PageLayout>
+
+<style>
+  /* 和 /blog/ 首页同款玻璃面板 */
+  .page-glass {
+    background: var(--c-glass);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 26px 28px;
+  }
+
+  .note-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .note-item {
+    padding: 18px 4px;
+    border-top: 1px solid var(--c-border-soft);
+  }
+
+  .note-item:first-child {
+    border-top: none;
+    padding-top: 4px;
+  }
+
+  .note-date {
+    margin: 0;
+    font-family: var(--ff-mono);
+    font-size: 11.5px;
+    color: var(--c-text-faint, #999);
+  }
+
+  .note-title {
+    margin: 4px 0 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #222;
+  }
+
+  .note-body {
+    margin-top: 6px;
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .note-body :global(p) {
+    margin: 0 0 8px;
+  }
+
+  .note-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .empty {
+    color: #666;
+    font-size: 14px;
+  }
+
+  @media (max-width: 720px) {
+    .page-glass {
+      padding: 20px 16px;
+    }
+  }
+</style>

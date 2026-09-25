@@ -1,0 +1,197 @@
+---
+/**
+ * /diary/ —— 倒霉熊日记完整档案。
+ *
+ * 这里不用轮播，就是一条条往下排的纵向列表：按日期倒序，同年的归拢在年份下面。
+ * About 页那个是「展示」，这里是「完整档案」，职责必须分开。
+ * 正文同样是原文，一个字不改。
+ */
+import Layout from '../../layouts/Layout.astro';
+import SiteBackground from '../../components/SiteBackground.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import { getBadLuckStories, summarize, type BadLuckStory } from '../../lib/badluck';
+
+const stories = await getBadLuckStories();
+const stat = summarize(stories);
+
+/** 按年份分组（数据已经是倒序，顺着走即可） */
+const years: { year: number; items: BadLuckStory[] }[] = [];
+for (const s of stories) {
+  const last = years[years.length - 1];
+  if (last && last.year === s.year) last.items.push(s);
+  else years.push({ year: s.year, items: [s] });
+}
+---
+
+<Layout
+  title="倒霉熊日记"
+  description="一些确实发生过的事情。一杯一杯敬自己。"
+  bodyClass="page-shell"
+>
+  <SiteBackground veil={0.3} />
+  <SiteHeader />
+
+  <main class="page-main" id="main">
+    <div class="glass-panel diary-shell">
+      <header class="diary-head">
+        <h1 class="diary-title">🐻 倒霉熊日记</h1>
+        <p class="eyebrow">Bad luck diary</p>
+        <p class="diary-lead">一些确实发生过的事情。<br />一杯一杯敬自己。</p>
+        <p class="diary-stat">{stat.label}</p>
+      </header>
+
+      {
+        years.map((group) => (
+          <section class="diary-year">
+            <h2 class="diary-year-label">{group.year}</h2>
+            <ol class="diary-list">
+              {group.items.map((story) => (
+                <li class="diary-item">
+                  <div class="diary-meta">
+                    <p class="diary-date">{story.ymd}</p>
+                    {story.cupLabel ? (
+                      <p class="diary-cup">
+                        {story.cupLabel}
+                        <span class="diary-toast">敬自己</span>
+                      </p>
+                    ) : null}
+                  </div>
+                  <p class="diary-text">{story.text}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))
+      }
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .page-main {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding-inline: var(--page-pad);
+    padding-bottom: 72px;
+  }
+
+  .diary-shell {
+    padding: 34px 32px 40px;
+  }
+
+  .diary-title {
+    margin: 0;
+    font-family: var(--ff-sans);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--c-text);
+  }
+
+  .diary-head .eyebrow {
+    margin: 8px 0 0;
+  }
+
+  .diary-lead {
+    margin: 12px 0 0;
+    font-family: var(--ff-serif);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--c-text-dim);
+  }
+
+  .diary-stat {
+    margin: 10px 0 0;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--c-text-faint);
+  }
+
+  .diary-year + .diary-year {
+    margin-top: 34px;
+  }
+
+  .diary-year-label {
+    margin: 34px 0 4px;
+    font-family: var(--ff-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--c-text-faint);
+  }
+
+  .diary-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .diary-item {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 24px;
+    padding: 18px 0;
+    border-top: 1px solid var(--c-border-soft);
+  }
+
+  .diary-meta {
+    min-width: 0;
+  }
+
+  .diary-date {
+    margin: 0;
+    font-family: var(--ff-mono);
+    font-size: 11.5px;
+    color: var(--c-text-faint);
+  }
+
+  .diary-cup {
+    margin: 5px 0 0;
+    font-family: var(--ff-sans);
+    font-size: 14.5px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--c-text);
+  }
+
+  .diary-toast {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--c-accent);
+  }
+
+  /* 归档页空间够，正文完整显示（只有 About 的轮播卡才会截断） */
+  .diary-text {
+    margin: 0;
+    font-family: var(--ff-sans);
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--c-text-dim);
+    white-space: pre-line;
+  }
+
+  @media (max-width: 720px) {
+    .diary-shell {
+      padding: 26px 20px 32px;
+    }
+
+    .diary-item {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .diary-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .diary-cup {
+      margin: 0;
+    }
+
+    .diary-toast {
+      display: inline;
+      margin-left: 4px;
+    }
+  }
+</style>

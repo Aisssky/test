@@ -1,0 +1,113 @@
+---
+/**
+ * 倒霉熊日记 —— About 页里的一个区块（展示位）。
+ *
+ * 这里只放**最近几条**，配一句很小的统计，末尾给一个「继续倒霉 →」去 /diary/。
+ * 完整档案在 /diary/ 归档页，那边是朴素的纵向列表，不重复做轮播。
+ */
+import BadLuckCarousel from './BadLuckCarousel.astro';
+import { withBase } from '../lib/site';
+import { getBadLuckStories } from '../lib/badluck';
+
+interface Props {
+  /** About 页只展示最近的几条 */
+  limit?: number;
+}
+
+const { limit = 5 } = Astro.props;
+
+const all = await getBadLuckStories();
+const recent = all.slice(0, limit);
+---
+
+{
+  recent.length ? (
+    <section class="glass-panel bl-section" id="badluck">
+      <div class="bl-head">
+        <h2 class="bl-title">🐻 倒霉熊日记</h2>
+        <p class="eyebrow">Bad luck diary</p>
+        <p class="bl-lead">一些确实发生过的事情。<br />一杯一杯敬自己。</p>
+      </div>
+
+      <BadLuckCarousel items={recent} />
+
+      <a class="bl-more" href={withBase('/diary/')}>继续倒霉 →</a>
+    </section>
+  ) : null
+}
+
+<style>
+  /* 父组件的 scoped 样式进不到子组件里，这里自己把 panel 的外观接上。
+
+     width/min-width/max-width 三件套是必须的，别删：
+     父级 .body 是 flex，且本区块有 margin:0 auto（会取消 stretch），
+     于是 width:auto 退化成 fit-content，其下限是 min-content；轮播里
+     --bl-card-w 用了百分比、回算出很大的 min-content，结果整页横向溢出
+     （390px 视口下面板被撑到 678px）。显式给宽度才能打破这个回算。 */
+  .bl-section {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 30px 32px;
+    scroll-margin-top: calc(var(--header-h) + 60px);
+    animation: bl-rise 0.5s ease both;
+  }
+
+  .bl-title {
+    margin: 0;
+    font-family: var(--ff-sans);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--c-text);
+  }
+
+  .bl-head .eyebrow {
+    margin: 6px 0 0;
+  }
+
+  .bl-lead {
+    margin: 10px 0 0;
+    font-family: var(--ff-serif);
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--c-text-dim);
+  }
+
+  .bl-more {
+    display: inline-block;
+    margin-top: 18px;
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    color: var(--c-accent);
+    text-decoration: none;
+  }
+
+  .bl-more:hover {
+    color: var(--c-accent-hover);
+  }
+
+  @keyframes bl-rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .bl-section {
+      padding: 24px 20px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bl-section {
+      animation: none;
+    }
+  }
+</style>

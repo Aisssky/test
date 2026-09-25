@@ -1,0 +1,116 @@
+---
+/**
+ * 倒霉熊日记 —— 单张卡片（倒霉档案卡）。
+ *
+ * 只有四样东西：日期 / 第 X 杯敬自己 / 正文原文 / 右下角一只很克制的熊。
+ * 正文一律原样渲染（连 Markdown 都不解析），换行靠 white-space: pre-line，
+ * 星星、方括号、emoji 全部按字面显示——这是他的原话，不是排版素材。
+ */
+interface Props {
+  /** 2026.09.17 */
+  date: string;
+  /** 「第三十六杯」，没有杯号时传 null */
+  cupLabel: string | null;
+  /** 正文原文，已去掉开头那句「第 X 杯敬自己，」 */
+  text: string;
+}
+
+const { date, cupLabel, text } = Astro.props;
+---
+
+<article class="bl-card">
+  <div class="bl-meta">
+    <p class="bl-date">{date}</p>
+    {
+      cupLabel ? (
+        <p class="bl-cup">
+          {cupLabel}
+          <span class="bl-toast">敬自己</span>
+        </p>
+      ) : null
+    }
+  </div>
+
+  <p class="bl-text">{text}</p>
+
+  <span class="bl-bear" aria-hidden="true">🐻</span>
+</article>
+
+<style>
+  .bl-card {
+    position: relative;
+    height: var(--bl-card-h, 330px);
+    padding: 15px 14px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+    /* 轻度继承站点玻璃语言，不做厚重 Glassmorphism */
+    background: rgba(255, 255, 255, 0.46);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    backdrop-filter: blur(6px) saturate(115%);
+    -webkit-backdrop-filter: blur(6px) saturate(115%);
+    transition:
+      transform 240ms ease,
+      box-shadow 240ms ease,
+      opacity 240ms ease;
+  }
+
+  .bl-meta {
+    flex: 0 0 auto;
+  }
+
+  .bl-date {
+    margin: 0;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--c-text-faint);
+  }
+
+  /* 「第 X 杯敬自己」是卡片里唯一的视觉重点 */
+  .bl-cup {
+    margin: 6px 0 0;
+    font-family: var(--ff-sans);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--c-text);
+  }
+
+  .bl-toast {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--c-accent);
+  }
+
+  .bl-text {
+    margin: 0;
+    flex: 1 1 auto;
+    font-family: var(--ff-sans);
+    font-size: 12.5px;
+    line-height: 1.75;
+    color: var(--c-text-dim);
+    white-space: pre-line;
+    /* 五张一排时宽度有限，超出的部分淡出，全文在 /diary/ 看 */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 11;
+    -webkit-box-orient: vertical;
+    mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  }
+
+  /* 栏目身份，不是装饰主题——只放这一只，小小一个 */
+  .bl-bear {
+    position: absolute;
+    right: 10px;
+    bottom: 7px;
+    font-size: 13px;
+    line-height: 1;
+    opacity: 0.32;
+    pointer-events: none;
+  }
+</style>
