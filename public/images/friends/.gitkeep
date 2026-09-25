@@ -1,0 +1,3 @@
+# 友链头像放这里
+# 建议 80x80 正方形、.webp、单张 20KB 以内
+# 在 src/content/about/friends.md 里写：avatar: "/images/friends/xxx.webp"

@@ -3,7 +3,8 @@
  * About —— 一个可以一直往下走的小空间（digital garden，不是 accordion）。
  *
  * 全平铺，不需要点击才能看到内容：
- *   Hero(弹幕玄关) → PROFILE → NOW → GAMES → CURIOUS → THIS WEBSITE → BRAIN DUMP → Colophon
+ *   Hero(弹幕玄关) → PROFILE → NOW → GAMES → BAD LUCK(倒霉熊日记)
+ *   → THIS WEBSITE → BRAIN DUMP → FRIENDS → Colophon
  * 首屏只放 Hero + 弹幕，正文从 PROFILE 开始。
  *
  * 数据全部来自 src/content/about/*.md 的 frontmatter，改内容不用动代码。
@@ -14,7 +15,11 @@ import Layout from '../layouts/Layout.astro';
 import SiteBackground from '../components/SiteBackground.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import Danmaku from '../components/Danmaku.astro';
+import FriendCard from '../components/FriendCard.astro';
+import BadLuckSection from '../components/BadLuckSection.astro';
 import { withBase, SITE } from '../lib/site';
+import { imageAspect } from '../lib/imgsize';
+import { resolve } from 'node:path';
 
 const files = import.meta.glob('../content/about/*.md', { eager: true }) as Record<
   string,
@@ -29,15 +34,31 @@ const gamesDoc = pick('games');
 const nowDoc = pick('now');
 const siteDoc = pick('site');
 const thoughtsDoc = pick('thoughts');
+const friendsDoc = pick('friends');
 
 const games: any[] = gamesDoc.games ?? [];
+
+/**
+ * GAMES 卡片宽度跟着封面比例走：读 public/ 下那张图的原始宽高，得到 --ar。
+ * 读不到（cover 为空 / 文件不在）就用 1.5 兜底，不会挂构建。
+ */
+const PUBLIC_DIR = resolve(process.cwd(), 'public');
+
+const aspectOf = (cover?: string): number => {
+  if (!cover) return 1.5;
+  try {
+    return imageAspect(resolve(PUBLIC_DIR, cover.replace(/^\/+/, '')));
+  } catch {
+    return 1.5;
+  }
+};
 const nowList: any[] = nowDoc.now ?? [];
 const stack: any[] = siteDoc.stack ?? [];
 const timeline: any[] = siteDoc.timeline ?? [];
-const curious: string[] = thoughtsDoc.curious ?? [];
 const brainDump: string[] = thoughtsDoc.brain_dump ?? [];
 const thoughtsList: any[] = thoughtsDoc.thoughts ?? [];
 const secrets: any[] = thoughtsDoc.secrets ?? [];
+const friends: any[] = friendsDoc.friends ?? [];
 
 /** frontmatter 不走 Markdown 渲染，这里只补 **粗体** 一种语法 */
 const rich = (text = ''): string =>
@@ -71,9 +92,10 @@ const chapters = [
   { id: 'profile', label: 'Profile' },
   { id: 'now', label: 'Now' },
   { id: 'games', label: 'Games' },
-  { id: 'curious', label: 'Curious' },
+  { id: 'badluck', label: 'Bad luck' },
   { id: 'website', label: 'This website' },
   { id: 'brain', label: 'Brain dump' },
+  { id: 'friends', label: 'Friends' },
 ];
 ---
 
@@ -112,53 +134,16 @@ const chapters = [
       <section class="panel reveal" id="profile">
         <h2 class="eyebrow">Profile</h2>
 
-        {paras(profile.body).map((p) => <p class="prose" set:html={rich(p)} />)}
+        {/* PROFILE 正文：按 md 里手写的换行原样分段显示，整体居中。
+            用 pre-line 而不是切成多个 <p>，段内行距才不会忽大忽小。 */}
+        <p class="prose prose--center" set:html={rich(String(profile.body ?? '').trim())} />
 
         {
-          profile.likes?.length ? (
-            <ul class="likes">
-              {profile.likes.map((l: any) => (
-                <li>
-                  <span class="li-icon" aria-hidden="true">
-                    {l.icon}
-                  </span>
-                  {l.label}
-                </li>
-              ))}
-            </ul>
-          ) : null
-        }
-
-        {
-          profile.skills?.length ? (
-            <div class="chips">
-              {profile.skills.map((s: string) => (
-                <span class="chip">{s}</span>
-              ))}
-            </div>
-          ) : null
-        }
-
-        {
-          profile.projects?.length ? (
-            <div class="projects">
-              {profile.projects.map((p: any) => (
-                <div class="project">
-                  <p class="project-name">{p.name}</p>
-                  <p class="project-line">职责：{p.role}</p>
-                  <p class="project-line">技术栈：{p.stack}</p>
-                  <p class="project-links">
-                    {p.link ? (
-                      <a href={p.link} target="_blank" rel="noopener">
-                        Steam 商店页 ↗
-                      </a>
-                    ) : null}
-                    {p.note ? <span class="project-note">（{p.note}）</span> : null}
-                    {p.post ? <a href={withBase(`/blog/${p.post}/`)}>开发日志 →</a> : null}
-                  </p>
-                </div>
-              ))}
-            </div>
+          profile.contact ? (
+            <p class="profile-contact">
+              <span class="li-icon" aria-hidden="true">📧</span>
+              <a href={`mailto:${profile.contact}`}>{profile.contact}</a>
+            </p>
           ) : null
         }
       </section>
@@ -190,9 +175,12 @@ const chapters = [
         <ul class="game-grid">
           {
             games.map((g: any) => (
-              <li class="game-card">
+              <li
+                class="game-card"
+                style={`--ar: ${aspectOf(g.cover).toFixed(3)}; --scale: ${Number(g.scale) || 1}`}
+              >
                 {g.cover ? (
-                  <div class="game-cover">
+                  <div class={`game-cover${g.cover_fit === 'cover' ? ' game-cover--crop' : ''}`}>
                     <img
                       src={withBase(g.cover)}
                       alt={`${g.title} 封面`}
@@ -231,13 +219,8 @@ const chapters = [
         </ul>
       </section>
 
-      <!-- ================= CURIOUS ================= -->
-      <section class="panel reveal" id="curious">
-        <h2 class="eyebrow">Curious</h2>
-        <ul class="quiet-list">
-          {curious.map((q: string) => <li>{q}</li>)}
-        </ul>
-      </section>
+      <!-- ================= 倒霉熊日记（展示最近几条，全部在 /diary/） ================= -->
+      <BadLuckSection limit={5} />
 
       <!-- ================= THIS WEBSITE ================= -->
       <section class="panel reveal" id="website">
@@ -262,8 +245,11 @@ const chapters = [
           timeline.length ? (
             <ol class="timeline">
               {timeline.map((t: any) => (
-                <li>
-                  <span class="tl-year">{t.year}</span>
+                <li class:list={['tl-item', t.confirmed === false && 'is-todo']}>
+                  <span class="tl-year">
+                    {t.year}
+                    {t.confirmed === false ? <span class="tl-todo">待确认</span> : null}
+                  </span>
                   <ul class="tl-events">
                     {(t.events ?? []).map((e: string) => (
                       <li>{e}</li>
@@ -300,6 +286,40 @@ const chapters = [
           thoughtsDoc.guestbook_hint ? (
             <p class="dump-hint">
               <a href={`mailto:${SITE.email}`}>{thoughtsDoc.guestbook_hint}</a>
+            </p>
+          ) : null
+        }
+      </section>
+
+      <!-- ================= FRIENDS ================= -->
+      <section class="panel reveal" id="friends">
+        <h2 class="eyebrow">Friends</h2>
+        {friendsDoc.lead ? <p class="panel-lead">{friendsDoc.lead}</p> : null}
+
+        {
+          friends.length ? (
+            <div class="friend-list">
+              {friends.map((f: any) => (
+                <FriendCard
+                  name={f.name}
+                  url={f.url}
+                  description={f.description}
+                  avatar={f.avatar}
+                />
+              ))}
+            </div>
+          ) : (
+            <p class="friend-empty">还没有友链。</p>
+          )
+        }
+
+        {
+          friendsDoc.apply_text ? (
+            <p class="friend-apply">
+              <span>{friendsDoc.apply_text}</span>
+              <a href={friendsDoc.apply_url || `mailto:${SITE.email}`}>
+                {friendsDoc.apply_label ?? 'Add your site →'}
+              </a>
             </p>
           ) : null
         }
@@ -360,6 +380,27 @@ const chapters = [
     justify-content: center;
     text-align: center;
     padding-top: var(--header-h);
+    /* 柔光层 .hero-inner::before 用了 inset:-24% -18%，会横着往外扩出约 56px；
+       手机上这会让整页多出一条横向滚动（实测 390 视口下文档宽 408）。
+       用 clip 而不是 hidden：clip 不会生成滚动容器，纵向保持 visible，
+       hero 的 100vh 不会被撑出滚动条。 */
+    overflow-x: clip;
+  }
+
+  /* 弹幕从标题后面飘过时被这层柔光洗淡，保证名字和 intro 始终读得清 */
+  .hero-inner::before {
+    content: '';
+    position: absolute;
+    inset: -24% -18%;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(255, 255, 255, 0.45) 42%,
+      rgba(255, 255, 255, 0) 72%
+    );
+    z-index: -1;
+    pointer-events: none;
   }
 
   .hero-inner {
@@ -505,97 +546,37 @@ const chapters = [
     margin: 0 0 12px;
   }
 
+  /* PROFILE 那段自称：居中 + 保留 md 里的手写换行 */
+  .prose--center {
+    text-align: center;
+    white-space: pre-line;
+  }
+
   .prose:last-child {
     margin-bottom: 0;
   }
 
-  /* ---- PROFILE：likes / skills / projects ---- */
-  .likes {
-    list-style: none;
+  /* ---- PROFILE：联系方式一行 ---- */
+  .profile-contact {
     margin: 18px 0 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 26px;
-  }
-
-  .likes li {
     display: flex;
     align-items: center;
     gap: 7px;
     font-family: var(--ff-sans);
     font-size: 13px;
-    color: var(--c-text-dim);
   }
 
-  .li-icon {
-    font-size: 14px;
-  }
-
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--c-border-soft);
-  }
-
-  .chip {
-    font-family: var(--ff-mono);
-    font-size: 11px;
-    color: var(--c-text-dim);
-    border: 1px solid var(--c-border-soft);
-    border-radius: 999px;
-    padding: 4px 12px;
-  }
-
-  .projects {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--c-border-soft);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .project-name {
-    font-family: var(--ff-sans);
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--c-text);
-    margin: 0 0 4px;
-  }
-
-  .project-line {
-    font-family: var(--ff-sans);
-    font-size: 12.5px;
-    color: var(--c-text-dim);
-    margin: 0 0 2px;
-  }
-
-  .project-links {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px;
-    margin: 6px 0 0;
-    font-family: var(--ff-sans);
-    font-size: 12.5px;
-  }
-
-  .project-links a {
+  .profile-contact a {
     color: var(--c-accent);
     text-decoration: none;
   }
 
-  .project-links a:hover {
+  .profile-contact a:hover {
     color: var(--c-accent-hover);
   }
 
-  .project-note {
-    color: var(--c-text-faint);
-    font-size: 11.5px;
+  .li-icon {
+    font-size: 14px;
   }
 
   /* ---- NOW ---- */
@@ -641,14 +622,27 @@ const chapters = [
   /* ---- GAMES ---- */
   .game-grid {
     list-style: none;
-    margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 20px;
+    /* 卡片宽度跟着封面比例走（--ar 构建时读图片头算出），可选 --scale 整卡放大。
+       宽度 = 比例 × 倍数 × 21%（21% 保证 4 张仍按「2 + 2」分两排；
+       放大某张卡时它变宽变高，其余卡尺寸不变）。
+       不做 justify 拉伸 —— 拉伸会让「放大 1.5 倍」被行宽摊薄成 1.2 倍左右。 */
+    display: flex;
+    flex-wrap: wrap;
+    /* 靠左排，不做居中：整组卡片从面板左边缘开始，空出来的都留在右边 */
+    justify-content: flex-start;
+    gap: 10px;
+    align-items: flex-start;
+    width: 62%;
+    margin: 0;
   }
 
   .game-card {
+    --ar: 1.5;
+    --scale: 1;
+    flex: 0 0 auto;
+    width: calc(var(--ar) * var(--scale) * 17%);
+    min-width: 0;
     background: var(--c-glass-strong);
     border: 1px solid var(--c-border);
     border-radius: var(--radius-sm);
@@ -657,30 +651,48 @@ const chapters = [
     flex-direction: column;
   }
 
+  /* 默认：完整显示，不裁剪。横图/竖图/方图/立绘都按原比例进卡片。 */
+  /* 不设死高度：卡片宽度已经由比例决定，封面高度 = 宽度 / 比例。
+     300px 只是兜底上限（防止某张图独占一行时顶到天上）。 */
   .game-cover {
-    aspect-ratio: 16 / 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-height: 300px;
     overflow: hidden;
     background: rgba(23, 32, 51, 0.05);
   }
 
   .game-cover img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    max-height: 300px;
+    object-fit: contain;
     display: block;
   }
 
+  /* 例外：md 里给该条写 cover_fit: cover 时，才按 16:10 裁满（适合纯横图截图） */
+  .game-cover--crop {
+    aspect-ratio: 16 / 10;
+  }
+
+  .game-cover--crop img {
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+  }
+
   .game-main {
-    padding: 16px 18px 18px;
+    padding: 8px 9px 9px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     flex: 1 1 auto;
   }
 
   .game-title {
     font-family: var(--ff-sans);
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--c-text);
     margin: 0;
@@ -688,52 +700,52 @@ const chapters = [
 
   .game-meta {
     font-family: var(--ff-mono);
-    font-size: 11px;
+    font-size: 10px;
     color: var(--c-text-faint);
     margin: 0;
   }
 
   .game-stats {
-    margin: 4px 0 0;
-    padding: 10px 0 0;
+    margin: 2px 0 0;
+    padding: 5px 0 0;
     border-top: 1px solid var(--c-border-soft);
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 3px;
   }
 
   .game-stats div {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
+    gap: 8px;
   }
 
   .game-stats dt {
     font-family: var(--ff-sans);
-    font-size: 11.5px;
+    font-size: 10.5px;
     color: var(--c-text-faint);
   }
 
   .game-stats dd {
     margin: 0;
     font-family: var(--ff-sans);
-    font-size: 12px;
+    font-size: 11px;
     color: var(--c-text-dim);
     text-align: right;
   }
 
   .game-why {
     font-family: var(--ff-sans);
-    font-size: 13px;
-    line-height: 1.7;
+    font-size: 12px;
+    line-height: 1.65;
     color: var(--c-text-dim);
-    margin: 6px 0 0;
+    margin: 3px 0 0;
   }
 
   .game-link {
     margin-top: auto;
     font-family: var(--ff-sans);
-    font-size: 12px;
+    font-size: 11px;
     color: var(--c-accent);
     text-decoration: none;
   }
@@ -836,11 +848,32 @@ const chapters = [
   }
 
   .tl-year {
-    flex: 0 0 62px;
+    flex: 0 0 74px;
     font-family: var(--ff-mono);
     font-size: 12px;
     color: var(--c-text-faint);
     padding-top: 1px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  /* 未经核实的时间线：弱化，不冒充史实 */
+  .tl-todo {
+    font-family: var(--ff-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    color: var(--c-text-faint);
+    border: 1px dashed var(--c-border-soft);
+    border-radius: 3px;
+    padding: 1px 4px;
+    align-self: flex-start;
+    white-space: nowrap;
+  }
+
+  .tl-item.is-todo .tl-events li {
+    color: var(--c-text-faint);
+    font-style: italic;
   }
 
   .tl-events {
@@ -894,6 +927,40 @@ const chapters = [
     font-size: 13.5px;
     color: var(--c-text-faint);
     margin: 10px 0 0;
+  }
+
+  /* ---- FRIENDS ---- */
+  .friend-list {
+    margin-top: 2px;
+  }
+
+  .friend-empty {
+    font-family: var(--ff-sans);
+    font-size: 12.5px;
+    color: var(--c-text-faint);
+    margin: 6px 0 0;
+  }
+
+  .friend-apply {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--c-border-soft);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    font-family: var(--ff-sans);
+    font-size: 12.5px;
+    color: var(--c-text-dim);
+  }
+
+  .friend-apply a {
+    color: var(--c-accent);
+    text-decoration: none;
+  }
+
+  .friend-apply a:hover {
+    color: var(--c-accent-hover);
   }
 
   /* ---- COLOPHON ---- */
@@ -953,7 +1020,11 @@ const chapters = [
       padding: 24px 20px;
     }
     .game-grid {
-      grid-template-columns: minmax(0, 1fr);
+      /* 手机端回到单列满宽：一行一张 */
+      width: 100%;
+    }
+    .game-card {
+      width: 100%;
     }
     .timeline > li {
       flex-direction: column;

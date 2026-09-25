@@ -1,68 +1,47 @@
 ---
-name: Aisssky
-tagline: Curious human
-# 一句话自我介绍，显示在名字下方
+# Hero 区三行：大字 / 大字下面一行 / 再下面一句
+name: About
+tagline: Aisssky
+
+# 一句话自我介绍，显示在名字下方（Hero 区）
 intro: >
-  I make things, play games, and occasionally think about things that
-  probably don't need to be thought about.
+  心有渴望者，向心而行
 
-# 主体介绍段落（支持 Markdown），会渲染在 PROFILE 卡片下方
-body: >
-  独立游戏开发，主要方向是 **Unreal Engine 5 / C++**。
-  喜欢搞清楚东西到底是怎么运作的——从一行 C++ 的对象生命周期，
-  到一束光在屏幕上是怎样被算出来的。
-  这个站点同时是作品集和笔记的存放处。
+# ============================================================================
+# PROFILE 正文 —— 只回答三件事：我是谁 / 我喜欢什么 / 我为什么做这些
+# 支持 **粗体**（只支持这一种 Markdown），空行分段。
+# ⚠️ 这里不写技能列表、不写项目履历——那是首页和 /projects 的活。
+# ============================================================================
+# 用 | （不是 >）保留手写换行，页面按原样分行并居中显示。
+body: |
+  来自中国的中国人~现在在天府之国留学~
+  Game101无法持续阅读之人，Shader入门精要看完也记不住之人，
+  Leetcode 100题刷完14天后记忆丧失之人，各种缩写概念过脑不留痕之人，
+  基础依旧稀碎之人，深究底层津津有味一个月后你是谁之人，
+  看着自己以前拉的坨大💩反而无法识别之人，
+  自己来写比ai费的token便宜的廉价之人，没有游戏无法开机仍然坚持熬夜之人，
+  膝盖装配滑轮之人，降低存在感之人，
+  一学习就犯困之人，学上头了兴奋到失眠，没有学习也焦虑到失眠之人
 
-# LIKES —— 喜欢的东西
-likes:
-  - { icon: "🎮", label: "Games" }
-  - { icon: "💻", label: "Programming" }
-  - { icon: "🎨", label: "Computer Graphics" }
-  - { icon: "🧠", label: "Random Ideas" }
-  - { icon: "📚", label: "Learning" }
-
-# CURRENTLY —— 最近在做什么（与 now.md 有重叠，这里只放最想让人看到的三条）
-currently:
-  - { k: "Building", v: "这个网站 · Astro + Decap CMS" }
-  - { k: "Working", v: "《赛博朋克：飘渺城影》UE5 C++" }
-  - { k: "Learning", v: "Computer Graphics · GAMES101" }
-
-# 技能标签
-skills:
-  - UE5
-  - C++
-  - BluePrints
-  - TypeScript
-  - Lua
-  - 图形学
-  - SVN / Git
-
-# 参与项目
-projects:
-  - name: 《赛博朋克：飘渺城影》
-    role: 对话系统 / 文本收集 / 教程系统
-    stack: UE5 C++ · UMG · Dialogue Builder · SVN
-    link: https://store.steampowered.com/app/3552700/_/
-    note: 现已开放愿望单
-    post: 2026-04-21-cyberpunk-devlog
-
-# 联系方式
-contact:
-  - { icon: "📩", label: aisssky09@163.com, href: "mailto:aisssky09@163.com" }
-  - { icon: "🐙", label: "github.com/Aisssky", href: "https://github.com/Aisssky" }
+# 联系方式 —— 正文下面那一行，渲染成 mailto 链接。
+# 想换图标就改 about.astro 里 .profile-contact 那个 span。
+contact: "2574531644@qq.com"
 ---
 
 # 说明
 
-这页不是简历。
+PROFILE 只回答三个问题：**我是谁 / 我喜欢什么 / 我为什么做这些**。
+
+曾经这里还有 SKILLS、PROJECTS、CONTACT、LIKES、CURRENTLY MAKING 五块，已经删掉了——
+它们让这一页读起来像 Portfolio，而首页已经负责「我做过什么」。
+现在正文下面只剩一行 `contact`（📧 邮箱）。
+页面底部 Colophon 还另有一个邮箱（取自 `src/lib/site.ts`），两处是否要统一由本人定。
 
 如果哪天想加自我介绍以外的东西——比如一张照片、一句最近很喜欢的话——
 直接在 frontmatter 里加字段，或在下面正文里继续写。
 
-下方正文会出现在 PROFILE 卡片之后、GAMES 之前。
-
 ## TODO（需要本人确认）
 
-- [ ] `intro` 那句英文是否想换成中文
-- [ ] `currently` 三条是否准确
+- [ ] `body` / `intro` 已是本人原话（逐字保留，只清掉了里头的制表符）
 - [ ] 是否需要放头像 / 立绘裁切图
+- [ ] Colophon 里的邮箱还是 `aisssky09@163.com`，和这里的 QQ 邮箱不一致，要不要统一

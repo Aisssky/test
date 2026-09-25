@@ -81,9 +81,9 @@ const icons: Record<string, string> = {
         return a;
       };
 
-      const normal = shuffle(thoughts.filter((t) => t.weight !== 'egg'));
+      const pool = shuffle(thoughts.filter((t) => t.weight !== 'egg'));
       const eggs = thoughts.filter((t) => t.weight === 'egg');
-      const picked = normal.slice(0, Math.min(count, normal.length));
+      const picked = pool.slice(0, Math.min(count, pool.length));
 
       // 彩蛋低频出现：约 1/4 的概率随机顶替掉一条
       if (eggs.length && picked.length && Math.random() < 0.25) {
@@ -92,18 +92,30 @@ const icons: Record<string, string> = {
       }
 
       const lanes = 7;
-      picked.forEach((t: any, i: number) => {
-        const el = document.createElement('span');
+      // 飘过时长：默认 13 秒（20 秒太慢，完全不像弹幕），再叠 ±15% 随机
+      const duration = (t: any) => `${((t.speed || 13) * (0.85 + Math.random() * 0.3)).toFixed(2)}s`;
+
+      let cursor = 0;
+      /** 给一条弹幕换内容／换道／换速度（用于循环复用） */
+      const relaunch = (el: HTMLElement, t: any, i: number) => {
         el.className = `dm dm--${t.weight || 'normal'}`;
         el.textContent = `${icons[t.category] ?? ''} ${t.text}`.trim();
-
         // 分道，避免挤在同一条水平线上；再叠一点随机抖动
         const lane = i % lanes;
-        el.style.top = `${(6 + lane * 12 + Math.random() * 3).toFixed(2)}%`;
-        el.style.animationDuration = `${t.speed || 20}s`;
-        el.style.animationDelay = `${(i * 1.1 + Math.random() * 1.4).toFixed(2)}s`;
+        el.style.top = `${(5 + lane * 12.5 + Math.random() * 3).toFixed(2)}%`;
+        el.style.animationDuration = duration(t);
+      };
+
+      picked.forEach((t: any, i: number) => {
+        const el = document.createElement('span');
+        relaunch(el, t, i);
+        // 负 delay：动画从行程中途开始 → 一打开页面就满屏弹幕，
+        // 而不是从右侧一条一条慢慢爬进来（那才是不像弹幕的主因）
+        const dur = parseFloat(el.style.animationDuration);
+        el.style.animationDelay = `-${(Math.random() * dur).toFixed(2)}s`;
 
         if (t.weight === 'egg' && secrets.length) {
+          el.dataset.egg = '1';
           const secret = secrets[Math.floor(Math.random() * secrets.length)];
           el.addEventListener('click', () => {
             if (!dialog) return;
@@ -116,6 +128,15 @@ const icons: Record<string, string> = {
             dialog.showModal();
           });
         }
+
+        // 飘完不消失，换一条继续飘——弹幕要一直在，不是一次性
+        el.addEventListener('animationiteration', () => {
+          if (el.dataset.egg === '1') {
+            el.style.display = 'none'; // 彩蛋只出现一次
+            return;
+          }
+          relaunch(el, pool[cursor++ % pool.length], Math.floor(Math.random() * lanes));
+        });
 
         layer.appendChild(el);
       });
@@ -137,10 +158,21 @@ const icons: Record<string, string> = {
   }
 </script>
 
-<style>
+<!--
+  这里必须是 is:global —— 弹幕元素由 JS 动态创建，拿不到 Astro 注入的
+  data-astro-cid-xxx 属性，scoped 选择器一条都匹配不上（表现为弹幕全堆在顶部一行）。
+  类名都有 dm-/danmaku/secret 前缀，全局作用域不会撞车。
+-->
+<style is:global>
   .danmaku {
     position: absolute;
-    inset: 0;
+    /* 避开顶部固定导航栏 */
+    top: var(--header-h, 60px);
+    /* 撑满整个视口宽度：hero 自身受页面内边距限制，弹幕不能被关在中间 */
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+    height: calc(100% - var(--header-h, 60px));
     overflow: hidden;
     pointer-events: none;
     opacity: 1;
@@ -154,26 +186,37 @@ const icons: Record<string, string> = {
   .dm {
     position: absolute;
     left: 100%;
+    top: 0;
     white-space: nowrap;
     font-family: var(--ff-sans);
     font-size: 14px;
+    font-weight: 500;
     line-height: 1;
-    color: var(--c-text-dim);
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+    color: var(--c-text);
+    /* 背景是插画，必须有白色描边托底，否则字会被画面吃掉 */
+    text-shadow:
+      0 0 3px rgba(255, 255, 255, 1),
+      0 0 6px rgba(255, 255, 255, 0.95),
+      0 0 10px rgba(255, 255, 255, 0.8),
+      0 1px 1px rgba(255, 255, 255, 0.9);
     animation-name: dm-move;
     animation-timing-function: linear;
     animation-fill-mode: forwards;
+    /* 一直飘：飘完换一条接着来，而不是一次性放完就空了 */
+    animation-iteration-count: infinite;
     will-change: transform;
   }
 
   .dm--small {
-    font-size: 12px;
-    color: var(--c-text-faint);
-    opacity: 0.9;
+    font-size: 12.5px;
+    /* 插画背景上用 faint 会直接看不见，最低也得 dim */
+    color: var(--c-text-dim);
+    opacity: 0.92;
   }
 
   .dm--highlight {
-    font-size: 16px;
+    font-size: 17px;
+    font-weight: 600;
     color: var(--c-text);
   }
 

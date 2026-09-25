@@ -2,65 +2,57 @@
 # ============================================================================
 # 弹幕 / 脑内声音
 #
-# 页面每次打开会从中随机挑 8～15 条飘过，所以这里的条目越多越好——
+# 页面每次打开会从中随机挑 12 条横向飘过，所以条目越多越好——
 # 攒到 30 条以上时，每次进页面的感觉就会明显不一样。
 #
-# 字段：
+# 字段（只有 text 是必填，其余都可省略）：
 #   text      弹幕文字（必填）
-#   category  类型：idea / game / tech / night / weird / egg
-#   weight    视觉权重：normal(常规) | small(小号低语) | highlight(突出) | egg(彩蛋)
-#   speed     飘过时长（秒），越大越慢，建议 14～26
-#   year      想法产生的年份，仅作记录，页面上可选择性显示
+#   category  类型，决定前面的小图标：
+#             idea 💭 · game 🎮 · tech 💻 · night 🌙 · weird 🌀 · egg ✦
+#             normal = 普通，不显示图标
+#   weight    视觉权重：normal(默认) | small(小号低语) | highlight(突出) | egg(彩蛋，可点击)
+#   speed     飘过时长（秒），越大越慢；省略则默认 20，建议 14～26
+#   year      想法产生的年份，仅作记录，页面上目前不显示
+#
+# ⚠️ 加弹幕时的自检：这句话你会不会真的在心里说过？
+#    如果答案是「这句话很适合放在个人网站上」，那多半是模板味——删掉。
 # ============================================================================
+# ⚠️ 下面全部是本人原话。不要往里加「看起来像他会说的话」——
+#    上一版就是因为混进了编的条目被要求全部清空。加之前先问过本人。
 thoughts:
-  - { text: "如果把 ECS 用来做博客，会怎么样？", category: idea, weight: normal, speed: 18, year: 2026 }
-  - { text: "为什么游戏里的门都可以打开？", category: game, weight: normal, speed: 20, year: 2026 }
-  - { text: "如果 GPU 真的能思考呢", category: tech, weight: highlight, speed: 22, year: 2026 }
-  - { text: "今天突然想做一个……", category: idea, weight: small, speed: 16, year: 2026 }
-  - { text: "这个算法能不能拿来做游戏？", category: tech, weight: normal, speed: 19, year: 2026 }
-  - { text: "为什么游戏里的 UI 总是那么好看？", category: game, weight: normal, speed: 21, year: 2026 }
-  - { text: "如果梦也可以被保存呢……", category: night, weight: highlight, speed: 26, year: 2026 }
-  - { text: "猫如果会写代码会用什么 IDE？", category: weird, weight: normal, speed: 18, year: 2026 }
-  - { text: "如果博客文章可以像游戏存档一样保存？", category: idea, weight: normal, speed: 20, year: 2026 }
-  - { text: "为什么没有一种 IDE 可以把代码直接变成 3D 世界？", category: idea, weight: normal, speed: 22, year: 2026 }
-  - { text: "我是不是应该做一个自己的字体？", category: idea, weight: small, speed: 17, year: 2026 }
-  - { text: "如果网站背景会随着文章内容改变呢？", category: idea, weight: normal, speed: 21, year: 2026 }
-  - { text: "如果把光照系统用来模拟梦境……", category: tech, weight: highlight, speed: 25, year: 2026 }
-  - { text: "一本正经地研究了一个完全没用的问题", category: weird, weight: small, speed: 15, year: 2026 }
-  - { text: "存档读档，是不是也算一种时间旅行", category: night, weight: normal, speed: 24, year: 2026 }
-
-  # —— 彩蛋：出现频率极低 ——
-  - { text: "[ Aisssky.exe has stopped responding ]", category: egg, weight: egg, speed: 14, year: 2026 }
-  - { text: "Achievement unlocked：想到一个没什么用的点子", category: egg, weight: egg, speed: 20, year: 2026 }
-  - { text: "✦ You found a thought that was never supposed to escape.", category: egg, weight: egg, speed: 28, year: 2026 }
-
-# ============================================================================
-# THINGS I'M CURIOUS ABOUT —— 长期好奇、还没想明白的问题
-# 这是「安静区域」，不飘，老老实实列在那儿。
-# ============================================================================
-curious:
-  - "Why do game worlds feel real?"
-  - "Can a computer-generated world ever feel nostalgic?"
-  - "What would an operating system designed for games look like?"
-  - "Can graphics explain mathematics?"
-  - "Why do I keep redesigning this website?"
+  - text: "我们在命运的两端 是否有相似的痛感"
+    category: night
+  - text: "我知道了，我什么都知道了，小时候让我奶奶给我脑瓜门上点红点老天爷以为是准星呢一直追着狙击我，我说呢哈哈哈哈哈哈哈哈"
+    category: weird
+  - text: "老师：名门正派 我：老师说什么正太？"
+    category: weird
+  - text: "Playing with temptation, searching for salvation Caught up in confusion, need a resolution"
+    category: night
+  - text: "好不容易存点钱，被牙知道了库库给我花了"
+    category: normal
+  - text: "煮大虾……油炸大虾……油焖大虾……烤大虾……煎大虾……干锅大虾……"
+    category: weird
+  - text: "这个世界还是太social了"
+    category: normal
+  - text: "钱猴西，大量的钱，猴西"
+    category: weird
+  - text: "梦见去日本看kzh的演唱会……"
+    category: night
+  - text: "不要……全平台……都叫一个名字……"
+    category: idea
+  - text: "我干脆去给马修蹄子好了……ai肯定代替不了修蹄师……"
+    category: idea
 
 # ============================================================================
-# 彩蛋系统：点击某些特殊弹幕后弹出的小窗
-# id 对应 thoughts 里 weight: egg 的条目（按顺序匹配）
+# 彩蛋系统：点击 weight: egg 的弹幕后弹出的小窗
+# 目前 thoughts 里没有 egg 条目（先清空了编的），所以彩蛋暂时不会出现。
+# 想启用：在 thoughts 里加一条 weight: egg 的，再在下面补正文。
 # ============================================================================
 secrets:
   - id: SECRET #01
-    title: "我曾经想过做一个……"
+    title: "（待填）"
     body: >
-      但是后来发现太麻烦了。
-      （待填：这里写那个没做完的东西）
-
-  - id: SECRET #02
-    title: "Achievement Unlocked"
-    body: >
-      「第一次认真看完 About」
-      谢谢你真的滚到了这里。
+      （待填）这里写点只有点了才知道的东西。
 
 # ============================================================================
 # BRAIN DUMP —— 思想垃圾桶
@@ -69,10 +61,8 @@ brain_dump_lead: >
   一些不值得写成文章、但扔掉又可惜的想法。
   以后写文章时顺手记下的碎片也可以放进来。
 brain_dump:
-  - "如果博客文章可以像游戏存档一样保存？"
-  - "为什么没有一种 IDE 可以把代码直接变成 3D 世界？"
-  - "我是不是应该做一个自己的字体？"
-  - "如果网站背景会随着文章内容改变呢？"
+  - "（待填）一条不值得写成文章、但扔掉又可惜的想法。"
+  - "（待填）再一条。写完文章顺手记下来的那种。"
 guestbook_hint: "Have a weird thought?"
 ---
 
@@ -83,28 +73,38 @@ guestbook_hint: "Have a weird thought?"
 在 `thoughts:` 下面照格式加一行就行，不用改任何代码：
 
 ```yaml
-- { text: "你的新想法", category: idea, weight: normal, speed: 20, year: 2026 }
+- { text: "你的新想法", category: idea }
 ```
 
+最短只写 text 也可以：`- { text: "好想吃东西" }`（不显示图标）。
+
 **category 决定图标**：
-`idea` 💭 · `game` 🎮 · `tech` 💻 · `night` 🌙 · `weird` 🌀 · `egg` ✦
+`idea` 💭 · `game` 🎮 · `tech` 💻 · `night` 🌙 · `weird` 🌀 · `egg` ✦ · `normal` 无图标
 
-**weight 决定大小**：
-`normal` 常规 · `small` 小号低语 · `highlight` 突出加亮 · `egg` 彩蛋样式
+**weight 决定大小**（可省略）：
+`normal` 常规（默认）· `small` 小号低语 · `highlight` 突出加亮 · `egg` 彩蛋样式（可点击）
 
-## 关于 weird 那一类
-
-「猫如果会写代码会用什么 IDE」这种——**请务必保留**。
-完全没用但很有意思的想法才是一个人的味道。
+**speed** 可省略，默认 20 秒飘完。
 
 ## 弹幕是空气，不是正文
 
 页面上会有一个明确的「安静区域」：弹幕只在首屏那一屏飘，
-往下滚进正式内容后就会淡出。不会变成 B 站首页。
+往下滚进正式内容后就会淡出。**不会变成 B 站首页**——这条别改。
+
+## 关于「AI 味」
+
+**铁律：不替他编弹幕。**
+
+之前这里混进过一批编的条目（「半夜睡不着」「换电脑！」「好冷宿舍没暖气」这类），
+被要求**全部清空重写**——因为它们读起来像「一个程序员个人网站应该出现的碎碎念」。
+现在 `thoughts:` 里这 11 条是本人原话，一条都不是编的。
+
+以后要加，只能加本人亲口说的。没有原话就空着，不要用「看起来像他会说的」去补。
 
 ## TODO（需要本人确认）
 
-- [ ] 弹幕种子里混了我写的和你写的——**不想要的直接删**，想加的直接加
-- [ ] 是否要做「按时间变色」：早上偏技术/学习，深夜偏脑洞
-- [ ] 两个彩蛋的内容
-- [ ] `curious` 最后一句要不要保留自嘲那句
+- [ ] 弹幕现在只到 11 条，攒到 30 条以上每次进页面的观感会明显不同
+- [ ] 两个彩蛋（egg 类弹幕 + secrets 正文）——要不要启用，还是干脆去掉这个机制
+- [ ] brain_dump 两条待填
+- [ ] CURIOUS 板块已于 2026-09-25 整块删除（那五句是我编的英文），
+      数据 `curious:` 也一并从本文件清掉了

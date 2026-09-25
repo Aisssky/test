@@ -1,0 +1,122 @@
+---
+/**
+ * 友链条目 —— 刻意做得轻：不是大卡片，是一行列表。
+ * 有头像就显示头像，没有就显示一个圆点。
+ */
+import { withBase } from '../lib/site';
+
+interface Props {
+  name: string;
+  url: string;
+  description?: string;
+  avatar?: string;
+}
+
+const { name, url, description = '', avatar = '' } = Astro.props;
+---
+
+<a class="friend" href={url} target="_blank" rel="noopener me">
+  <span class="friend-mark" aria-hidden="true">
+    {
+      avatar ? (
+        <img class="friend-avatar" src={withBase(avatar)} alt="" loading="lazy" decoding="async" />
+      ) : (
+        <span class="friend-dot"></span>
+      )
+    }
+  </span>
+
+  <span class="friend-text">
+    <span class="friend-name">{name}</span>
+    {description ? <span class="friend-desc">{description}</span> : null}
+  </span>
+
+  <span class="friend-go" aria-hidden="true">↗</span>
+</a>
+
+<style>
+  .friend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 2px;
+    border-top: 1px solid var(--c-border-soft);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s ease;
+  }
+
+  .friend:first-child {
+    border-top: none;
+  }
+
+  .friend:hover {
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  .friend-mark {
+    flex: 0 0 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .friend-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--c-border-soft);
+  }
+
+  /* 没有头像时的圆点 */
+  .friend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    opacity: 0.75;
+  }
+
+  .friend-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .friend-name {
+    font-family: var(--ff-sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--c-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .friend:hover .friend-name {
+    color: var(--c-accent-hover);
+  }
+
+  .friend-desc {
+    font-family: var(--ff-sans);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--c-text-dim);
+  }
+
+  .friend-go {
+    flex: 0 0 auto;
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    color: var(--c-text-faint);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .friend:hover .friend-go {
+    color: var(--c-accent);
+    transform: translate(2px, -2px);
+  }
+</style>

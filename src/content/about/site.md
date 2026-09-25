@@ -1,18 +1,9 @@
 ---
 # THIS WEBSITE —— 这个小地方的故事
 story: >
-  This website is my little corner of the internet.
+  因为服务器到期不想再续所以迁移到了这里，在审视自己过去记的笔记的时候发现过去记的东西基本上已经会了，都是很基础的东西，就没有搬过来。未来应该会持续更新吧，毕竟把各种各样的想法分散在各个平台还是有一点难绷的。
 
-  It started as a simple static page.
-
-  Then I kept adding things.
-
-  And breaking things.
-
-  And rebuilding things.
-
-  Now it is a place for: writing, notes, experiments, random thoughts,
-  and things that I don't know where else to put.
+  其实是今天学校不断电没事做，一边学网络同步一边后台蹬了一晚上AI✧(≖ ◡ ≖✿)
 
 # BUILT WITH
 stack:
@@ -22,21 +13,13 @@ stack:
   - { name: "GitHub Pages", note: "构建与托管（GitHub Actions）" }
 
 # SITE TIMELINE
+# confirmed: true  = 已核实，当事实渲染
+# confirmed: false = 未经核实，弱化显示 + 带「待确认」标记，不当史实
 timeline:
-  - year: "2026-02"
-    events:
-      - "写下第一篇 UE5 踩坑记录"
-  - year: "2026-04"
-    events:
-      - "旧站上线（手写 HTML）"
-      - "加入《赛博朋克：飘渺城影》开发日志"
-  - year: "2026-05"
-    events:
-      - "GAMES101 图形学笔记"
   - year: "2026-09"
+    confirmed: true
     events:
-      - "迁移到 Astro + Decap CMS"
-      - "换成这个二次元固定背景"
+      - "重构为 Astro + Decap CMS"
 
 # 进度条文案（故意写不满）
 progress_label: "Status"
@@ -54,6 +37,6 @@ progress_note: "(It's never going to be finished.)"
 
 ## TODO（需要本人确认）
 
-- [ ] 2026-02 之前有没有更早的版本？（有的话补上，没有就删掉这一条）
+- [ ] 时间线已精简：只留 2026-09「重构为 Astro + Decap CMS」一条（2026-02/04/05 那批
+      未经核实，已删）。以后每做一次大改往 `timeline` 里加一条，`confirmed: true` 再当事实显示
 - [ ] 是否要把「删掉的 C++ 笔记」也记进时间线（它确实存在过）
-- [ ] `story` 那段英文要不要改成中文
