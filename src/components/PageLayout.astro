@@ -5,6 +5,7 @@
 import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import SiteBackground from '../components/SiteBackground.astro';
 import '../styles/blog.css';
 
 interface Props {
@@ -24,6 +25,8 @@ const { title, description, subtitle, noindex = false } = Astro.props;
   bodyClass="page-shell"
   noindex={noindex}
 >
+  {/* 列表页文字更密，遮罩比首页/About 浓一档，保证可读性 */}
+  <SiteBackground veil={0.3} />
   <SiteHeader />
 
   <main class="page-main" id="main">
