@@ -139,3 +139,109 @@ collections:
       - label: 正文
         name: body
         widget: markdown
+
+  # ------------------------------------------------------------------
+  # 随记（Notes）：游戏开发之外的记录。
+  # 与 src/content.config.ts 里的 notes 集合保持一致；无单篇详情页，
+  # 正文直接渲染在 /notes/ 列表页。
+  # ------------------------------------------------------------------
+  - name: notes
+    label: 随记
+    label_singular: 随记
+    description: 游戏开发之外的随手记录，正文会直接显示在 /notes/ 列表页。
+    folder: src/content/notes
+    create: true
+    delete: true
+    slug: '{{year}}-{{month}}-{{day}}-{{slug}}'
+    summary: '{{title}} · {{date}}'
+    sortable_fields: ['date', 'title']
+    fields:
+      - label: 日期
+        name: date
+        widget: datetime
+        format: 'YYYY-MM-DD'
+        hint: 这条随记发生 / 写下的日期
+
+      - label: 标题
+        name: title
+        widget: string
+        required: false
+        hint: 可留空，留空就只显示日期和正文
+
+      - label: 一句话说明
+        name: description
+        widget: text
+        required: false
+        hint: 会显示在首页 Notes 列表里；留空则首页只显示标题
+
+      - label: 标签
+        name: tags
+        widget: list
+        required: false
+        default: []
+
+      - label: 草稿
+        name: draft
+        widget: boolean
+        default: false
+
+      - label: 正文
+        name: body
+        widget: markdown
+
+  # ------------------------------------------------------------------
+  # 倒霉熊日记（badluck）：一个文件 = 一天，文件名 = 日期。
+  # 与 src/content.config.ts 的 badluck 集合保持一致（date 必填，
+  # cup / cups / draft 可选）。无单篇详情页：About 首页显示最近 5 条，
+  # 全量在 /diary/。
+  #
+  # ⚠️ 同一天又倒霉了：不要新建条目（文件名会撞），
+  #    打开当天那条，把新杯号加到「同一天多杯」列表、正文往下加一行。
+  # ------------------------------------------------------------------
+  - name: badluck
+    label: 倒霉熊日记
+    label_singular: 日记
+    description: 一杯一杯敬自己。正文逐字原样，不要润色。
+    folder: src/content/badluck
+    create: true
+    delete: true
+    slug: '{{year}}-{{month}}-{{day}}'
+    summary: '{{date}} · 第{{cup}}杯'
+    sortable_fields: ['date']
+    fields:
+      - label: 日期
+        name: date
+        widget: datetime
+        format: 'YYYY-MM-DD'
+        hint: 发生 / 写下这条的日期，文件名就是它
+
+      - label: 第几杯
+        name: cup
+        widget: number
+        value_type: int
+        min: 1
+        required: false
+        hint: 这一天只写了一杯就填这里；多杯请往下填「同一天多杯」，两个不要同时填
+
+      - label: 同一天多杯
+        name: cups
+        widget: list
+        required: false
+        field:
+          label: 杯号
+          name: cup
+          widget: number
+          value_type: int
+          min: 1
+        hint: 按正文顺序填，例如 31、32。留空表示这一天只有一杯
+
+      - label: 草稿
+        name: draft
+        widget: boolean
+        default: false
+        hint: 只想起了「第几杯敬自己」、正文还没写出来时勾上，就不会出现在页面上
+
+      - label: 正文
+        name: body
+        widget: markdown
+        hint: 逐字原样写，不要润色、不要补标点、不要删 emoji。要不要以「第X杯敬自己，」开头都行，页面会自动处理
