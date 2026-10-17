@@ -97,8 +97,15 @@ const currently = [
               notes.length ? (
                 notes.map((note) => (
                   <li>
-                    <a class="entry" href={withBase('/notes/')}>
-                      <span class="entry-date">{formatDate(note.data.date)}</span>
+                    <a
+                      class={`entry${note.data.cover ? ' entry--work' : ''}`}
+                      href={note.data.link || withBase('/notes/')}
+                      target={note.data.link ? '_blank' : undefined}
+                      rel={note.data.link ? 'noopener' : undefined}
+                    >
+                      {note.data.cover && (
+                        <img class="entry-thumb" src={note.data.cover} alt="" loading="lazy" />
+                      )}
                       <span class="entry-body">
                         <span class="entry-title">{note.data.title ?? '（无题）'}</span>
                         {note.data.description && (
@@ -108,7 +115,7 @@ const currently = [
                           <span class="entry-tags">{note.data.tags.slice(0, 2).join(' · ')}</span>
                         ) : null}
                       </span>
-                      <span class="entry-arrow" aria-hidden="true">→</span>
+                      <span class="entry-arrow" aria-hidden="true">{note.data.link ? '↗' : '→'}</span>
                     </a>
                   </li>
                 ))
@@ -364,6 +371,26 @@ const currently = [
 
   .entry:hover .entry-title {
     color: var(--c-accent-hover);
+  }
+
+  .entry--work {
+    align-items: center;
+  }
+
+  .entry-thumb {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #eef0f3;
+  }
+
+  @media (max-width: 560px) {
+    .entry-thumb {
+      width: 38px;
+      height: 38px;
+    }
   }
 
   .is-muted .entry-title {

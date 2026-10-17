@@ -150,6 +150,9 @@ collections:
     label_singular: 随记
     description: 游戏开发之外的随手记录，正文会直接显示在 /notes/ 列表页。
     folder: src/content/notes
+    # 封面图直接进已有的游戏封面文件夹，不另建子目录（只影响「随记」集合，文章封面仍走 uploads/）
+    media_folder: public/images/games
+    public_folder: /images/games
     create: true
     delete: true
     slug: '{{year}}-{{month}}-{{day}}-{{slug}}'
@@ -179,6 +182,19 @@ collections:
         widget: list
         required: false
         default: []
+
+      - label: 封面图
+        name: cover
+        widget: image
+        required: false
+        allow_multiple: false
+        hint: 可选。游戏 / 作品封面；填了这条随记会在 /notes/ 里以带封面的作品卡片展示
+
+      - label: 外链
+        name: link
+        widget: string
+        required: false
+        hint: 可选。游戏上线地址 / 商店页 / 演示链接；填了卡片会出现「查看 ↗」按钮，首页也会直接跳外链
 
       - label: 草稿
         name: draft

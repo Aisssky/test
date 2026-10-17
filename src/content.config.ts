@@ -111,6 +111,12 @@ const notes = defineCollection({
     /** 标签 */
     tags: z.array(z.string()).default([]),
 
+    /** 封面图（可选）：游戏 / 作品封面，配合 link 显示为带封面的作品卡片 */
+    cover: z.string().optional(),
+
+    /** 外链（可选）：游戏上线地址 / 商店页 / 演示链接；填了卡片出现「查看 ↗」 */
+    link: z.string().optional(),
+
     /** 草稿：不进任何页面 */
     draft: z.boolean().default(false),
   }),

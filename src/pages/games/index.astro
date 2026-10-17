@@ -1,0 +1,369 @@
+---
+/**
+ * 我的游戏库 /games/
+ * 深色、封面优先的 H5 游戏导航页。
+ * - 数据全部来自 src/data/games.ts（集中维护，卡片不硬编码）
+ * - 不引入大库；搜索只用少量客户端 JS
+ * - 不渲染全局动漫背景（深色实底覆盖，避免封面与背景混在一起）
+ * - 沿用 SiteHeader / SiteFooter / Layout 的 SEO 体系
+ */
+import Layout from '../../layouts/Layout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { withBase } from '../../lib/site';
+import { gamesSorted } from '../../data/games';
+
+const title = '我的游戏库 · AI 游戏创作';
+const description =
+  'Aisssky 的 AI 游戏作品集 —— 18 个脑洞，18 次尝试。盛趣游戏「代号 Meme」线上实践项目期间的创作，挑一个玩玩吧。';
+---
+
+<Layout title={title} description={description} image="/images/promo.webp">
+  <SiteHeader />
+
+  <main class="arcade" id="main">
+    <section class="hero">
+      <p class="eyebrow">MY GAME ARCADE</p>
+      <h1>我的游戏库</h1>
+      <p class="lede">18 个脑洞，18 次尝试。来挑一个玩玩吧。</p>
+      <p class="hero-note">盛趣游戏「代号 Meme」线上实践项目 · AI 辅助创作</p>
+
+      <div class="search">
+        <input
+          id="game-search"
+          type="search"
+          placeholder="搜索游戏名称……"
+          aria-label="搜索游戏名称"
+          autocomplete="off"
+          enterkeyhint="search"
+        />
+      </div>
+    </section>
+
+    <section class="grid" id="game-grid" aria-label="游戏目录">
+      {
+        gamesSorted.map((g) =>
+          g.url ? (
+            <a
+              class="card"
+              href={g.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              id={`game-${g.id}`}
+              data-title={g.title.toLowerCase()}
+              aria-label={`${g.title} — 开始游玩`}
+            >
+              <div class="card-cover" data-fallback={g.title}>
+                <img src={withBase(g.cover)} alt={g.title} loading="lazy" />
+              </div>
+              <div class="card-body">
+                <h2 class="card-title">{g.title}</h2>
+                {g.description && <p class="card-desc">{g.description}</p>}
+                <span class="card-cta">
+                  开始游玩 <span aria-hidden="true">↗</span>
+                </span>
+              </div>
+            </a>
+          ) : (
+            <div
+              class="card card--pending"
+              id={`game-${g.id}`}
+              data-title={g.title.toLowerCase()}
+              aria-label={`${g.title} — 链接待补`}
+            >
+              <div class="card-cover" data-fallback={g.title}>
+                <img src={withBase(g.cover)} alt={g.title} loading="lazy" />
+              </div>
+              <div class="card-body">
+                <h2 class="card-title">{g.title}</h2>
+                <span class="card-cta card-cta--pending">链接待补</span>
+              </div>
+            </div>
+          )
+        )
+      }
+    </section>
+
+    <p class="empty" id="game-empty" hidden>
+      没有找到匹配的游戏。<button type="button" id="clear-search">清除搜索</button>
+    </p>
+
+    <section class="about-note">
+      <h2>创作说明</h2>
+      <p>
+        这些小游戏来自我参加盛趣游戏「代号 Meme」线上实践项目期间的创作尝试。在 AI
+        的帮助下，我把一个个脑洞逐渐变成了可以实际游玩的游戏。这里收录了我的作品，欢迎随便挑一个试试。
+      </p>
+      <p class="muted">若未来想写详细的创作过程，可以单独写成博客文章，再从游戏库链接过去。</p>
+    </section>
+  </main>
+
+  <SiteFooter />
+</Layout>
+
+<script>
+  const input = document.getElementById('game-search') as HTMLInputElement | null;
+  const grid = document.getElementById('game-grid');
+  const empty = document.getElementById('game-empty');
+  const clearBtn = document.getElementById('clear-search');
+
+  function applyFilter() {
+    if (!input || !grid || !empty) return;
+    const q = input.value.trim().toLowerCase();
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('.card'));
+    let visible = 0;
+    for (const card of cards) {
+      const title = (card.dataset.title ?? '').toLowerCase();
+      const match = q === '' || title.includes(q);
+      card.hidden = !match;
+      if (match) visible++;
+    }
+    empty.hidden = visible !== 0;
+  }
+
+  input?.addEventListener('input', applyFilter);
+  // 中文/移动端输入法组合输入中可能误触发，compositionend 再滤一次
+  input?.addEventListener('compositionend', applyFilter);
+  clearBtn?.addEventListener('click', () => {
+    if (input) input.value = '';
+    applyFilter();
+    input?.focus();
+  });
+
+  // 封面加载失败时退化为中性占位（不破坏卡片布局）
+  document.querySelectorAll<HTMLImageElement>('.card-cover img').forEach((img) => {
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+      img.parentElement?.classList.add('is-broken');
+    });
+  });
+</script>
+
+<style>
+  :global(body.arcade-page) {
+    background: #0e1116;
+    color: #e8ecf2;
+    min-height: 100vh;
+  }
+
+  .arcade {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: calc(var(--header-h) + 44px) var(--page-pad) 80px;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 38px;
+  }
+
+  .hero .eyebrow {
+    color: #7e8aa0;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin: 6px 0 12px;
+    color: #f2f5f9;
+  }
+
+  .lede {
+    font-size: clamp(15px, 2.2vw, 19px);
+    color: #c4ccd8;
+    margin: 0 0 8px;
+  }
+
+  .hero-note {
+    font-size: 13px;
+    color: #8a94a6;
+    margin: 0 0 24px;
+    letter-spacing: 0.02em;
+  }
+
+  .search {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  #game-search {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e8ecf2;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  #game-search::placeholder {
+    color: #6b7585;
+  }
+
+  #game-search:focus {
+    border-color: var(--c-accent);
+    box-shadow: 0 0 0 3px rgba(98, 137, 199, 0.25);
+  }
+
+  .grid {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  @media (min-width: 600px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 900px) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: #151b23;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.18s ease, border-color 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(98, 137, 199, 0.6);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  .card:focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+  }
+
+  .card-cover {
+    aspect-ratio: 3 / 4;
+    background: #0e131a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .card-cover.is-broken::after {
+    content: attr(data-fallback);
+    color: #56607a;
+    font-size: 13px;
+    padding: 0 12px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .card-body {
+    padding: 14px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    color: #eef2f7;
+    line-height: 1.4;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: #9aa4b2;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .card-cta {
+    margin-top: auto;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--c-accent);
+  }
+
+  .card-cta--pending {
+    color: #6b7585;
+  }
+
+  .card--pending {
+    opacity: 0.88;
+  }
+
+  .empty {
+    text-align: center;
+    color: #9aa4b2;
+    margin: 44px 0;
+    font-size: 15px;
+  }
+
+  .empty button {
+    background: rgba(98, 137, 199, 0.15);
+    color: #cdd8ea;
+    border: 1px solid rgba(98, 137, 199, 0.4);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-left: 10px;
+  }
+
+  .empty button:hover {
+    background: rgba(98, 137, 199, 0.3);
+  }
+
+  .about-note {
+    max-width: 720px;
+    margin: 64px auto 0;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+  }
+
+  .about-note h2 {
+    font-size: 18px;
+    color: #eef2f7;
+    margin: 0 0 12px;
+  }
+
+  .about-note p {
+    color: #aeb7c4;
+    font-size: 14px;
+    line-height: 1.75;
+    margin: 0 0 10px;
+  }
+
+  .about-note .muted {
+    color: #7a8494;
+    font-size: 13px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card {
+      transition: none;
+    }
+  }
+</style>

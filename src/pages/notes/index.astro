@@ -22,16 +22,36 @@ const rendered = await Promise.all(
   <div class="page-glass">
     {
       rendered.length > 0 ? (
-        <ul class="note-list">
-          {rendered.map(({ note, Content }) => (
-            <li class="note-item">
-              <p class="note-date">{formatDate(note.data.date)}</p>
-              {note.data.title && <h2 class="note-title">{note.data.title}</h2>}
-              <div class="note-body">
-                <Content />
-              </div>
-            </li>
-          ))}
+          <ul class="note-list">
+          {rendered.map(({ note, Content }) => {
+            const cover = note.data.cover;
+            const link = note.data.link;
+            return (
+              <li class={`note-item${cover ? ' note-item--work' : ''}`}>
+                {cover && (
+                  <div class="note-cover">
+                    {link ? (
+                      <a href={link} target="_blank" rel="noopener">
+                        <img src={cover} alt={note.data.title ?? 'cover'} loading="lazy" />
+                      </a>
+                    ) : (
+                      <img src={cover} alt={note.data.title ?? 'cover'} loading="lazy" />
+                    )}
+                  </div>
+                )}
+                <div class="note-main">
+                  <p class="note-date">{formatDate(note.data.date)}</p>
+                  {note.data.title && <h2 class="note-title">{note.data.title}</h2>}
+                  <div class="note-body">
+                    <Content />
+                  </div>
+                  {link && (
+                    <a class="note-link" href={link} target="_blank" rel="noopener">查看 ↗</a>
+                  )}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <div class="empty">
@@ -68,6 +88,46 @@ const rendered = await Promise.all(
   .note-item:first-child {
     border-top: none;
     padding-top: 4px;
+  }
+
+  /* 带封面 / 外链的作品卡片 */
+  .note-item--work {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 22px;
+    align-items: start;
+  }
+
+  .note-cover {
+    border-radius: 10px;
+    overflow: hidden;
+    background: #eef0f3;
+    align-self: start;
+  }
+
+  .note-cover img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 260px;
+    object-fit: contain;
+  }
+
+  .note-link {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: var(--c-accent);
+    color: #fff;
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    text-decoration: none;
+    transition: opacity 0.18s ease;
+  }
+
+  .note-link:hover {
+    opacity: 0.9;
   }
 
   .note-date {
@@ -107,6 +167,12 @@ const rendered = await Promise.all(
   @media (max-width: 720px) {
     .page-glass {
       padding: 20px 16px;
+    }
+    .note-item--work {
+      grid-template-columns: 1fr;
+    }
+    .note-cover {
+      max-width: 220px;
     }
   }
 </style>
