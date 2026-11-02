@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 524" width="1000" height="524" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect x="0.5" y="0.5" width="999" height="523" rx="14" fill="#FBFAF7" stroke="#E3E0D8"/>
+
+  <text x="40" y="36" font-size="12.5" font-weight="600" fill="#2A2A26" letter-spacing="0.3">序列式 Sequence Containers</text>
+  <line x1="40" y1="46" x2="340" y2="46" stroke="#378ADD" stroke-width="2"/>
+  <text x="372" y="36" font-size="12.5" font-weight="600" fill="#2A2A26" letter-spacing="0.3">有序关联式 Ordered · 红黑树</text>
+  <line x1="372" y1="46" x2="688" y2="46" stroke="#1D9E75" stroke-width="2"/>
+  <text x="720" y="36" font-size="12.5" font-weight="600" fill="#2A2A26" letter-spacing="0.3">无序关联式 Unordered · 哈希桶</text>
+  <line x1="720" y1="46" x2="960" y2="46" stroke="#BA7517" stroke-width="2"/>
+
+  <line x1="356" y1="62" x2="356" y2="486" stroke="#DCD9D0" stroke-width="1" stroke-dasharray="4 5"/>
+  <line x1="704" y1="62" x2="704" y2="486" stroke="#DCD9D0" stroke-width="1" stroke-dasharray="4 5"/>
+
+  <g font-family="'Cascadia Mono',Consolas,monospace" font-size="11.5" font-weight="600" fill="#2A2A26">
+    <text x="40" y="74">array</text>
+    <text x="40" y="160">vector</text>
+    <text x="40" y="242">deque</text>
+    <text x="40" y="336">list</text>
+    <text x="40" y="420">forward_list</text>
+    <text x="372" y="74">set / multiset</text>
+    <text x="372" y="262">map / multimap</text>
+    <text x="720" y="74">unordered_set</text>
+    <text x="720" y="262">unordered_map</text>
+  </g>
+  <g font-size="9.5" fill="#8A8880" text-anchor="end">
+    <text x="340" y="74">定长 · 连续</text>
+    <text x="340" y="160">动态 · 连续</text>
+    <text x="340" y="242">分段连续 + 中控</text>
+    <text x="340" y="336">双向链表 · 节点分散</text>
+    <text x="340" y="420">单向链表</text>
+    <text x="688" y="74">节点只存 key</text>
+    <text x="688" y="262">节点存 key + value</text>
+    <text x="960" y="74">桶数组 + 单链</text>
+    <text x="960" y="262">桶数组 + 单链</text>
+  </g>
+
+  <g fill="#FFFFFF" stroke="#2A2A28" stroke-width="1.2">
+    <rect x="40" y="84" width="36" height="30"/><rect x="76" y="84" width="36" height="30"/><rect x="112" y="84" width="36" height="30"/><rect x="148" y="84" width="36" height="30"/>
+    <rect x="184" y="84" width="36" height="30"/><rect x="220" y="84" width="36" height="30"/><rect x="256" y="84" width="36" height="30"/><rect x="292" y="84" width="36" height="30"/>
+  </g>
+  <text x="40" y="132" font-size="10" fill="#6B6A64">随机访问 O(1) ｜ 不能增删 ｜ 大小编译期固定，<tspan font-family="'Cascadia Mono',Consolas,monospace">++</tspan> 就是 +1</text>
+
+  <g fill="#FFFFFF" stroke="#2A2A28" stroke-width="1.2">
+    <rect x="40" y="170" width="36" height="30"/><rect x="76" y="170" width="36" height="30"/><rect x="112" y="170" width="36" height="30"/><rect x="148" y="170" width="36" height="30"/>
+    <rect x="184" y="170" width="36" height="30"/><rect x="220" y="170" width="36" height="30"/><rect x="256" y="170" width="36" height="30"/>
+  </g>
+  <line x1="296" y1="185" x2="316" y2="185" stroke="#993C1D" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#a)"/>
+  <rect x="320" y="170" width="18" height="30" fill="#FBECE6" stroke="#993C1D" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="40" y="218" font-size="10" fill="#6B6A64">随机访问 O(1) ｜ 尾插均摊 O(1) ｜ <tspan fill="#993C1D">扩容 = 整块搬家 → 迭代器全失效</tspan></text>
+
+  <g fill="#EFEDE6" stroke="#C9C6BC" stroke-width="1">
+    <rect x="62" y="252" width="20" height="8"/><rect x="86" y="252" width="20" height="8"/><rect x="110" y="252" width="20" height="8"/><rect x="134" y="252" width="20" height="8"/><rect x="158" y="252" width="20" height="8"/>
+  </g>
+  <text x="186" y="260" font-size="8.5" fill="#A8A69E">中控指针数组</text>
+  <g fill="#FFFFFF" stroke="#2A2A28" stroke-width="1.2">
+    <rect x="62" y="268" width="36" height="30"/><rect x="98" y="268" width="36" height="30"/><rect x="134" y="268" width="36" height="30"/><rect x="170" y="268" width="36" height="30"/><rect x="206" y="268" width="36" height="30"/>
+  </g>
+  <line x1="56" y1="283" x2="40" y2="283" stroke="#2A2A28" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#a)"/>
+  <line x1="244" y1="283" x2="300" y2="283" stroke="#2A2A28" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#a)"/>
+  <text x="40" y="308" font-size="10" fill="#6B6A64">头/尾 O(1) ｜ 中间 O(n) ｜ 随机访问两次间接 ｜ 元素地址不连续</text>
+
+  <g fill="#FFFFFF" stroke="#2A2A28" stroke-width="1.2">
+    <rect x="48" y="346" width="36" height="28"/><rect x="100" y="346" width="36" height="28"/><rect x="152" y="346" width="36" height="28"/><rect x="204" y="346" width="36" height="28"/><rect x="256" y="346" width="36" height="28"/>
+  </g>
+  <g stroke="#C9C6BC" stroke-width="0.8">
+    <line x1="59" y1="346" x2="59" y2="374"/><line x1="73" y1="346" x2="73" y2="374"/>
+    <line x1="111" y1="346" x2="111" y2="374"/><line x1="125" y1="346" x2="125" y2="374"/>
+    <line x1="163" y1="346" x2="163" y2="374"/><line x1="177" y1="346" x2="177" y2="374"/>
+    <line x1="215" y1="346" x2="215" y2="374"/><line x1="229" y1="346" x2="229" y2="374"/>
+    <line x1="267" y1="346" x2="267" y2="374"/><line x1="281" y1="346" x2="281" y2="374"/>
+  </g>
+  <g stroke="#2A2A28" stroke-width="1.1" marker-end="url(#a)">
+    <line x1="85" y1="354" x2="98" y2="354"/><line x1="137" y1="354" x2="150" y2="354"/><line x1="189" y1="354" x2="202" y2="354"/><line x1="241" y1="354" x2="254" y2="354"/>
+  </g>
+  <g stroke="#8A8880" stroke-width="1.1" marker-end="url(#a)">
+    <line x1="99" y1="366" x2="86" y2="366"/><line x1="151" y1="366" x2="138" y2="366"/><line x1="203" y1="366" x2="190" y2="366"/><line x1="255" y1="366" x2="242" y2="366"/>
+  </g>
+  <line x1="34" y1="360" x2="46" y2="360" stroke="#8A8880" stroke-width="1.1" marker-end="url(#a)"/>
+  <text x="40" y="392" font-size="10" fill="#6B6A64">插/删 O(1)（需已有迭代器）｜ 查找 O(n) ｜ 每节点 2 指针</text>
+
+  <g fill="#FFFFFF" stroke="#2A2A28" stroke-width="1.2">
+    <rect x="48" y="430" width="36" height="28"/><rect x="100" y="430" width="36" height="28"/><rect x="152" y="430" width="36" height="28"/><rect x="204" y="430" width="36" height="28"/><rect x="256" y="430" width="36" height="28"/>
+  </g>
+  <g stroke="#C9C6BC" stroke-width="0.8">
+    <line x1="73" y1="430" x2="73" y2="458"/><line x1="125" y1="430" x2="125" y2="458"/><line x1="177" y1="430" x2="177" y2="458"/><line x1="229" y1="430" x2="229" y2="458"/><line x1="281" y1="430" x2="281" y2="458"/>
+  </g>
+  <g stroke="#2A2A28" stroke-width="1.1" marker-end="url(#a)">
+    <line x1="85" y1="444" x2="98" y2="444"/><line x1="137" y1="444" x2="150" y2="444"/><line x1="189" y1="444" x2="202" y2="444"/><line x1="241" y1="444" x2="254" y2="444"/>
+  </g>
+  <text x="40" y="476" font-size="10" fill="#6B6A64">只留 next ｜ 省一半指针 ｜ 只能 ++ ｜ 插在「前驱之后」</text>
+
+  <g stroke="#1D9E75" stroke-width="1" fill="none">
+    <line x1="524" y1="108" x2="483" y2="130"/><line x1="538" y1="108" x2="579" y2="130"/>
+    <line x1="471" y1="156" x2="455" y2="178"/><line x1="485" y1="156" x2="501" y2="178"/>
+    <line x1="583" y1="156" x2="567" y2="178"/><line x1="597" y1="156" x2="613" y2="178"/>
+  </g>
+  <g fill="#FFFFFF" stroke="#1D9E75" stroke-width="1.2">
+    <rect x="517" y="84" width="28" height="24"/><rect x="464" y="132" width="28" height="24"/><rect x="576" y="132" width="28" height="24"/>
+    <rect x="436" y="180" width="28" height="24"/><rect x="492" y="180" width="28" height="24"/><rect x="548" y="180" width="28" height="24"/><rect x="604" y="180" width="28" height="24"/>
+  </g>
+  <g font-size="9" fill="#0F6E56" text-anchor="middle" font-family="'Cascadia Mono',Consolas,monospace">
+    <text x="531" y="99">50</text><text x="478" y="147">30</text><text x="590" y="147">70</text>
+    <text x="450" y="195">20</text><text x="506" y="195">40</text><text x="562" y="195">60</text><text x="618" y="195">80</text>
+  </g>
+  <text x="372" y="222" font-size="10" fill="#6B6A64">按 key 有序 ｜ 查找/插入/删除 O(log n) ｜ <tspan font-family="'Cascadia Mono',Consolas,monospace">++</tspan> = 中序后继 = 升序</text>
+
+  <g stroke="#1D9E75" stroke-width="1" fill="none">
+    <line x1="524" y1="294" x2="478" y2="316"/><line x1="538" y1="294" x2="584" y2="316"/>
+    <line x1="467" y1="340" x2="447" y2="362"/><line x1="481" y1="340" x2="497" y2="362"/>
+    <line x1="581" y1="340" x2="561" y2="362"/><line x1="595" y1="340" x2="611" y2="362"/>
+  </g>
+  <g fill="#FFFFFF" stroke="#1D9E75" stroke-width="1.2">
+    <rect x="509" y="272" width="44" height="22"/><rect x="452" y="318" width="44" height="22"/><rect x="566" y="318" width="44" height="22"/>
+    <rect x="420" y="364" width="44" height="22"/><rect x="478" y="364" width="44" height="22"/><rect x="534" y="364" width="44" height="22"/><rect x="592" y="364" width="44" height="22"/>
+  </g>
+  <g stroke="#C9C6BC" stroke-width="0.8">
+    <line x1="531" y1="272" x2="531" y2="294"/><line x1="474" y1="318" x2="474" y2="340"/><line x1="588" y1="318" x2="588" y2="340"/>
+    <line x1="442" y1="364" x2="442" y2="386"/><line x1="500" y1="364" x2="500" y2="386"/><line x1="556" y1="364" x2="556" y2="386"/><line x1="614" y1="364" x2="614" y2="386"/>
+  </g>
+  <g font-size="8.5" fill="#0F6E56" font-family="'Cascadia Mono',Consolas,monospace">
+    <text x="514" y="286">50</text><text x="457" y="332">30</text><text x="571" y="332">70</text>
+    <text x="425" y="378">20</text><text x="483" y="378">40</text><text x="539" y="378">60</text><text x="597" y="378">80</text>
+  </g>
+  <text x="372" y="404" font-size="10" fill="#6B6A64">按 key 有序 ｜ value 不参与比较 ｜ 节点宽 = 两个 value_type</text>
+  <text x="372" y="434" font-size="10" fill="#8A8880">红黑树 = 自平衡 BST，树高 ≤ 2·log₂(n+1) → 最坏也是 O(log n)</text>
+
+  <ellipse cx="845" cy="148" rx="78" ry="72" fill="#F6F2E6" stroke="#DFD5BC" stroke-width="1"/>
+  <g fill="#FFFFFF" stroke="#BA7517" stroke-width="1.2">
+    <rect x="720" y="84" width="40" height="18"/><rect x="720" y="106" width="40" height="18"/><rect x="720" y="128" width="40" height="18"/>
+    <rect x="720" y="150" width="40" height="18"/><rect x="720" y="172" width="40" height="18"/><rect x="720" y="194" width="40" height="18"/>
+  </g>
+  <g font-size="8.5" fill="#8A6A2A" font-family="'Cascadia Mono',Consolas,monospace" text-anchor="middle">
+    <text x="740" y="97">0</text><text x="740" y="119">1</text><text x="740" y="141">2</text><text x="740" y="163">3</text><text x="740" y="185">4</text><text x="740" y="207">5</text>
+  </g>
+  <g stroke="#BA7517" stroke-width="1" marker-end="url(#a)">
+    <line x1="762" y1="93" x2="810" y2="93"/><line x1="834" y1="93" x2="854" y2="93"/>
+    <line x1="762" y1="115" x2="810" y2="115"/>
+    <line x1="762" y1="137" x2="810" y2="137"/><line x1="834" y1="137" x2="854" y2="137"/>
+    <line x1="762" y1="159" x2="810" y2="159"/>
+    <line x1="762" y1="181" x2="810" y2="181"/>
+  </g>
+  <g fill="#FFFFFF" stroke="#BA7517" stroke-width="1.1">
+    <rect x="812" y="83" width="20" height="20"/><rect x="856" y="83" width="20" height="20"/>
+    <rect x="812" y="105" width="20" height="20"/>
+    <rect x="812" y="127" width="20" height="20"/><rect x="856" y="127" width="20" height="20"/>
+    <rect x="812" y="149" width="20" height="20"/>
+    <rect x="812" y="171" width="20" height="20"/>
+  </g>
+  <text x="720" y="240" font-size="10" fill="#6B6A64">无序 ｜ 平均 O(1)、最坏 O(n) ｜ <tspan fill="#993C1D">rehash → 迭代器全失效</tspan></text>
+
+  <ellipse cx="848" cy="326" rx="80" ry="66" fill="#F6F2E6" stroke="#DFD5BC" stroke-width="1"/>
+  <g fill="#FFFFFF" stroke="#BA7517" stroke-width="1.2">
+    <rect x="720" y="268" width="40" height="16"/><rect x="720" y="288" width="40" height="16"/><rect x="720" y="308" width="40" height="16"/>
+    <rect x="720" y="328" width="40" height="16"/><rect x="720" y="348" width="40" height="16"/><rect x="720" y="368" width="40" height="16"/>
+  </g>
+  <g font-size="8.5" fill="#8A6A2A" font-family="'Cascadia Mono',Consolas,monospace" text-anchor="middle">
+    <text x="740" y="280">0</text><text x="740" y="300">1</text><text x="740" y="320">2</text><text x="740" y="340">3</text><text x="740" y="360">4</text><text x="740" y="380">5</text>
+  </g>
+  <g stroke="#BA7517" stroke-width="1" marker-end="url(#a)">
+    <line x1="762" y1="276" x2="810" y2="276"/><line x1="844" y1="276" x2="854" y2="276"/>
+    <line x1="762" y1="296" x2="810" y2="296"/>
+    <line x1="762" y1="316" x2="810" y2="316"/><line x1="844" y1="316" x2="854" y2="316"/>
+    <line x1="762" y1="336" x2="810" y2="336"/>
+    <line x1="762" y1="356" x2="810" y2="356"/>
+  </g>
+  <g fill="#FFFFFF" stroke="#BA7517" stroke-width="1.1">
+    <rect x="812" y="267" width="32" height="18"/><rect x="856" y="267" width="32" height="18"/>
+    <rect x="812" y="287" width="32" height="18"/>
+    <rect x="812" y="307" width="32" height="18"/><rect x="856" y="307" width="32" height="18"/>
+    <rect x="812" y="327" width="32" height="18"/>
+    <rect x="812" y="347" width="32" height="18"/>
+  </g>
+  <g stroke="#DFD5BC" stroke-width="0.8">
+    <line x1="828" y1="267" x2="828" y2="285"/><line x1="872" y1="267" x2="872" y2="285"/>
+    <line x1="828" y1="287" x2="828" y2="305"/>
+    <line x1="828" y1="307" x2="828" y2="325"/><line x1="872" y1="307" x2="872" y2="325"/>
+    <line x1="828" y1="327" x2="828" y2="345"/>
+    <line x1="828" y1="347" x2="828" y2="365"/>
+  </g>
+  <text x="720" y="404" font-size="10" fill="#6B6A64">节点内含 key + value ｜ 桶里挂的是 <tspan font-family="'Cascadia Mono',Consolas,monospace">pair&lt;const K, V&gt;</tspan> 节点</text>
+  <text x="720" y="424" font-size="9.5" fill="#8A8880">自定义类型当 key 需提供 <tspan font-family="'Cascadia Mono',Consolas,monospace">std::hash</tspan> 与 <tspan font-family="'Cascadia Mono',Consolas,monospace">operator==</tspan></text>
+
+  <line x1="40" y1="494" x2="960" y2="494" stroke="#E3E0D8" stroke-width="1"/>
+  <text x="40" y="512" font-size="10" fill="#8A8880">缓存局部性（实际快慢的决定因素）：连续 array/vector ＞ 分段 deque ＞ 节点 list/tree ＞ 桶 unordered</text>
+</svg>

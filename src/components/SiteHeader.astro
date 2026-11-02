@@ -73,6 +73,8 @@ const path = Astro.url.pathname;
     letter-spacing: 0.02em;
     color: var(--c-text);
     text-decoration: none;
+    /* 品牌永远单行，避免窄屏被挤成「✦」/「Aisssky」两行 */
+    white-space: nowrap;
   }
 
   nav {
@@ -87,6 +89,8 @@ const path = Astro.url.pathname;
     color: var(--c-text-dim);
     text-decoration: none;
     transition: color 0.18s ease;
+    /* 链接保持单行，「游戏库」不能在中间断开 */
+    white-space: nowrap;
   }
 
   nav a:hover {
@@ -107,6 +111,29 @@ const path = Astro.url.pathname;
     }
     nav a {
       font-size: 12px;
+    }
+  }
+
+  /* 小屏：品牌一行 + 导航一行居中（60px 内两行放得下），
+     否则单行排布会把「游戏库」「GitHub ↗」拆成多行 */
+  @media (max-width: 480px) {
+    .gh-inner {
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      padding: 0 14px;
+    }
+    .gh-brand {
+      font-size: 14px;
+      line-height: 1.2;
+    }
+    nav {
+      flex-wrap: nowrap;
+      gap: 14px;
+    }
+    nav a {
+      font-size: 12px;
+      line-height: 1.2;
     }
   }
 </style>

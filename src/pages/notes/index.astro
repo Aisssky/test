@@ -7,10 +7,11 @@
  */
 import PageLayout from '../../components/PageLayout.astro';
 import { getCollection, render } from 'astro:content';
-import { formatDate } from '../../lib/site';
+import { formatDate, withBase } from '../../lib/site';
 
 const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+  // 时间正序：早的在上、新的在下（新增随记追加到列表末尾）
+  (a, b) => a.data.date.valueOf() - b.data.date.valueOf(),
 );
 
 const rendered = await Promise.all(
@@ -27,15 +28,15 @@ const rendered = await Promise.all(
             const cover = note.data.cover;
             const link = note.data.link;
             return (
-              <li class={`note-item${cover ? ' note-item--work' : ''}`}>
+              <li class={`note-item${cover ? ' note-item--work' : ''}`} id={note.id}>
                 {cover && (
                   <div class="note-cover">
                     {link ? (
                       <a href={link} target="_blank" rel="noopener">
-                        <img src={cover} alt={note.data.title ?? 'cover'} loading="lazy" />
+                        <img src={withBase(cover)} alt={note.data.title ?? 'cover'} loading="lazy" />
                       </a>
                     ) : (
-                      <img src={cover} alt={note.data.title ?? 'cover'} loading="lazy" />
+                      <img src={withBase(cover)} alt={note.data.title ?? 'cover'} loading="lazy" />
                     )}
                   </div>
                 )}
@@ -83,6 +84,8 @@ const rendered = await Promise.all(
   .note-item {
     padding: 18px 4px;
     border-top: 1px solid var(--c-border-soft);
+    /* 站内锚点跳转时给吸顶导航留出余量 */
+    scroll-margin-top: 80px;
   }
 
   .note-item:first-child {
