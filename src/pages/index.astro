@@ -273,6 +273,12 @@ const currently = [
     padding: 26px 28px;
   }
 
+  /* 站内锚点 #notes：往下留出 fixed 头部的高度，
+     这样从外部链接（如 /#notes）进来不会被导航条压住 */
+  #notes {
+    scroll-margin-top: calc(var(--header-h) + 16px);
+  }
+
   .panel-head {
     display: flex;
     align-items: baseline;

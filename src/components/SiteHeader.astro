@@ -10,7 +10,7 @@ import { withBase, SITE } from '../lib/site';
 
 const links = [
   { href: withBase('/blog/'), label: 'Writing' },
-  { href: `${withBase('/')}#notes`, label: 'Notes' },
+  { href: withBase('/notes/'), label: 'Notes' },
   { href: withBase('/games/'), label: '游戏库' },
   { href: withBase('/about/'), label: 'About' },
 ];
@@ -27,7 +27,7 @@ const path = Astro.url.pathname;
         links.map((link) => (
           <a
             href={link.href}
-            aria-current={path.startsWith(link.href.split('#')[0]) && link.href !== withBase('/') + '#notes' ? 'page' : undefined}
+            aria-current={path.startsWith(link.href) ? 'page' : undefined}
           >
             {link.label}
           </a>
