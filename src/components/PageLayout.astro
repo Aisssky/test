@@ -14,11 +14,9 @@ interface Props {
   /** 标题下方的说明行 */
   subtitle?: string;
   noindex?: boolean;
-  /** 覆盖默认全站底图（站内绝对路径），不传则用 main.webp */
-  bg?: string;
 }
 
-const { title, description, subtitle, noindex = false, bg } = Astro.props;
+const { title, description, subtitle, noindex = false } = Astro.props;
 ---
 
 <Layout
@@ -28,7 +26,7 @@ const { title, description, subtitle, noindex = false, bg } = Astro.props;
   noindex={noindex}
 >
   {/* 列表页文字更密，遮罩比首页/About 浓一档，保证可读性 */}
-  <SiteBackground veil={0.3} src={bg} />
+  <SiteBackground veil={0.3} />
   <SiteHeader />
 
   <main class="page-main" id="main">
