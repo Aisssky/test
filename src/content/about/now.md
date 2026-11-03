@@ -1,7 +1,7 @@
 ---
 # NOW —— About 是「我是谁」，Now 是「我现在在哪」。
 # 建议每月更新一次，改这一页就够了。
-updated: 2026-09-24
+updated: 2026-11-03
 
 now:
   - { k: "Building", v: "这个网站 · Astro + Decap CMS" }
@@ -9,7 +9,7 @@ now:
   - { k: "Learning", v: "C++ · Computer Graphics · GAMES101" }
   - { k: "Playing", v: "TODO · 最近在玩什么" }
   - { k: "Reading", v: "TODO · 最近在看什么" }
-  - { k: "Thinking about", v: "TODO · 最近脑子里的一个问题" }
+  - { k: "Thinking about", v: "到底要不要深造呢…… [择校数据](/test/future/grad-school-data.html)" }
 ---
 
 # 填写说明

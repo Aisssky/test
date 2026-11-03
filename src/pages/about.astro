@@ -60,13 +60,24 @@ const thoughtsList: any[] = thoughtsDoc.thoughts ?? [];
 const secrets: any[] = thoughtsDoc.secrets ?? [];
 const friends: any[] = friendsDoc.friends ?? [];
 
-/** frontmatter 不走 Markdown 渲染，这里只补 **粗体** 一种语法 */
-const rich = (text = ''): string =>
-  String(text)
+/**
+ * frontmatter 不走 Markdown 渲染，这里补两种语法：
+ *  - **粗体**
+ *  - [文字](链接) → 新标签打开（仅放行 http(s)/mailto/站内绝对路径/锚点，避免 javascript: 之类）
+ * 先整体转义，再插入 <a>，所以标签不会被二次转义。
+ */
+const rich = (text = ''): string => {
+  const e = String(text)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+    .replace(/>/g, '&gt;');
+  return e
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, t: string, u: string) => {
+      const safe = /^(https?:|mailto:|\/|#)/i.test(u) ? u : '#';
+      return `<a href="${safe}" target="_blank" rel="noopener noreferrer">${t}</a>`;
+    })
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+};
 
 /** 按行切成段落（YAML 折叠标量的空行会变成换行） */
 const paras = (text = ''): string[] =>
@@ -160,7 +171,7 @@ const chapters = [
             nowList.map((item: any) => (
               <div class:list={['now-item', item.k === 'Thinking about' && 'is-focus']}>
                 <dt>{item.k}</dt>
-                <dd>{item.v}</dd>
+                <dd set:html={rich(item.v)} />
               </div>
             ))
           }
@@ -611,6 +622,16 @@ const chapters = [
     font-size: 14px;
     line-height: 1.55;
     color: var(--c-text);
+  }
+
+  .now-item dd a {
+    color: var(--c-accent);
+    text-decoration: none;
+    border-bottom: 1px dashed currentColor;
+  }
+
+  .now-item dd a:hover {
+    color: var(--c-accent-hover);
   }
 
   .now-item.is-focus dd {
