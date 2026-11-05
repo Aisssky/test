@@ -56,6 +56,7 @@ export const games: Game[] = [
   { id: 'candy', title: '消消糖果屋', url: 'https://www.evomeme.com/games/pwb01a13ac2d0f971139d9c650486e20197', cover: '/images/arcade/candy.webp', description: '甜到掉牙的三消小游戏，糖果连消根本停不下来。', order: 17 },
   { id: 'ai-worker', title: '能工智人', url: 'https://www.evomeme.com/games/pwb01a124e25e5e7c13af9e633ea6b55411', cover: '/images/arcade/ai-worker.webp', description: '假装自己是 AI 的潜行打工日，在工位间悄悄生存。', order: 18 },
   { id: 'pottery', title: '饥饿派制陶人', url: 'https://www.evomeme.com/games/pwb01a19ba7f8307f65b5353b697f8af2fe', cover: '/images/arcade/pottery.webp', description: '法式木偶剧场风，亲手捏出一件件陶器。', order: 20 },
+  { id: 'subway', title: '我的地铁不可能这么难挤！？', url: 'https://www.evomeme.com/games/pwb01a0d7d5ee6178e0b9eada408f9d69f5', cover: '/images/arcade/subway.webp', description: '早高峰的地铁挤到变形，看你能不能挤上去。', order: 21 },
 ];
 
 /** 按 order 排序后的列表（页面直接用） */
